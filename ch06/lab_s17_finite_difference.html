@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" crossorigin="anonymous"></script>
+<title>Finite-Difference Laplace Solver</title>
+<style>/* ===== common UI kit (shared by all sims) ===== */
+:root{
+  --bg:#f7f8fb; --panel:#ffffff; --ink:#1b2333; --muted:#5a6478; --line:#d5dae5;
+  --accent:#1f6feb; --pos:#d1242f; --neg:#1f6feb; --ok:#1a7f37; --warn:#b35900;
+  --c1:#1f6feb; --c2:#d1242f; --c3:#1a7f37; --c4:#8250df; --c5:#b35900;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink)}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:clamp(12px,min(2.6vh,1.46vw),26px);line-height:1.25}
+.app{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100vh;width:100vw;padding:.45em .7em;gap:.4em}
+header{display:flex;align-items:baseline;gap:.8em;min-width:0}
+header h1{font-size:1.3em;margin:0;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .tag{font-size:.8em;color:#fff;background:var(--accent);border-radius:.3em;padding:.1em .45em;white-space:nowrap}
+header .modes{margin-left:auto}
+main{display:grid;grid-template-columns:minmax(0,1fr) 21em;gap:.6em;min-height:0}
+.stage{position:relative;min-height:0;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:.5em;overflow:hidden}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.panel{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:.5em;padding:.5em .7em;overflow-y:auto;overflow-x:hidden;min-height:0;display:flex;flex-direction:column;gap:.45em}
+.ctl{display:flex;flex-direction:column;gap:.05em}
+.ctl-row{display:flex;justify-content:space-between;align-items:baseline;gap:.5em}
+.ctl-row label{font-weight:600}
+.ctl-row output{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:600;white-space:nowrap}
+input[type=range]{width:100%;height:1.3em;margin:0;accent-color:var(--accent);cursor:pointer}
+.seg{display:inline-flex;border:1px solid var(--accent);border-radius:.4em;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.92em;border:0;background:#fff;color:var(--accent);padding:.18em .6em;cursor:pointer}
+.seg button+button{border-left:1px solid var(--accent)}
+.seg button.on{background:var(--accent);color:#fff}
+button.btn{font:inherit;font-size:.92em;border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:.4em;padding:.15em .6em;cursor:pointer}
+button.btn:hover,.seg button:hover:not(.on){background:#eaf1fe}
+.row{display:flex;gap:.4em;flex-wrap:wrap;align-items:center}
+.formula{border-top:1px solid var(--line);padding-top:.35em;font-size:.95em}
+.formula .katex{font-size:1.02em}
+.formula .eq{margin:.15em 0;overflow-x:auto;overflow-y:hidden}
+.readout{font-variant-numeric:tabular-nums;font-size:.95em}
+.readout b{color:var(--accent)}
+.big{font-size:1.25em;font-weight:700;color:var(--accent)}
+footer.notice{font-size:1em;background:#fff8e1;border:1px solid #f0d78c;border-radius:.4em;padding:.25em .6em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+footer.notice::before{content:"What to notice: ";font-weight:700;color:var(--warn)}
+.chk{display:flex;gap:.4em;align-items:center;cursor:pointer}
+.chk input{width:1em;height:1em;accent-color:var(--accent)}
+select{font:inherit;font-size:.92em;padding:.05em .2em}
+.hide{display:none!important}
+.small{font-size:.85em;color:var(--muted)}
+@media (max-width:760px),(max-aspect-ratio:1/1){
+  body{font-size:clamp(12px,2.2vw,20px)}
+  main{grid-template-columns:1fr;grid-template-rows:minmax(0,1.4fr) minmax(0,1fr)}
+  footer.notice{white-space:normal}
+}
+
+main{grid-template-columns:minmax(0,1fr) 22em}
+</style>
+</head><body>
+<div class="app">
+  <header><span class="tag">Session 17</span><h1>Finite-Difference Solution of Laplace's Equation</h1><div class="modes" id="modes"></div></header>
+  <main>
+    <div class="stage"><canvas id="cv"></canvas></div>
+    <aside class="panel" id="panel">
+      <div id="ctl"></div>
+      <div class="readout" id="read"></div>
+      <div class="formula">
+        <div class="eq" data-tex="V_0\leftarrow\tfrac14\,(V_1+V_2+V_3+V_4)\quad(\text{Jacobi, G–S})"></div>
+        <div class="eq" data-tex="\text{SOR: }V_0\mathrel{+}=\omega\,[\tfrac14\textstyle\sum V_k-V_0]"></div>
+        <div class="eq" data-tex="\omega_{\rm opt}\approx 2/(1+\sin\tfrac{\pi}{N}),\ \ 1<\omega<2"></div>
+        <div class="eq" data-tex="V=\displaystyle\sum_{n\,\rm odd}\frac{4V_0}{n\pi}\sin\frac{n\pi x}{a}\,\frac{\sinh(n\pi y/a)}{\sinh(n\pi b/a)}"></div>
+      </div>
+    </aside>
+  </main>
+  <footer class="notice" id="notice">Every interior node relaxes toward the average of its four neighbours; SOR reaches the same answer in far fewer sweeps.</footer>
+</div>
+
+<!-- ===================== PHYSICS (pure, testable; no DOM) ===================== -->
+<script id="physics">
+const PHYS = (() => {
+  // Rectangular trough 0<x<a, 0<y<b on a uniform grid with nx x ny CELLS (h = a/nx = b/ny).
+  // Node (i,j): x = i h, y = j h, index k = j*(nx+1) + i; j = ny is the TOP edge.
+  function makeGrid(nx, ny, bc) { // bc = {top, bottom, left, right} in volts
+    const W = nx + 1, H = ny + 1, V = new Float64Array(W * H), fixed = new Uint8Array(W * H);
+    const g = { nx, ny, W, H, V, fixed, bc: { ...bc }, iter: 0 };
+    applyBC(g); return g;
+  }
+  function applyBC(g) {
+    const { W, H, V, fixed, bc } = g;
+    for (let i = 0; i < W; i++) { V[i] = bc.bottom; V[(H - 1) * W + i] = bc.top; fixed[i] = fixed[(H - 1) * W + i] = 1; }
+    for (let j = 0; j < H; j++) { V[j * W] = bc.left; V[j * W + W - 1] = bc.right; fixed[j * W] = fixed[j * W + W - 1] = 1; }
+    // corners are singular (two potentials meet); they never enter the 5-point stencil, so set them to the mean for display
+    const c = (k, a, b) => { V[k] = (a + b) / 2; };
+    c(0, bc.bottom, bc.left); c(W - 1, bc.bottom, bc.right); c((H - 1) * W, bc.top, bc.left); c(H * W - 1, bc.top, bc.right);
+  }
+  // one sweep. method: 'jacobi' | 'gs' | 'sor'. Returns max |change|.
+  function sweep(g, method, omega = 1.8) {
+    const { W, H, V, fixed } = g; let dmax = 0;
+    if (method === 'jacobi') {
+      const old = g._old && g._old.length === V.length ? g._old : (g._old = new Float64Array(V.length));
+      old.set(V);
+      for (let j = 1; j < H - 1; j++) for (let i = 1; i < W - 1; i++) { const k = j * W + i; if (fixed[k]) continue; const v = 0.25 * (old[k - 1] + old[k + 1] + old[k - W] + old[k + W]); const d = Math.abs(v - old[k]); if (d > dmax) dmax = d; V[k] = v; }
+    } else {
+      const w = method === 'sor' ? omega : 1;
+      for (let j = 1; j < H - 1; j++) for (let i = 1; i < W - 1; i++) { const k = j * W + i; if (fixed[k]) continue; const r = 0.25 * (V[k - 1] + V[k + 1] + V[k - W] + V[k + W]) - V[k]; const d = Math.abs(w * r); if (d > dmax) dmax = d; V[k] += w * r; }
+    }
+    g.iter++; return dmax;
+  }
+  // max |residual| of the discrete Laplace equation, expressed in volts: |avg of neighbours - V|
+  function residual(g) {
+    const { W, H, V, fixed } = g; let r = 0;
+    for (let j = 1; j < H - 1; j++) for (let i = 1; i < W - 1; i++) { const k = j * W + i; if (fixed[k]) continue; const e = Math.abs(0.25 * (V[k - 1] + V[k + 1] + V[k - W] + V[k + W]) - V[k]); if (e > r) r = e; }
+    return r;
+  }
+  function solve(g, method, omega, tol = 1e-6, maxIt = 200000) { let it = 0; while (it < maxIt) { sweep(g, method, omega); it++; if (residual(g) < tol) break; } return it; }
+  const omegaOpt = (nx, ny) => { // optimum SOR factor for the rectangle (Jacobi spectral radius rho_J = (cos(pi/nx)+cos(pi/ny))/2)
+    const rJ = 0.5 * (Math.cos(Math.PI / nx) + Math.cos(Math.PI / ny)); return 2 / (1 + Math.sqrt(1 - rJ * rJ)); };
+  // ---- analytic Fourier-series solution (superposition of the four single-side problems) ----
+  // sinh(k s)/sinh(k L) computed without overflow
+  const sr = (k, s, L) => Math.exp(k * (s - L)) * (1 - Math.exp(-2 * k * s)) / (1 - Math.exp(-2 * k * L));
+  function fourier(x, y, a, b, bc, nTerms = 2001) {
+    let v = 0;
+    for (let n = 1; n <= nTerms; n += 2) {
+      const c = 4 / (n * Math.PI), kx = n * Math.PI / a, ky = n * Math.PI / b;
+      if (bc.top) v += bc.top * c * Math.sin(kx * x) * sr(kx, y, b);
+      if (bc.bottom) v += bc.bottom * c * Math.sin(kx * x) * sr(kx, b - y, b);
+      if (bc.left) v += bc.left * c * Math.sin(ky * y) * sr(ky, a - x, a);
+      if (bc.right) v += bc.right * c * Math.sin(ky * y) * sr(ky, x, a);
+    }
+    return v;
+  }
+  // bilinear interpolation of the grid at physical point (x,y) with h = 1/nx (a = 1 normalisation)
+  function sample(g, x, y, a) {
+    const h = a / g.nx, fi = x / h, fj = y / h, i = Math.min(g.nx - 1, Math.floor(fi)), j = Math.min(g.ny - 1, Math.floor(fj)), u = fi - i, t = fj - j, W = g.W, V = g.V;
+    return (1 - u) * (1 - t) * V[j * W + i] + u * (1 - t) * V[j * W + i + 1] + (1 - u) * t * V[(j + 1) * W + i] + u * t * V[(j + 1) * W + i + 1];
+  }
+  return { makeGrid, applyBC, sweep, residual, solve, omegaOpt, fourier, sample };
+})();
+if (typeof module !== 'undefined') module.exports = PHYS;
+</script>
+
+<script>/* ===== common UI kit (shared by all sims; no physics here) ===== */
+const UI = (() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '+': '' };
+  // scientific notation with unicode superscripts: 1.53×10⁻¹⁹
+  function sci(x, d = 3) {
+    if (!isFinite(x)) return String(x);
+    if (x === 0) return '0';
+    const e = Math.floor(Math.log10(Math.abs(x)));
+    if (e >= -2 && e <= 3) return (+x.toPrecision(d)).toString();
+    let m = x / Math.pow(10, e);
+    let ms = (+m.toPrecision(d)).toString();
+    if (Math.abs(+ms) >= 10) { ms = (+(m / 10).toPrecision(d)).toString(); return ms + '×10' + String(e + 1).split('').map(c => SUP[c]).join(''); }
+    return ms + '×10' + String(e).split('').map(c => SUP[c]).join('');
+  }
+  // engineering format with SI prefix: eng(1.5e-9,'F') -> "1.50 nF"
+  const PRE = { '-24': 'y', '-21': 'z', '-18': 'a', '-15': 'f', '-12': 'p', '-9': 'n', '-6': 'µ', '-3': 'm', '0': '', '3': 'k', '6': 'M', '9': 'G', '12': 'T' };
+  function eng(x, unit = '', d = 3) {
+    if (!isFinite(x)) return String(x);
+    if (x === 0) return '0 ' + unit;
+    let e3 = Math.floor(Math.log10(Math.abs(x)) / 3) * 3;
+    e3 = Math.max(-24, Math.min(12, e3));
+    let m = x / Math.pow(10, e3);
+    let s = m.toPrecision(d);
+    if (Math.abs(+s) >= 1000 && e3 < 12) { e3 += 3; s = (x / Math.pow(10, e3)).toPrecision(d); }
+    return s + ' ' + PRE[e3] + unit;
+  }
+  // KaTeX is loaded with `defer`; anything rendered before it arrives is queued and re-rendered on load.
+  const texQueue = [];
+  function tex(el, src, display = false) {
+    if (typeof el === 'string') el = $(el);
+    if (!el) return;
+    if (window.katex) { try { katex.render(src, el, { displayMode: display, throwOnError: false }); return; } catch (e) { } }
+    el.textContent = src; // plain-TeX fallback when KaTeX is unavailable (offline)
+    texQueue.push([el, src, display]);
+  }
+  window.addEventListener('load', () => { if (window.katex) texQueue.splice(0).forEach(a => tex(...a)); });
+  // render every element carrying data-tex="..." (static formula panels)
+  function texAll(root = document) { root.querySelectorAll('[data-tex]').forEach(e => tex(e, e.dataset.tex, e.hasAttribute('data-display'))); }
+  function fontPx() { return parseFloat(getComputedStyle(document.body).fontSize) || 18; }
+
+  // canvas with DPR + resize handling; draw(ctx, w, h) in CSS px
+  function canvas(cv, draw) {
+    const ctx = cv.getContext('2d');
+    const obj = { cv, ctx, w: 0, h: 0, draw, redraw() { const dpr = window.devicePixelRatio || 1; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, obj.w, obj.h); obj.draw(ctx, obj.w, obj.h); } };
+    function resize() {
+      const r = cv.getBoundingClientRect(); const dpr = window.devicePixelRatio || 1;
+      obj.w = Math.max(10, r.width); obj.h = Math.max(10, r.height);
+      cv.width = Math.round(obj.w * dpr); cv.height = Math.round(obj.h * dpr); obj.redraw();
+    }
+    new ResizeObserver(resize).observe(cv); resize();
+    return obj;
+  }
+  function pointer(cv, { down, move, up, hover }) {
+    const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    let dragging = false;
+    cv.addEventListener('pointerdown', e => { const p = pos(e); if (down && down(p, e) !== false) { dragging = true; cv.setPointerCapture(e.pointerId); } });
+    cv.addEventListener('pointermove', e => { const p = pos(e); if (dragging) move && move(p, e); else hover && hover(p, e); });
+    const end = e => { if (dragging) { dragging = false; up && up(pos(e), e); } };
+    cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  }
+
+  // slider: {label(html), min,max,step,value, log:bool, fmt:fn, onInput:fn}
+  function slider(parent, o) {
+    const d = document.createElement('div'); d.className = 'ctl';
+    d.innerHTML = `<div class="ctl-row"><label>${o.label}</label><output></output></div><input type="range">`;
+    const inp = d.querySelector('input'), out = d.querySelector('output');
+    const N = 1000;
+    const toS = v => o.log ? Math.round((Math.log10(v) - Math.log10(o.min)) / (Math.log10(o.max) - Math.log10(o.min)) * N) : v;
+    const fromS = s => o.log ? Math.pow(10, Math.log10(o.min) + (Math.log10(o.max) - Math.log10(o.min)) * s / N) : +s;
+    if (o.log) { inp.min = 0; inp.max = N; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step || 'any'; }
+    const api = {
+      el: d, get value() { return api._v; },
+      set(v, fire = true) { api._v = v; inp.value = toS(v); out.innerHTML = o.fmt ? o.fmt(v) : (+v).toPrecision(3); if (fire && o.onInput) o.onInput(v); },
+    };
+    inp.addEventListener('input', () => api.set(fromS(inp.value)));
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(d);
+    api.set(o.value, false);
+    return api;
+  }
+  // segmented toggle: options [[value,label],...]
+  function seg(parent, options, value, onChange) {
+    const d = document.createElement('div'); d.className = 'seg';
+    const api = { el: d, value, set(v, fire = true) { api.value = v; [...d.children].forEach(b => b.classList.toggle('on', b.dataset.v === String(v))); if (fire && onChange) onChange(v); } };
+    options.forEach(([v, l]) => { const b = document.createElement('button'); b.dataset.v = v; b.innerHTML = l; b.onclick = () => api.set(v); d.appendChild(b); });
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(d);
+    api.set(value, false); return api;
+  }
+  function check(parent, label, value, onChange) {
+    const l = document.createElement('label'); l.className = 'chk';
+    l.innerHTML = `<input type="checkbox"> <span>${label}</span>`;
+    const i = l.querySelector('input'); i.checked = value; i.onchange = () => onChange(i.checked);
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(l); return i;
+  }
+
+  // ---------- plotting ----------
+  function niceStep(range, n) {
+    const raw = range / Math.max(1, n); const p = Math.pow(10, Math.floor(Math.log10(raw))); const f = raw / p;
+    return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p;
+  }
+  function ticks(a, b, n) { const s = niceStep(b - a, n); const t = []; for (let v = Math.ceil(a / s - 1e-9) * s; v <= b + s * 1e-9; v += s) t.push(Math.abs(v) < s * 1e-9 ? 0 : v); return { t, s }; }
+  function tickLabel(v, s) {
+    if (v === 0) return '0';
+    const a = Math.abs(v);
+    if (a >= 1e5 || a < 1e-3) return sci(v, 2);
+    const dec = Math.max(0, -Math.floor(Math.log10(s) + 1e-9));
+    return v.toFixed(Math.min(dec, 4));
+  }
+  // o: {xlim:[a,b], ylim:[a,b], logx, logy, xlabel, ylabel, title, series:[{x,y,color,width,dash,label}],
+  //     points:[{x,y,color,r,label}], vlines:[{x,color,dash,label}], hlines:[...], fs, legend:true, zero:true}
+  function plot(ctx, R, o) {
+    const fs = o.fs || fontPx() * 0.85;
+    ctx.save();
+    ctx.font = `${fs}px system-ui, sans-serif`;
+    const padL = fs * (o.padL || 3.8), padB = fs * (o.xlabel ? 2.5 : 1.5), padT = fs * (o.title ? 1.5 : 0.6), padR = fs * (o.padR || 0.8);
+    const I = { x: R.x + padL, y: R.y + padT, w: Math.max(10, R.w - padL - padR), h: Math.max(10, R.h - padT - padB) };
+    const lx = v => o.logx ? Math.log10(v) : v, ly = v => o.logy ? Math.log10(v) : v;
+    const [x0, x1] = o.xlim.map(lx), [y0, y1] = o.ylim.map(ly);
+    const X = v => I.x + (lx(v) - x0) / (x1 - x0) * I.w;
+    const Y = v => I.y + I.h - (ly(v) - y0) / (y1 - y0) * I.h;
+    // background + grid
+    ctx.fillStyle = '#fff'; ctx.fillRect(I.x, I.y, I.w, I.h);
+    ctx.strokeStyle = '#e6e9f0'; ctx.lineWidth = 1; ctx.fillStyle = '#4a5468';
+    const nx = Math.max(2, Math.floor(I.w / (fs * 5))), ny = Math.max(2, Math.floor(I.h / (fs * 2.4)));
+    const logT = (a, b) => { const t = []; const st = Math.max(1, Math.ceil((b - a) / 8)); for (let e = Math.ceil(a); e <= Math.floor(b); e += st) t.push(e); return t; };
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    if (o.logx) logT(x0, x1).forEach(e => { const px = I.x + (e - x0) / (x1 - x0) * I.w; ctx.beginPath(); ctx.moveTo(px, I.y); ctx.lineTo(px, I.y + I.h); ctx.stroke(); ctx.fillText(sci(Math.pow(10, e), 1).replace(/^1×/, ''), px, I.y + I.h + fs * 0.25); });
+    else { const { t, s } = ticks(x0, x1, nx); t.forEach(v => { const px = X(v); ctx.beginPath(); ctx.moveTo(px, I.y); ctx.lineTo(px, I.y + I.h); ctx.stroke(); ctx.fillText(tickLabel(v, s), px, I.y + I.h + fs * 0.25); }); }
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    if (o.logy) logT(y0, y1).forEach(e => { const py = I.y + I.h - (e - y0) / (y1 - y0) * I.h; ctx.beginPath(); ctx.moveTo(I.x, py); ctx.lineTo(I.x + I.w, py); ctx.stroke(); ctx.fillText(sci(Math.pow(10, e), 1).replace(/^1×/, ''), I.x - fs * 0.3, py); });
+    else { const { t, s } = ticks(y0, y1, ny); t.forEach(v => { const py = Y(v); ctx.beginPath(); ctx.moveTo(I.x, py); ctx.lineTo(I.x + I.w, py); ctx.stroke(); ctx.fillText(tickLabel(v, s), I.x - fs * 0.3, py); }); }
+    // zero axis
+    ctx.strokeStyle = '#8a93a6'; ctx.lineWidth = 1.2;
+    if (!o.logy && y0 < 0 && y1 > 0) { ctx.beginPath(); ctx.moveTo(I.x, Y(0)); ctx.lineTo(I.x + I.w, Y(0)); ctx.stroke(); }
+    if (!o.logx && x0 < 0 && x1 > 0) { ctx.beginPath(); ctx.moveTo(X(0), I.y); ctx.lineTo(X(0), I.y + I.h); ctx.stroke(); }
+    ctx.strokeStyle = '#4a5468'; ctx.strokeRect(I.x, I.y, I.w, I.h);
+    // labels
+    ctx.fillStyle = '#1b2333';
+    if (o.xlabel) { ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText(o.xlabel, I.x + I.w / 2, R.y + R.h); }
+    if (o.ylabel) { ctx.save(); ctx.translate(R.x + fs * 0.1, I.y + I.h / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(o.ylabel, 0, 0); ctx.restore(); }
+    if (o.title) { ctx.font = `600 ${fs}px system-ui, sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(o.title, I.x, R.y + fs * 0.1); ctx.font = `${fs}px system-ui, sans-serif`; }
+    // data
+    ctx.save(); ctx.beginPath(); ctx.rect(I.x, I.y, I.w, I.h); ctx.clip();
+    (o.hlines || []).forEach(l => { ctx.strokeStyle = l.color || '#888'; ctx.setLineDash(l.dash || [6, 4]); ctx.lineWidth = l.width || 1.5; ctx.beginPath(); ctx.moveTo(I.x, Y(l.y)); ctx.lineTo(I.x + I.w, Y(l.y)); ctx.stroke(); });
+    (o.vlines || []).forEach(l => { ctx.strokeStyle = l.color || '#888'; ctx.setLineDash(l.dash || [6, 4]); ctx.lineWidth = l.width || 1.5; ctx.beginPath(); ctx.moveTo(X(l.x), I.y); ctx.lineTo(X(l.x), I.y + I.h); ctx.stroke(); });
+    ctx.setLineDash([]);
+    (o.series || []).forEach(s => {
+      if (s.fill) { ctx.fillStyle = s.fill; ctx.beginPath(); const yb = Y(o.logy ? o.ylim[0] : Math.max(o.ylim[0], Math.min(o.ylim[1], 0))); ctx.moveTo(X(s.x[0]), yb); for (let i = 0; i < s.x.length; i++) ctx.lineTo(X(s.x[i]), Y(s.y[i])); ctx.lineTo(X(s.x[s.x.length - 1]), yb); ctx.closePath(); ctx.fill(); }
+      ctx.strokeStyle = s.color || '#1f6feb'; ctx.lineWidth = s.width || 2.5; ctx.setLineDash(s.dash || []);
+      ctx.beginPath(); let pen = false;
+      for (let i = 0; i < s.x.length; i++) { const yv = s.y[i]; if (!isFinite(yv) || (o.logy && yv <= 0)) { pen = false; continue; } const px = X(s.x[i]), py = Y(yv); if (!pen) { ctx.moveTo(px, py); pen = true; } else ctx.lineTo(px, py); }
+      ctx.stroke(); ctx.setLineDash([]);
+    });
+    (o.points || []).forEach(p => { ctx.fillStyle = p.color || '#d1242f'; ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), p.r || fs * 0.35, 0, 7); ctx.fill(); });
+    ctx.restore();
+    (o.points || []).forEach(p => { if (p.label) { ctx.fillStyle = p.color || '#d1242f'; ctx.textAlign = p.align || 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(p.label, X(p.x) + (p.align === 'right' ? -fs * 0.5 : fs * 0.5), Y(p.y) - fs * 0.2); } });
+    // legend
+    const leg = (o.series || []).filter(s => s.label);
+    if (leg.length && o.legend !== false) {
+      let ly2 = I.y + fs * 0.4; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      const lw = Math.max(...leg.map(s => ctx.measureText(s.label).width)) + fs * 2.6;
+      const lx2 = o.legendLeft ? I.x + fs * 0.4 : I.x + I.w - lw - fs * 0.3;
+      ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(lx2 - fs * 0.2, ly2 - fs * 0.3, lw, leg.length * fs * 1.2 + fs * 0.2);
+      leg.forEach(s => { ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 2.5; ctx.setLineDash(s.dash || []); ctx.beginPath(); ctx.moveTo(lx2, ly2 + fs * .3); ctx.lineTo(lx2 + fs * 1.6, ly2 + fs * .3); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#1b2333'; ctx.fillText(s.label, lx2 + fs * 2.0, ly2 + fs * .3); ly2 += fs * 1.2; });
+    }
+    ctx.restore();
+    return { X, Y, I, fs };
+  }
+  function arrow(ctx, x0, y0, x1, y1, color, w = 2, head = 10) {
+    const a = Math.atan2(y1 - y0, x1 - x0), L = Math.hypot(x1 - x0, y1 - y0); head = Math.min(head, L * 0.6);
+    ctx.strokeStyle = ctx.fillStyle = color; ctx.lineWidth = w;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - head * 0.7 * Math.cos(a), y1 - head * 0.7 * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - head * Math.cos(a - 0.4), y1 - head * Math.sin(a - 0.4)); ctx.lineTo(x1 - head * Math.cos(a + 0.4), y1 - head * Math.sin(a + 0.4)); ctx.closePath(); ctx.fill();
+  }
+  // arrowhead in the middle of a polyline segment
+  function midHead(ctx, x, y, ang, color, s = 9) {
+    ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(x + s * Math.cos(ang), y + s * Math.sin(ang));
+    ctx.lineTo(x + s * Math.cos(ang + 2.5), y + s * Math.sin(ang + 2.5)); ctx.lineTo(x + s * Math.cos(ang - 2.5), y + s * Math.sin(ang - 2.5)); ctx.closePath(); ctx.fill();
+  }
+  // perceptual-ish colour map (blue -> cyan -> yellow -> red), t in [0,1]
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    const S = [[0, [49, 54, 149]], [0.25, [69, 117, 180]], [0.45, [171, 217, 233]], [0.6, [254, 224, 144]], [0.8, [244, 109, 67]], [1, [165, 0, 38]]];
+    for (let i = 1; i < S.length; i++) if (t <= S[i][0]) { const [a, ca] = S[i - 1], [b, cb] = S[i]; const u = (t - a) / (b - a); return ca.map((c, k) => Math.round(c + (cb[k] - c) * u)); }
+    return S[S.length - 1][1];
+  }
+  // marching-squares contour of node field f (nx*ny, row-major f[j*nx+i]); toPx(i,j)->[x,y]; mask(i,j) true = skip cell
+  function contour(ctx, f, nx, ny, level, toPx, mask) {
+    ctx.beginPath();
+    const lerp = (a, b) => (level - a) / (b - a);
+    for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+      if (mask && mask(i, j)) continue;
+      const v0 = f[j * nx + i], v1 = f[j * nx + i + 1], v2 = f[(j + 1) * nx + i + 1], v3 = f[(j + 1) * nx + i];
+      const c = (v0 > level) | ((v1 > level) << 1) | ((v2 > level) << 2) | ((v3 > level) << 3);
+      if (c === 0 || c === 15) continue;
+      const e = [];
+      if ((v0 > level) !== (v1 > level)) e.push([i + lerp(v0, v1), j]);
+      if ((v1 > level) !== (v2 > level)) e.push([i + 1, j + lerp(v1, v2)]);
+      if ((v3 > level) !== (v2 > level)) e.push([i + lerp(v3, v2), j + 1]);
+      if ((v0 > level) !== (v3 > level)) e.push([i, j + lerp(v0, v3)]);
+      for (let k = 0; k + 1 < e.length; k += 2) { const a = toPx(...e[k]), b = toPx(...e[k + 1]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    }
+    ctx.stroke();
+  }
+  function text(ctx, s, x, y, { color = '#1b2333', size, align = 'left', base = 'middle', weight = '', bg = null } = {}) {
+    const fz = size || fontPx();
+    ctx.font = `${weight} ${fz}px system-ui, sans-serif`; ctx.textAlign = align; ctx.textBaseline = base;
+    if (bg) { const wd = ctx.measureText(s).width, x0 = align === 'center' ? x - wd / 2 : align === 'right' ? x - wd : x, y0 = base === 'middle' ? y - fz * 0.6 : base === 'top' ? y - fz * 0.1 : y - fz * 1.1; ctx.fillStyle = bg; ctx.fillRect(x0 - fz * 0.2, y0, wd + fz * 0.4, fz * 1.2); }
+    ctx.fillStyle = color; ctx.fillText(s, x, y);
+  }
+  return { $, sci, eng, tex, texAll, contour, fontPx, canvas, pointer, slider, seg, check, plot, arrow, midHead, cmap, text, ticks };
+})();
+</script>
+
+<!-- ===================== UI / RENDERING ===================== -->
+<script id="app">
+(() => {
+  const { $, sci, tex, texAll, canvas, slider, seg, check, plot, text, cmap, contour, pointer } = UI;
+  const S = { method: 'gs', omega: 1.8, autoOmega: true, n: 20, aspect: 1, bc: { top: 100, bottom: 0, left: 0, right: 0 }, running: true, ipf: 1, tool: 'none', Vc: 50, equip: true, values: true, tol: 1e-4 };
+  let g, hist = [], cur = null, cond = null; // cond: Uint8Array mask of user-drawn conductor (persisted across resets)
+  seg('#modes', [['jacobi', 'Jacobi'], ['gs', 'Gauss–Seidel'], ['sor', 'SOR']], S.method, v => { S.method = v; omegaVis(); reset(); });
+  const omegaVis = () => { sOm.el.style.visibility = bOpt.style.visibility = S.method === 'sor' ? 'visible' : 'hidden'; };
+  const c = $('#ctl');
+  const grid2 = () => { const d = document.createElement('div'); d.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:0 .7em'; c.appendChild(d); return d; };
+  const g1 = grid2();
+  const sOm = slider(g1, { label: 'SOR factor ω', min: 1, max: 1.99, step: 0.01, value: S.omega, fmt: v => v.toFixed(2), onInput: v => { S.omega = v; S.autoOmega = false; reset(); } });
+  slider(g1, { label: 'Grid N (cells)', min: 4, max: 60, step: 1, value: S.n, fmt: v => v, onInput: v => { S.n = v; cond = null; reset(); } });
+  const rowA = document.createElement('div'); rowA.className = 'row'; c.appendChild(rowA);
+  const bOpt = document.createElement('button'); bOpt.className = 'btn'; bOpt.textContent = 'ω → ω_opt'; bOpt.onclick = () => { S.autoOmega = true; reset(); }; rowA.appendChild(bOpt);
+  const aspBox = document.createElement('span'); rowA.appendChild(aspBox);
+  seg(aspBox, [['1', 'a = b'], ['2', 'a = 2b']], '1', v => { S.aspect = +v; cond = null; reset(); });
+  const bcBox = grid2();
+  [['top', 'Top'], ['bottom', 'Bottom'], ['left', 'Left'], ['right', 'Right']].forEach(([k, l]) => slider(bcBox, { label: l, min: -100, max: 100, step: 5, value: S.bc[k], fmt: v => v + ' V', onInput: v => { S.bc[k] = v; reset(); } }));
+  const g3 = grid2();
+  slider(g3, { label: 'Sweeps/frame', min: 1, max: 200, log: true, value: 1, fmt: v => Math.round(v), onInput: v => { S.ipf = Math.round(v); } });
+  const toolBox = document.createElement('div'); toolBox.className = 'row'; c.insertBefore(toolBox, g3);
+  toolBox.insertAdjacentHTML('beforeend', '<b>Conductor:</b>');
+  seg(toolBox, [['none', 'off'], ['draw', 'draw'], ['erase', 'erase']], 'none', v => { S.tool = v; });
+  const bBox = document.createElement('button'); bBox.className = 'btn'; bBox.textContent = 'box'; bBox.onclick = () => { presetBox(); reset(); }; toolBox.appendChild(bBox);
+  slider(g3, { label: 'Conductor V', min: -100, max: 100, step: 5, value: S.Vc, fmt: v => v + ' V', onInput: v => { S.Vc = v; reset(); } });
+  const rowB = document.createElement('div'); rowB.className = 'row'; c.appendChild(rowB);
+  const bRun = document.createElement('button'); bRun.className = 'btn'; bRun.onclick = () => { S.running = !S.running; setRun(); }; rowB.appendChild(bRun);
+  const bStep = document.createElement('button'); bStep.className = 'btn'; bStep.textContent = '+1 sweep'; bStep.onclick = () => { S.running = false; setRun(); doSweeps(1); C.redraw(); }; rowB.appendChild(bStep);
+  const bRes = document.createElement('button'); bRes.className = 'btn'; bRes.textContent = '↺ Reset'; bRes.onclick = () => reset(); rowB.appendChild(bRes);
+  const bClr = document.createElement('button'); bClr.className = 'btn'; bClr.textContent = 'Clear plot'; bClr.onclick = () => { hist = cur ? [cur] : []; C.redraw(); }; rowB.appendChild(bClr);
+  check(c, 'Equipotentials (10 V steps)', true, v => { S.equip = v; C.redraw(); });
+  function setRun() { bRun.textContent = S.running ? '❚❚ Pause' : '▶ Run'; }
+  const NX = () => S.n * S.aspect, NY = () => S.n;
+  function presetBox() { const W = NX() + 1, H = NY() + 1; cond = new Uint8Array(W * H); const i0 = Math.round(NX() * 0.4), i1 = Math.round(NX() * 0.6), j0 = Math.round(NY() * 0.3), j1 = Math.round(NY() * 0.5); for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) cond[j * W + i] = 1; }
+  function applyCond() { if (!cond) return; for (let k = 0; k < cond.length; k++) if (cond[k]) { const i = k % g.W, j = (k / g.W) | 0; if (i > 0 && j > 0 && i < g.W - 1 && j < g.H - 1) { g.fixed[k] = 1; g.V[k] = S.Vc; } } }
+  const MCOL = { jacobi: '#d1242f', gs: '#1f6feb', sor: '#1a7f37' };
+  function reset() {
+    if (S.autoOmega) sOm.set(+PHYS.omegaOpt(NX(), NY()).toFixed(2), false), S.omega = +PHYS.omegaOpt(NX(), NY()).toFixed(2);
+    g = PHYS.makeGrid(NX(), NY(), S.bc); applyCond();
+    cur = { method: S.method, omega: S.omega, n: S.n, its: [0], res: [Math.max(1e-12, PHYS.residual(g))], conv: null };
+    hist.push(cur); if (hist.length > 5) hist.shift();
+    S.running = true; setRun(); C && C.redraw();
+  }
+  function doSweeps(k) {
+    for (let s = 0; s < k; s++) {
+      if (cur.conv) break;
+      PHYS.sweep(g, S.method, S.omega); const r = PHYS.residual(g);
+      cur.its.push(g.iter); cur.res.push(Math.max(r, 1e-12));
+      if (r < S.tol) { cur.conv = g.iter; S.running = false; setRun(); break; }
+      if (g.iter > 50000) { S.running = false; setRun(); break; }
+    }
+  }
+  let geo = null;
+  function draw(ctx, w, h) {
+    if (!g) return;
+    const fs = UI.fontPx(), nx = g.nx, ny = g.ny;
+    const fw = Math.min(w * 0.52, (h - fs * 3.2) * nx / ny), cs = fw / nx, fh = cs * ny;
+    const ox = fs * 2.6, oy = fs * 1.6;
+    const X = i => ox + i * cs, Y = j => oy + (ny - j) * cs;
+    geo = { X, Y, cs, ox, oy };
+    // colour map (bilinear via an offscreen canvas at node resolution)
+    const vmin = Math.min(S.bc.top, S.bc.bottom, S.bc.left, S.bc.right, cond ? S.Vc : 0, 0), vmax = Math.max(S.bc.top, S.bc.bottom, S.bc.left, S.bc.right, cond ? S.Vc : 0, 1e-9);
+    const off = document.createElement('canvas'); off.width = g.W; off.height = g.H; const oc = off.getContext('2d'); const im = oc.createImageData(g.W, g.H);
+    for (let j = 0; j < g.H; j++) for (let i = 0; i < g.W; i++) { const k = j * g.W + i, t = (g.V[k] - vmin) / (vmax - vmin), col = cmap(t), p = ((g.H - 1 - j) * g.W + i) * 4; im.data[p] = col[0]; im.data[p + 1] = col[1]; im.data[p + 2] = col[2]; im.data[p + 3] = 255; }
+    oc.putImageData(im, 0, 0);
+    ctx.imageSmoothingEnabled = true; ctx.drawImage(off, 0, 0, g.W, g.H, X(0) - cs / 2, Y(ny) - cs / 2, fw + cs, fh + cs);
+    ctx.save(); ctx.beginPath(); ctx.rect(X(0), Y(ny), fw, fh); ctx.clip(); ctx.restore();
+    ctx.fillStyle = '#fff'; // mask the half-cell overhang outside the trough
+    ctx.fillRect(X(0) - cs, Y(ny) - cs, fw + 2 * cs, cs); ctx.fillRect(X(0) - cs, Y(0), fw + 2 * cs, cs); ctx.fillRect(X(0) - cs, Y(ny) - cs, cs, fh + 2 * cs); ctx.fillRect(X(nx), Y(ny) - cs, cs, fh + 2 * cs);
+    // equipotentials
+    if (S.equip) {
+      ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = 1.4;
+      const f = new Float64Array(g.W * g.H); for (let j = 0; j < g.H; j++) for (let i = 0; i < g.W; i++) f[j * g.W + i] = g.V[j * g.W + i];
+      for (let L = Math.ceil((vmin + 1e-6) / 10) * 10; L < vmax; L += 10) { if (Math.abs(L) < 1e-9 && (vmin === 0)) continue; contour(ctx, f, g.W, g.H, L, (i, j) => [X(i), Y(j)]); }
+    }
+    // conductor nodes
+    if (cond) { ctx.fillStyle = 'rgba(40,40,40,.85)'; for (let k = 0; k < cond.length; k++) if (cond[k] && g.fixed[k]) { const i = k % g.W, j = (k / g.W) | 0; ctx.fillRect(X(i) - cs / 2, Y(j) - cs / 2, cs, cs); } }
+    // grid & node values for coarse grids
+    if (nx <= 30) { ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1; ctx.beginPath(); for (let i = 0; i <= nx; i++) { ctx.moveTo(X(i), Y(0)); ctx.lineTo(X(i), Y(ny)); } for (let j = 0; j <= ny; j++) { ctx.moveTo(X(0), Y(j)); ctx.lineTo(X(nx), Y(j)); } ctx.stroke(); }
+    if (S.n <= 10) for (let j = 1; j < ny; j++) for (let i = 1; i < nx; i++) text(ctx, g.V[j * g.W + i].toFixed(cs > fs * 3.2 ? 2 : 1), X(i), Y(j), { align: 'center', size: Math.min(fs * 0.8, cs * 0.3), color: '#111', bg: 'rgba(255,255,255,.7)' });
+    // boundary labels
+    ctx.strokeStyle = '#1b2333'; ctx.lineWidth = 3; ctx.strokeRect(X(0), Y(ny), fw, fh);
+    text(ctx, `${S.bc.top} V`, X(nx / 2), Y(ny) - fs * 0.75, { align: 'center', weight: 700 });
+    text(ctx, `${S.bc.bottom} V`, X(nx / 2), Y(0) + fs * 0.8, { align: 'center', weight: 700 });
+    text(ctx, `${S.bc.left} V`, X(0) - fs * 0.3, Y(ny / 2), { align: 'right', weight: 700, size: fs * 0.9 });
+    text(ctx, `${S.bc.right} V`, X(nx) + fs * 0.3, Y(ny / 2), { weight: 700, size: fs * 0.9 });
+    // centre marker
+    if (nx % 2 === 0 && ny % 2 === 0) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(X(nx / 2), Y(ny / 2), fs * 0.45, 0, 7); ctx.stroke(); }
+    // residual plot
+    const px = X(nx) + fs * 3.2, pw = w - px - 4;
+    const maxIt = Math.max(10, ...hist.map(hh => hh.its[hh.its.length - 1]));
+    const series = hist.map((hh, idx) => ({ x: hh.its, y: hh.res, color: MCOL[hh.method], width: hh === cur ? 3 : 1.6, dash: hh === cur ? [] : [5, 4], label: idx >= hist.length - 3 ? `${({ jacobi: 'Jacobi', gs: 'G–S', sor: 'SOR ω=' + hh.omega.toFixed(2) })[hh.method]}, N=${hh.n}${hh.conv ? ': ' + hh.conv : ''}` : '' }));
+    plot(ctx, { x: px, y: 4, w: pw, h: h - 8 }, { xlim: [0, maxIt * 1.02], ylim: [S.tol / 10, 300], logy: true, legendLeft: false, title: 'Max residual vs sweep', xlabel: 'sweep', ylabel: 'volts', series, hlines: [{ y: S.tol, color: '#5a6478' }], padL: 3.2 });
+    // readout
+    const isCenter = nx % 2 === 0 && ny % 2 === 0;
+    const a = S.aspect, b = 1, vc = isCenter ? g.V[(ny / 2) * g.W + nx / 2] : PHYS.sample(g, a / 2, 0.5, a);
+    const exact = cond ? null : PHYS.fourier(a / 2, 0.5, a, b, S.bc);
+    $('#read').innerHTML = `Sweep <b>${g.iter}</b> &nbsp; residual <b>${sci(cur.res[cur.res.length - 1], 2)} V</b> ${cur.conv ? '<span style="color:#1a7f37;font-weight:700">✓ converged</span>' : ''}<br>
+      Centre: FD <span class="big">${vc.toFixed(3)} V</span>` + (exact !== null ? ` &nbsp;Fourier <b>${exact.toFixed(3)} V</b>` : '<br><span class="small">(no analytic solution with an internal conductor)</span>');
+  }
+  const C = canvas($('#cv'), draw);
+  // painting conductors
+  const paint = p => {
+    if (S.tool === 'none' || !geo) return false;
+    const i = Math.round((p.x - geo.ox) / geo.cs), j = Math.round(g.ny - (p.y - geo.oy) / geo.cs);
+    if (i < 1 || j < 1 || i >= g.W - 1 || j >= g.H - 1) return;
+    if (!cond || cond.length !== g.W * g.H) cond = new Uint8Array(g.W * g.H);
+    const k = j * g.W + i;
+    if (S.tool === 'draw') { cond[k] = 1; g.fixed[k] = 1; g.V[k] = S.Vc; } else { cond[k] = 0; g.fixed[k] = 0; }
+    cur.conv = null; if (!S.running) { S.running = true; setRun(); }
+  };
+  pointer($('#cv'), { down: p => paint(p), move: p => paint(p) });
+  let last = 0;
+  function frame(t) { if (S.running && g) { doSweeps(S.ipf); C.redraw(); } requestAnimationFrame(frame); }
+  texAll(); omegaVis(); reset(); requestAnimationFrame(frame);
+})();
+</script>
+</body></html>

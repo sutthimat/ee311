@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Cylindrical and Spherical Coordinates</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f6f5f1; --panel:#ffffff; --ink:#16181d; --muted:#4d535e; --line:#d6d2c8;
+  --pos:#c8322c; --neg:#1f5fbf; --acc:#d97000; --grn:#12804a; --vio:#7a3fb3;
+  /* ~18.5px at 1280x720; scales with the iframe/container */
+  font-size: clamp(12px, min(1.45vw, 2.6vh), 30px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.3}
+#app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
+header{padding:.35rem 1rem .3rem;border-bottom:2px solid var(--line);display:flex;align-items:baseline;column-gap:1.2rem;flex-wrap:wrap}
+header h1{font-size:1.3rem;margin:0;font-weight:700;white-space:nowrap}
+.notice{margin:0;font-size:1rem;color:var(--muted)}
+.notice b{color:var(--acc)}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(15rem,23rem);min-height:0}
+#stage{position:relative;min-width:0;min-height:0;overflow:hidden}
+#stage canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+aside{position:relative;border-left:2px solid var(--line);background:var(--panel);padding:.4rem .7rem;overflow-y:auto;overflow-x:hidden;
+  display:flex;flex-direction:column;gap:.35rem;min-height:0}
+aside>*{flex-shrink:0}
+aside h3{font-size:1rem;margin:.1rem 0 0;color:var(--muted);font-weight:700}
+.row{display:grid;grid-template-columns:5.6rem minmax(0,1fr) 5.2rem;align-items:center;gap:.35rem;font-size:1rem}
+.row label{white-space:nowrap}
+.row .val{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--acc);margin:0;height:1.3rem}
+.btns{display:flex;flex-wrap:wrap;gap:.3rem}
+button,select{font:inherit;font-size:1rem;padding:.1rem .55rem;border:1.5px solid #9a968c;border-radius:.4rem;background:#fff;color:var(--ink);cursor:pointer;line-height:1.35}
+button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+button:disabled{opacity:.4;cursor:default}
+.chk{display:inline-flex;align-items:center;gap:.3rem;margin-right:.6rem;white-space:nowrap;cursor:pointer}
+.chk input{width:1.05rem;height:1.05rem;accent-color:var(--acc);margin:0}
+table.ro{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:1rem}
+table.ro td{padding:.03rem .2rem;white-space:nowrap}
+table.ro td:last-child{text-align:right;font-weight:600}
+.formula{background:#f1eee6;border-radius:.4rem;padding:.25rem .5rem;font-size:1rem;overflow-x:auto;overflow-y:hidden}
+.formula .katex-display{margin:.15rem 0}
+.small{font-size:1rem;color:var(--muted)}
+.warn{color:var(--pos);font-weight:600}
+.tex.d{display:block}
+</style>
+
+<style>
+.lbl{position:absolute;transform:translate(-50%,-50%);font-weight:700;font-size:1.1rem;pointer-events:none;
+  text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;white-space:nowrap}
+.lbl.sm{font-size:1rem;font-weight:600}
+.hint{position:absolute;left:.6rem;bottom:.4rem;font-size:.95rem;color:var(--muted);background:rgba(246,245,241,.85);padding:.1rem .4rem;border-radius:.3rem}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <h1>Coordinate systems &amp; unit vectors</h1>
+  <p class="notice"><b>Notice:</b> curvilinear unit vectors <b>change direction</b> with position; angle increments give edges ρdφ, r dθ, r sinθ dφ.</p>
+</header>
+<main>
+  <div id="stage"><div id="labels"></div><div class="hint">Drag to rotate · wheel to zoom</div></div>
+  <aside>
+    <div class="btns"><button id="mCyl" class="on">Cylindrical</button><button id="mSph">Spherical</button></div>
+    <div id="cylCtl">
+      <div class="row"><label>ρ</label><input type="range" id="rho" min="0.3" max="4" step="0.05" value="2.5"><span class="val" id="rho-v"></span></div>
+      <div class="row"><label>φ</label><input type="range" id="phiC" min="0" max="360" step="1" value="20"><span class="val" id="phiC-v"></span></div>
+      <div class="row"><label>z</label><input type="range" id="z" min="-2" max="3" step="0.05" value="1.5"><span class="val" id="z-v"></span></div>
+    </div>
+    <div id="sphCtl" style="display:none">
+      <div class="row"><label>r</label><input type="range" id="r" min="0.3" max="4" step="0.05" value="3"><span class="val" id="r-v"></span></div>
+      <div class="row"><label>θ</label><input type="range" id="th" min="1" max="179" step="1" value="50"><span class="val" id="th-v"></span></div>
+      <div class="row"><label>φ</label><input type="range" id="phiS" min="0" max="360" step="1" value="20"><span class="val" id="phiS-v"></span></div>
+    </div>
+    <div>
+      <label class="chk"><input type="checkbox" id="tVol" checked>Volume element</label>
+      <label class="chk"><input type="checkbox" id="tSurf" checked>Coord. surfaces</label>
+      <label class="chk"><input type="checkbox" id="tRing">Unit vectors around a ring</label>
+    </div>
+    <div id="dRow"><div class="row"><label id="dLenLbl">dρ, dz</label><input type="range" id="dsz" min="0.05" max="0.8" step="0.01" value="0.6"><span class="val" id="dsz-v"></span></div>
+    <div class="row"><label id="dAngLbl">dφ</label><input type="range" id="dang" min="1" max="30" step="1" value="15"><span class="val" id="dang-v"></span></div></div>
+    <table class="ro" id="tbl"></table>
+    <div class="small" id="volNote">Shrink d: product formula → exact volume.</div>
+    <div class="formula" id="fml"></div>
+  </aside>
+</main>
+</div>
+
+<!-- ===================== PHYSICS / MATH (pure, no DOM) ===================== -->
+<script id="physics">
+var PHYS = (function () {
+  const cos = Math.cos, sin = Math.sin;
+  // cylindrical (rho, phi, z) -> cartesian
+  const cylToCart = (rho, phi, z) => [rho * cos(phi), rho * sin(phi), z];
+  // spherical (r, theta, phi) -> cartesian (theta from +z, phi from +x)
+  const sphToCart = (r, th, phi) => [r * sin(th) * cos(phi), r * sin(th) * sin(phi), r * cos(th)];
+  // local unit vectors, Cartesian components
+  const cylUnit = (phi) => ({ a_rho: [cos(phi), sin(phi), 0], a_phi: [-sin(phi), cos(phi), 0], a_z: [0, 0, 1] });
+  const sphUnit = (th, phi) => ({
+    a_r: [sin(th) * cos(phi), sin(th) * sin(phi), cos(th)],
+    a_th: [cos(th) * cos(phi), cos(th) * sin(phi), -sin(th)],
+    a_phi: [-sin(phi), cos(phi), 0]
+  });
+  // edge lengths of the differential element (metric/scale factors x increments)
+  const cylEdges = (rho, d) => ({ drho: d.drho, rhodphi: rho * d.dphi, dz: d.dz });
+  const sphEdges = (r, th, d) => ({ dr: d.dr, rdth: r * d.dth, rsinthdphi: r * Math.sin(th) * d.dphi });
+  const cylDV = (rho, d) => rho * d.drho * d.dphi * d.dz;
+  const sphDV = (r, th, d) => r * r * Math.sin(th) * d.dr * d.dth * d.dphi;
+  // exact volume of a finite element (closed forms) for checking dV
+  const cylVolExact = (rho, d) => 0.5 * ((rho + d.drho) ** 2 - rho * rho) * d.dphi * d.dz;
+  const sphVolExact = (r, th, d) => ((r + d.dr) ** 3 - r ** 3) / 3 * (Math.cos(th) - Math.cos(th + d.dth)) * d.dphi;
+  return { cylToCart, sphToCart, cylUnit, sphUnit, cylEdges, sphEdges, cylDV, sphDV, cylVolExact, sphVolExact };
+})();
+</script>
+<script id="ui">
+/* ===== Shared UI helpers (DOM / canvas only, no physics) ===== */
+var UI = (function () {
+  const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
+  const $ = (s) => document.querySelector(s);
+
+  // ---------- KaTeX ----------
+  function renderTex(root) {
+    (root || document).querySelectorAll('.tex').forEach((el) => {
+      if (el.dataset.src == null) el.dataset.src = el.textContent.trim();
+      if (window.katex) {
+        try { katex.render(el.dataset.src, el, { displayMode: el.classList.contains('d'), throwOnError: false }); } catch (e) { el.textContent = el.dataset.src; }
+      }
+    });
+  }
+  function setTex(el, src) {
+    if (typeof el === 'string') el = $(el);
+    if (!el) return;
+    if (el.dataset.src === src && el.dataset.done) return;
+    el.dataset.src = src;
+    if (window.katex) { try { katex.render(src, el, { displayMode: el.classList.contains('d'), throwOnError: false }); el.dataset.done = 1; } catch (e) { el.textContent = src; } }
+    else el.textContent = src;
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => renderTex());
+  else renderTex();
+  window.addEventListener('load', () => renderTex());
+
+  // ---------- number formatting ----------
+  const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+  const sup = (n) => String(n).split('').map((c) => SUP[c] || c).join('');
+  function sci(x, d) {
+    d = d == null ? 3 : d;
+    if (!isFinite(x)) return x > 0 ? '∞' : (x < 0 ? '−∞' : '—');
+    if (x === 0) return '0';
+    const e = Math.floor(Math.log10(Math.abs(x)));
+    if (e >= -2 && e <= 3) return minus(x.toPrecision(d));
+    const m = x / Math.pow(10, e);
+    return minus(m.toFixed(d - 1)) + '×10' + sup(e);
+  }
+  function minus(s) { return String(s).replace(/^-/, '−'); }
+  const PFX = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+  function si(x, unit, d) {
+    d = d == null ? 3 : d;
+    if (!isFinite(x)) return '—';
+    if (Math.abs(x) < 1e-18) return '0 ' + unit;
+    const a = Math.abs(x);
+    for (const [f, p] of PFX) if (a >= f * 0.9995) { const v = x / f; return minus(Math.abs(v) >= Math.pow(10, d) ? v.toFixed(0) : v.toPrecision(d)) + ' ' + p + unit; }
+    return sci(x, d) + ' ' + unit;
+  }
+  function fix(x, n) { return minus((Math.abs(x) < 0.5 * Math.pow(10, -n) ? 0 : x).toFixed(n)); }
+
+  // ---------- canvas ----------
+  function canvas2d(canvas, draw) {
+    const ctx = canvas.getContext('2d');
+    const obj = { ctx, W: 1, H: 1, dpr: 1, redraw };
+    let pending = false;
+    function resize() {
+      const r = canvas.getBoundingClientRect();
+      obj.dpr = window.devicePixelRatio || 1;
+      obj.W = Math.max(1, r.width); obj.H = Math.max(1, r.height);
+      canvas.width = Math.round(obj.W * obj.dpr); canvas.height = Math.round(obj.H * obj.dpr);
+      ctx.setTransform(obj.dpr, 0, 0, obj.dpr, 0, 0);
+      draw(obj);
+    }
+    function redraw() {
+      if (pending) return; pending = true;
+      requestAnimationFrame(() => { pending = false; ctx.setTransform(obj.dpr, 0, 0, obj.dpr, 0, 0); draw(obj); });
+    }
+    new ResizeObserver(resize).observe(canvas);
+    return obj;
+  }
+
+  // world <-> screen mapping that keeps aspect ratio 1:1
+  function View(xmin, xmax, ymin, ymax) { this.box = [xmin, xmax, ymin, ymax]; this.fit(0, 0, 100, 100); }
+  View.prototype.fit = function (px, py, W, H) {
+    const [x0, x1, y0, y1] = this.box;
+    this.s = Math.min(W / (x1 - x0), H / (y1 - y0));
+    this.cx = (x0 + x1) / 2; this.cy = (y0 + y1) / 2;
+    this.ox = px + W / 2; this.oy = py + H / 2;
+    this.rect = [px, py, W, H];
+    this.xmin = this.cx - W / 2 / this.s; this.xmax = this.cx + W / 2 / this.s;
+    this.ymin = this.cy - H / 2 / this.s; this.ymax = this.cy + H / 2 / this.s;
+    return this;
+  };
+  View.prototype.X = function (x) { return this.ox + (x - this.cx) * this.s; };
+  View.prototype.Y = function (y) { return this.oy - (y - this.cy) * this.s; };
+  View.prototype.toW = function (px, py) { return [this.cx + (px - this.ox) / this.s, this.cy - (py - this.oy) / this.s]; };
+
+  function arrow(ctx, x1, y1, x2, y2, color, width, head) {
+    const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy);
+    if (L < 0.5) return;
+    head = Math.min(head == null ? 10 : head, L * 0.6);
+    const ux = dx / L, uy = dy / L;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width || 2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - ux * head * 0.7, y2 - uy * head * 0.7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - ux * head - uy * head * 0.45, y2 - uy * head + ux * head * 0.45);
+    ctx.lineTo(x2 - ux * head + uy * head * 0.45, y2 - uy * head - ux * head * 0.45);
+    ctx.closePath(); ctx.fill();
+  }
+
+  function label(ctx, text, x, y, opt) {
+    opt = opt || {};
+    const fs = (opt.size || 1) * rem();
+    ctx.font = (opt.bold ? '600 ' : '') + fs + 'px ' + (opt.font || 'system-ui, sans-serif');
+    ctx.textAlign = opt.align || 'left'; ctx.textBaseline = opt.base || 'middle';
+    if (opt.bg) {
+      const w = ctx.measureText(text).width, pad = 0.2 * fs;
+      let bx = x - (ctx.textAlign === 'center' ? w / 2 : ctx.textAlign === 'right' ? w : 0);
+      let by = y - (ctx.textBaseline === 'middle' ? fs * 0.6 : ctx.textBaseline === 'bottom' ? fs * 1.15 : 0);
+      ctx.fillStyle = opt.bg; ctx.fillRect(bx - pad, by - pad * 0.3, w + 2 * pad, fs * 1.2 + pad * 0.6);
+    }
+    ctx.fillStyle = opt.color || '#16181d';
+    ctx.fillText(text, x, y);
+  }
+
+  // pointer helper: handlers receive canvas-local px coords
+  function pointer(canvas, h) {
+    let dragging = false;
+    const loc = (e) => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    canvas.addEventListener('pointerdown', (e) => {
+      const [x, y] = loc(e);
+      if (h.down && h.down(x, y, e)) { dragging = true; canvas.setPointerCapture(e.pointerId); e.preventDefault(); }
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      const [x, y] = loc(e);
+      if (dragging) { h.move && h.move(x, y, e); e.preventDefault(); }
+      else if (h.hover) canvas.style.cursor = h.hover(x, y) ? 'grab' : 'default';
+    });
+    const end = (e) => { if (dragging) { dragging = false; h.up && h.up(e); } };
+    canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+  }
+
+  // slider binding: <input type=range id=...> and <span id=...-v>
+  function range(id, fmt, cb, toVal) {
+    const el = document.getElementById(id), out = document.getElementById(id + '-v');
+    toVal = toVal || ((v) => v);
+    const upd = (fire) => { const v = toVal(parseFloat(el.value)); if (out) out.textContent = fmt(v); if (fire) cb(v); return v; };
+    el.addEventListener('input', () => upd(true));
+    upd(false);
+    return { get: () => toVal(parseFloat(el.value)), set: (raw) => { el.value = raw; upd(false); }, el };
+  }
+
+  // ---------- log/linear plot ----------
+  function niceTicks(a, b, n) {
+    const span = b - a, step0 = span / Math.max(1, n), mag = Math.pow(10, Math.floor(Math.log10(step0)));
+    const r = step0 / mag, step = (r < 1.5 ? 1 : r < 3.5 ? 2 : r < 7.5 ? 5 : 10) * mag;
+    const out = []; for (let t = Math.ceil(a / step - 1e-9) * step; t <= b + 1e-9 * span; t += step) out.push(Math.abs(t) < step * 1e-9 ? 0 : t);
+    return out;
+  }
+  function plot(ctx, rect, o) {
+    const R = rem();
+    const [px, py, W, H] = rect;
+    const ml = o.ml != null ? o.ml : 4.2 * R, mb = 2.6 * R, mt = o.mt != null ? o.mt : 0.6 * R, mr = 0.8 * R;
+    const x0 = px + ml, x1 = px + W - mr, y0 = py + mt, y1 = py + H - mb;
+    const lx = !!o.logx, ly = !!o.logy;
+    const tx = (v) => lx ? Math.log10(v) : v, ty = (v) => ly ? Math.log10(v) : v;
+    const [xa, xb] = o.xr.map(tx), [ya, yb] = o.yr.map(ty);
+    const X = (v) => x0 + (tx(v) - xa) / (xb - xa) * (x1 - x0);
+    const Y = (v) => y1 - (ty(v) - ya) / (yb - ya) * (y1 - y0);
+    const invX = (p) => { const t = xa + (p - x0) / (x1 - x0) * (xb - xa); return lx ? Math.pow(10, t) : t; };
+    ctx.save();
+    ctx.fillStyle = '#fff'; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+    if (o.shade) for (const s of o.shade) {
+      const a = Math.max(x0, X(s[0])), b = Math.min(x1, X(s[1]));
+      if (b > a) { ctx.fillStyle = s[2] || 'rgba(18,128,74,0.12)'; ctx.fillRect(a, y0, b - a, y1 - y0); }
+    }
+    // grid + ticks
+    ctx.lineWidth = 1; ctx.font = R + 'px system-ui, sans-serif'; ctx.fillStyle = '#4d535e';
+    const xt = lx ? (() => { const t = []; for (let e = Math.ceil(xa - 1e-9); e <= xb + 1e-9; e++) t.push(e); return t; })() : niceTicks(xa, xb, Math.max(2, Math.floor((x1 - x0) / (5 * R))));
+    const yt = ly ? (() => { const t = []; for (let e = Math.ceil(ya - 1e-9); e <= yb + 1e-9; e++) t.push(e); return t; })() : niceTicks(ya, yb, Math.max(2, Math.floor((y1 - y0) / (2.5 * R))));
+    const xstep = Math.max(1, Math.ceil(xt.length / Math.max(2, (x1 - x0) / (3.6 * R))));
+    const ystep = Math.max(1, Math.ceil(yt.length / Math.max(2, (y1 - y0) / (1.6 * R))));
+    if (lx) { ctx.strokeStyle = '#eeebe4'; for (let e = Math.floor(xa); e < xb; e++) for (let k = 2; k < 10; k++) { const v = e + Math.log10(k); if (v > xa && v < xb) { const p = x0 + (v - xa) / (xb - xa) * (x1 - x0); ctx.beginPath(); ctx.moveTo(p, y0); ctx.lineTo(p, y1); ctx.stroke(); } } }
+    if (ly) { ctx.strokeStyle = '#eeebe4'; for (let e = Math.floor(ya); e < yb; e++) for (let k = 2; k < 10; k++) { const v = e + Math.log10(k); if (v > ya && v < yb) { const p = y1 - (v - ya) / (yb - ya) * (y1 - y0); ctx.beginPath(); ctx.moveTo(x0, p); ctx.lineTo(x1, p); ctx.stroke(); } } }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    xt.forEach((t, i) => {
+      const p = x0 + (t - xa) / (xb - xa) * (x1 - x0);
+      ctx.strokeStyle = '#d9d5cc'; ctx.beginPath(); ctx.moveTo(p, y0); ctx.lineTo(p, y1); ctx.stroke();
+      if (i % xstep === 0) ctx.fillText(lx ? '10' + sup(t) : (o.fmtx ? o.fmtx(t) : minus(+t.toPrecision(6) + '')), p, y1 + 0.25 * R);
+    });
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    yt.forEach((t, i) => {
+      const p = y1 - (t - ya) / (yb - ya) * (y1 - y0);
+      ctx.strokeStyle = '#d9d5cc'; ctx.beginPath(); ctx.moveTo(x0, p); ctx.lineTo(x1, p); ctx.stroke();
+      if (i % ystep === 0) ctx.fillText(ly ? '10' + sup(t) : (o.fmty ? o.fmty(t) : minus(+t.toPrecision(6) + '')), x0 - 0.3 * R, p);
+    });
+    ctx.strokeStyle = '#16181d'; ctx.lineWidth = 1.5; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+    ctx.fillStyle = '#16181d'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    if (o.xlabel) ctx.fillText(o.xlabel, (x0 + x1) / 2, py + H - 0.05 * R);
+    if (o.ylabel) { ctx.save(); ctx.translate(px + 0.1 * R, (y0 + y1) / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'top'; ctx.fillText(o.ylabel, 0, 0); ctx.restore(); }
+    // series
+    ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
+    for (const s of o.series) {
+      ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 3; ctx.setLineDash(s.dash || []);
+      ctx.beginPath(); let pen = false;
+      for (const [x, y] of s.pts) {
+        if (!(isFinite(x) && isFinite(y)) || (lx && x <= 0) || (ly && y <= 0)) { pen = false; continue; }
+        const X_ = X(x), Y_ = Math.max(-1e4, Math.min(1e4, Y(y)));
+        if (pen) ctx.lineTo(X_, Y_); else { ctx.moveTo(X_, Y_); pen = true; }
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    if (o.extra) o.extra({ X, Y, x0, x1, y0, y1 });
+    ctx.restore();
+    // legend
+    if (o.legend !== false) {
+      const items = o.series.filter((s) => s.label);
+      ctx.font = R + 'px system-ui, sans-serif';
+      const lw = Math.max(...items.map((s) => ctx.measureText(s.label).width), 0) + 3.2 * R;
+      const pos = o.legendPos || 'tr';
+      let lxp = pos[1] === 'r' ? x1 - lw - 0.4 * R : x0 + 0.4 * R;
+      let lyp = pos[0] === 't' ? y0 + 0.4 * R : y1 - 0.4 * R - items.length * 1.35 * R - 0.3 * R;
+      if (items.length) {
+        ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.strokeStyle = '#c9c4b9'; ctx.lineWidth = 1;
+        ctx.fillRect(lxp, lyp, lw, items.length * 1.35 * R + 0.3 * R); ctx.strokeRect(lxp, lyp, lw, items.length * 1.35 * R + 0.3 * R);
+        items.forEach((s, i) => {
+          const yy = lyp + 0.15 * R + (i + 0.5) * 1.35 * R;
+          ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 3; ctx.setLineDash(s.dash || []);
+          ctx.beginPath(); ctx.moveTo(lxp + 0.4 * R, yy); ctx.lineTo(lxp + 2.4 * R, yy); ctx.stroke(); ctx.setLineDash([]);
+          ctx.fillStyle = '#16181d'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s.label, lxp + 2.8 * R, yy);
+        });
+      }
+    }
+    return { X, Y, invX, x0, x1, y0, y1 };
+  }
+
+  // log-scaled arrow length: maps |E| in [mlo, mhi] (log) to [Lmin, Lmax]
+  function logLen(m, mlo, mhi, Lmin, Lmax) {
+    if (!(m > 0)) return 0;
+    const t = Math.max(0, Math.min(1, (Math.log10(m) - Math.log10(mlo)) / (Math.log10(mhi) - Math.log10(mlo))));
+    return Lmin + t * (Lmax - Lmin);
+  }
+
+  return { rem, $, renderTex, setTex, sci, si, fix, sup, minus, canvas2d, View, arrow, label, pointer, range, plot, logLen, niceTicks };
+})();
+</script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module" id="app-js">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const P = PHYS, $ = UI.$, D2R = Math.PI / 180;
+let mode = 'cyl';
+
+const stage = $('#stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(window.devicePixelRatio || 1); renderer.setClearColor(0xf6f5f1);
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200);
+camera.up.set(0, 0, 1); camera.position.set(9.5, -7.5, 5.8);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0.6, 0.6, 0.6); controls.update();
+scene.add(new THREE.AmbientLight(0xffffff, 1.7));
+const dl = new THREE.DirectionalLight(0xffffff, 1.6); dl.position.set(6, -8, 12); scene.add(dl);
+const grid = new THREE.GridHelper(10, 10, 0xc4bfb3, 0xe0dcd3); grid.rotation.x = Math.PI / 2; scene.add(grid);
+function line(pts, color, dashed, width) {
+  const g = new THREE.BufferGeometry().setFromPoints(pts.map((p) => new THREE.Vector3(...p)));
+  const m = dashed ? new THREE.LineDashedMaterial({ color, dashSize: 0.14, gapSize: 0.1 }) : new THREE.LineBasicMaterial({ color });
+  const l = new THREE.Line(g, m); if (dashed) l.computeLineDistances(); return l;
+}
+scene.add(line([[-4.5, 0, 0], [5, 0, 0]], 0x444444), line([[0, -4.5, 0], [0, 5, 0]], 0x444444), line([[0, 0, -2.5], [0, 0, 4.5]], 0x444444));
+
+function makeArrow(color, r) {
+  const g = new THREE.Group(), mat = new THREE.MeshStandardMaterial({ color, roughness: 0.5 });
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 14), mat), head = new THREE.Mesh(new THREE.ConeGeometry(r * 2.8, 1, 18), mat);
+  g.add(shaft, head);
+  g.set = (from, v, L) => {
+    const V = new THREE.Vector3(...v).normalize(), hl = Math.min(0.3, L * 0.35);
+    shaft.scale.set(1, L - hl, 1); shaft.position.set(0, (L - hl) / 2, 0); head.scale.set(1, hl, 1); head.position.set(0, L - hl / 2, 0);
+    g.position.set(...from); g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), V);
+  };
+  return g;
+}
+const C3 = [0xc8322c, 0x12804a, 0x1f5fbf];
+const C3css = ['#c8322c', '#12804a', '#1f5fbf'];
+const mainArrows = C3.map((c) => { const a = makeArrow(c, 0.045); scene.add(a); return a; });
+const pointMesh = new THREE.Mesh(new THREE.SphereGeometry(0.09, 20, 14), new THREE.MeshStandardMaterial({ color: 0x16181d }));
+scene.add(pointMesh);
+const dyn = new THREE.Group(); scene.add(dyn);   // rebuilt on every update
+
+const labels = {};
+function L(key, cls) { if (!labels[key]) { const d = document.createElement('div'); d.className = 'lbl ' + (cls || ''); $('#labels').appendChild(d); labels[key] = d; } return labels[key]; }
+L('x').textContent = 'x'; L('y').textContent = 'y'; L('z').textContent = 'z';
+const placed = [];
+function place(el, p, html, color, from, px) {
+  if (html != null) el.innerHTML = html; if (color) el.style.color = color;
+  placed.push([el, p, from, px]);
+}
+function flushLabels() {
+  const r = stage.getBoundingClientRect();
+  Object.values(labels).forEach((el) => (el.style.display = 'none'));
+  const scr = (p) => { const v = new THREE.Vector3(...p).project(camera); return [(v.x + 1) / 2 * r.width, (1 - v.y) / 2 * r.height, v.z]; };
+  for (const [el, p, from, px] of placed) {
+    let [x, y, z] = scr(p);
+    if (z > 1) continue;
+    if (from) {   // push the label away from a reference point in screen space by px pixels (+ half the label width)
+      const [fx, fy] = scr(from); let dx = x - fx, dy = y - fy; const m = Math.hypot(dx, dy) || 1; dx /= m; dy /= m;
+      el.style.display = 'block'; const w = el.offsetWidth / 2, h = el.offsetHeight / 2;
+      x = fx + dx * (m + px + Math.abs(dx) * w); y = fy + dy * (m + px + Math.abs(dy) * h);
+    }
+    el.style.display = 'block'; el.style.left = x + 'px'; el.style.top = y + 'px';
+  }
+}
+
+// Build a curved "box" from a mapping f(u,v,w) over ranges; returns {group, corner(u,v,w)}
+function curvedBox(f, U, V, W, color) {
+  const g = new THREE.Group(), N = 14;
+  const mat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.38, side: THREE.DoubleSide, depthWrite: false, roughness: 0.8 });
+  const faces = [
+    (a, b) => f(U[0], V[0] + a * (V[1] - V[0]), W[0] + b * (W[1] - W[0])), (a, b) => f(U[1], V[0] + a * (V[1] - V[0]), W[0] + b * (W[1] - W[0])),
+    (a, b) => f(U[0] + a * (U[1] - U[0]), V[0], W[0] + b * (W[1] - W[0])), (a, b) => f(U[0] + a * (U[1] - U[0]), V[1], W[0] + b * (W[1] - W[0])),
+    (a, b) => f(U[0] + a * (U[1] - U[0]), V[0] + b * (V[1] - V[0]), W[0]), (a, b) => f(U[0] + a * (U[1] - U[0]), V[0] + b * (V[1] - V[0]), W[1])
+  ];
+  for (const F of faces) {
+    const pos = [], idx = [];
+    for (let i = 0; i <= N; i++) for (let j = 0; j <= N; j++) pos.push(...F(i / N, j / N));
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) { const a = i * (N + 1) + j; idx.push(a, a + N + 1, a + 1, a + 1, a + N + 1, a + N + 2); }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+    g.add(new THREE.Mesh(geo, mat));
+  }
+  // 12 edges
+  const edge = (fn) => { const pts = []; for (let i = 0; i <= 24; i++) pts.push(fn(i / 24)); return pts; };
+  for (const v of V) for (const w of W) g.add(line(edge((t) => f(U[0] + t * (U[1] - U[0]), v, w)), C3[0]));
+  for (const u of U) for (const w of W) g.add(line(edge((t) => f(u, V[0] + t * (V[1] - V[0]), w)), C3[1]));
+  for (const u of U) for (const v of V) g.add(line(edge((t) => f(u, v, W[0] + t * (W[1] - W[0]))), C3[2]));
+  return g;
+}
+function surfMesh(F, nu, nv, color, opacity) {
+  const pos = [], idx = [];
+  for (let i = 0; i <= nu; i++) for (let j = 0; j <= nv; j++) pos.push(...F(i / nu, j / nv));
+  for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { const a = i * (nv + 1) + j; idx.push(a, a + nv + 1, a + 1, a + 1, a + nv + 1, a + nv + 2); }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+  return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color, transparent: true, opacity, side: THREE.DoubleSide, depthWrite: false }));
+}
+
+const fmt2 = (x) => UI.fix(x, 2);
+const rRho = UI.range('rho', fmt2, update), rPhiC = UI.range('phiC', (v) => v + '°', update), rZ = UI.range('z', fmt2, update);
+const rR = UI.range('r', fmt2, update), rTh = UI.range('th', (v) => v + '°', update), rPhiS = UI.range('phiS', (v) => v + '°', update);
+const rD = UI.range('dsz', fmt2, update), rA = UI.range('dang', (v) => v + '°', update);
+['tVol', 'tSurf', 'tRing'].forEach((id) => $('#' + id).addEventListener('change', update));
+$('#mCyl').onclick = () => setMode('cyl'); $('#mSph').onclick = () => setMode('sph');
+function setMode(m) {
+  mode = m; $('#mCyl').classList.toggle('on', m === 'cyl'); $('#mSph').classList.toggle('on', m === 'sph');
+  $('#cylCtl').style.display = m === 'cyl' ? '' : 'none'; $('#sphCtl').style.display = m === 'sph' ? '' : 'none';
+  update();
+}
+const vec = (v) => '(' + v.map((x) => UI.fix(x, 2)).join(', ') + ')';
+function dispose(o) { o.traverse((c) => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); }); }
+
+function edgeRows(lbl) {
+  return lbl.map((s, i) => { const [a, b] = s.split(' = '); return ['<span style="color:' + C3css[i] + '">&#9632;</span> edge ' + a, b]; });
+}
+function update() {
+  dyn.children.slice().forEach((c) => { dyn.remove(c); dispose(c); });
+  placed.length = 0;
+  place(L('x'), [5.3, 0, 0]); place(L('y'), [0, 5.3, 0]); place(L('z'), [0, 0, 4.8]);
+  const showVol = $('#tVol').checked, showSurf = $('#tSurf').checked, showRing = $('#tRing').checked;
+  $('#dRow').style.display = showVol ? '' : 'none';
+  const d = rD.get(), da = rA.get() * D2R;
+  $('#dLenLbl').textContent = mode === 'cyl' ? 'dρ, dz' : 'dr'; $('#dAngLbl').textContent = mode === 'cyl' ? 'dφ' : 'dθ, dφ';
+  let pt, U, names, rows, map, ranges, edgeLbl, dvTex, fml;
+  if (mode === 'cyl') {
+    const rho = rRho.get(), phi = rPhiC.get() * D2R, z = rZ.get();
+    pt = P.cylToCart(rho, phi, z); const u = P.cylUnit(phi);
+    U = [u.a_rho, u.a_phi, u.a_z]; names = ['a<sub>ρ</sub>', 'a<sub>φ</sub>', 'a<sub>z</sub>'];
+    map = (a, b, c) => P.cylToCart(a, b, c);
+    const dd = { drho: d, dphi: da, dz: d };
+    ranges = [[rho, rho + dd.drho], [phi, phi + dd.dphi], [z, z + dd.dz]];
+    const e = P.cylEdges(rho, dd);
+    edgeLbl = ['dρ = ' + fmt2(e.drho), 'ρ dφ = ' + fmt2(e.rhodphi), 'dz = ' + fmt2(e.dz)];
+    rows = [['a<sub>ρ</sub>', vec(u.a_rho)], ['a<sub>φ</sub>', vec(u.a_phi)], ['a<sub>z</sub>', vec(u.a_z)], ['(x, y, z)', vec(pt)]];
+    if (showVol) rows.push(...edgeRows(edgeLbl), ['ρ dρ dφ dz', P.cylDV(rho, dd).toFixed(4)], ['exact volume', P.cylVolExact(rho, dd).toFixed(4)]);
+    fml = String.raw`\mathbf a_\rho=\cos\phi\,\mathbf a_x+\sin\phi\,\mathbf a_y` + '\n' + String.raw`\mathbf a_\phi=-\sin\phi\,\mathbf a_x+\cos\phi\,\mathbf a_y` + '\n' + String.raw`dv=d\rho\cdot\rho\,d\phi\cdot dz`;
+    if (showSurf) {
+      dyn.add(surfMesh((a, b) => P.cylToCart(rho, a * 2 * Math.PI, -2 + b * 5), 64, 4, 0xc8322c, 0.10));          // rho = const
+      dyn.add(surfMesh((a, b) => P.cylToCart(a * 4.5, phi, -2 + b * 5), 4, 4, 0x12804a, 0.12));                 // phi = const
+      dyn.add(surfMesh((a, b) => P.cylToCart(a * 4.5, b * 2 * Math.PI, z), 4, 64, 0x1f5fbf, 0.10));             // z = const
+      const circ = []; for (let i = 0; i <= 96; i++) circ.push(P.cylToCart(rho, i / 96 * 2 * Math.PI, z)); dyn.add(line(circ, 0x777777, true));
+    }
+    dyn.add(line([[0, 0, z], pt], 0x555555, true), line([[pt[0], pt[1], 0], pt], 0x555555, true), line([[0, 0, 0], [pt[0], pt[1], 0]], 0x555555, true));
+    place(L('rl', 'sm'), [pt[0] / 2, pt[1] / 2, z + 0.25], 'ρ', '#444');
+    if (showRing) for (let k = 0; k < 8; k++) {
+      const ph = k * Math.PI / 4; if (Math.abs(((ph - phi) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI)) < 0.15) continue;
+      const q = P.cylToCart(rho, ph, z), uu = P.cylUnit(ph);
+      [uu.a_rho, uu.a_phi].forEach((v, i) => { const a = makeArrow(C3[i], 0.03); a.set(q, v, 0.8); dyn.add(a); });
+    }
+  } else {
+    const r = rR.get(), th = rTh.get() * D2R, phi = rPhiS.get() * D2R;
+    pt = P.sphToCart(r, th, phi); const u = P.sphUnit(th, phi);
+    U = [u.a_r, u.a_th, u.a_phi]; names = ['a<sub>r</sub>', 'a<sub>θ</sub>', 'a<sub>φ</sub>'];
+    map = (a, b, c) => P.sphToCart(a, b, c);
+    const dd = { dr: d, dth: da, dphi: da };
+    ranges = [[r, r + dd.dr], [th, th + dd.dth], [phi, phi + dd.dphi]];
+    const e = P.sphEdges(r, th, dd);
+    edgeLbl = ['dr = ' + fmt2(e.dr), 'r dθ = ' + fmt2(e.rdth), 'r sinθ dφ = ' + fmt2(e.rsinthdphi)];
+    rows = [['a<sub>r</sub>', vec(u.a_r)], ['a<sub>θ</sub>', vec(u.a_th)], ['a<sub>φ</sub>', vec(u.a_phi)], ['(x, y, z)', vec(pt)]];
+    if (showVol) rows.push(...edgeRows(edgeLbl), ['r² sinθ dr dθ dφ', P.sphDV(r, th, dd).toFixed(4)], ['exact volume', P.sphVolExact(r, th, dd).toFixed(4)]);
+    fml = String.raw`\mathbf a_r\cdot\mathbf a_z=\cos\theta,\quad \mathbf a_\theta\cdot\mathbf a_z=-\sin\theta` + '\n' + String.raw`\text{edges: } dr,\ \ r\,d\theta,\ \ r\sin\theta\,d\phi` + '\n' + String.raw`dv=r^2\sin\theta\,dr\,d\theta\,d\phi`;
+    if (showSurf) {
+      dyn.add(surfMesh((a, b) => P.sphToCart(r, a * Math.PI, b * 2 * Math.PI), 40, 64, 0xc8322c, 0.09));     // r = const
+      const cone = surfMesh((a, b) => P.sphToCart(a * 4.5, th, b * 2 * Math.PI), 4, 64, 0x12804a, 0.10);    // theta = const
+      dyn.add(cone);
+      dyn.add(surfMesh((a, b) => P.sphToCart(a * 4.5, b * Math.PI, phi), 4, 40, 0x1f5fbf, 0.10));           // phi = const
+    }
+    dyn.add(line([[0, 0, 0], pt], 0x555555, true), line([[pt[0], pt[1], 0], pt], 0x555555, true), line([[0, 0, 0], [pt[0], pt[1], 0]], 0x555555, true));
+    place(L('rl', 'sm'), [pt[0] / 2, pt[1] / 2, pt[2] / 2 + 0.25], 'r', '#444');
+    if (showRing) for (let k = 0; k < 8; k++) {
+      const ph = k * Math.PI / 4; if (Math.abs(((ph - phi) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI)) < 0.15) continue;
+      const q = P.sphToCart(r, th, ph), uu = P.sphUnit(th, ph);
+      [uu.a_r, uu.a_th, uu.a_phi].forEach((v, i) => { const a = makeArrow(C3[i], 0.03); a.set(q, v, 0.75); dyn.add(a); });
+    }
+  }
+  pointMesh.position.set(...pt);
+  mainArrows.forEach((a, i) => { a.set(pt, U[i], 1.5); });
+  U.forEach((v, i) => place(L('u' + i), [pt[0] + v[0] * 1.5, pt[1] + v[1] * 1.5, pt[2] + v[2] * 1.5], names[i], C3css[i], pt, 14));
+  ['e0', 'e1', 'e2'].forEach((k) => { if (labels[k]) labels[k].style.display = 'none'; });
+  if (showVol) {
+    dyn.add(curvedBox(map, ranges[0], ranges[1], ranges[2], 0xd97000));
+    const [A, B, Cc] = ranges, m = (a) => (a[0] + a[1]) / 2;
+    const mids = [map(m(A), B[0], Cc[0]), map(A[0], m(B), Cc[0]), map(A[0], B[0], m(Cc))];
+    // push labels slightly outward from the element centre
+    const cen = map(m(A), m(B), m(Cc));
+    mids.forEach((q, i) => place(L('e' + i, 'sm'), q, edgeLbl[i].split(' = ')[0], C3css[i], cen, 8));
+  }
+  $('#tbl').innerHTML = rows.map((r) => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('');
+  $('#volNote').style.display = showVol ? '' : 'none';
+  $('#fml').innerHTML = fml.split('\n').map(() => '<span class="tex d"></span>').join('');
+  $('#fml').querySelectorAll('.tex').forEach((el, i) => UI.setTex(el, fml.split('\n')[i]));
+  render();
+}
+function render() { renderer.render(scene, camera); flushLabels(); }
+controls.addEventListener('change', render);
+function resize() {
+  const r = stage.getBoundingClientRect();
+  renderer.setSize(r.width, r.height, false); renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%';
+  camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix(); render();
+}
+new ResizeObserver(resize).observe(stage);
+window.addEventListener('load', () => update());
+update();
+window.__ready = true;
+</script>
+</body>
+</html>

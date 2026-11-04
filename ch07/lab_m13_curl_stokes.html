@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Curl and Stokes' Theorem</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+:root{--bg:#f4f6f9;--panel:#fff;--ink:#16202a;--mut:#56616e;--line:#d5dbe3;--acc:#1c64d6;--pos:#2b8a3e;--fs:clamp(11px,min(1.6vw,2.8vh),26px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:var(--fs)}
+#app{height:100%;display:grid;grid-template-rows:auto 1fr}
+header{padding:.3em .8em;display:flex;align-items:baseline;gap:1em;border-bottom:1px solid var(--line);background:var(--panel)}
+h1{font-size:1.2em;margin:0;white-space:nowrap}
+.cap{color:var(--mut);font-size:.9em;flex:1;min-width:0}.cap b{color:var(--ink)}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,33%);min-height:0}
+#stage{position:relative;min-width:0;min-height:0;overflow:hidden}
+#stage canvas{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none}
+aside{background:var(--panel);border-left:1px solid var(--line);padding:.4em .7em;overflow:auto;display:flex;flex-direction:column;gap:.38em}
+.row{display:grid;grid-template-columns:minmax(0,7.4em) minmax(0,1fr);align-items:center;gap:.5em}
+.row label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+input[type=range]{width:100%;accent-color:var(--acc);margin:0}
+.seg{display:flex;gap:3px;flex-wrap:wrap}
+button{font:inherit;font-size:.88em;padding:.15em .4em;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:.35em;cursor:pointer;flex:1}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.read{font-variant-numeric:tabular-nums;font-size:.9em;line-height:1.38;background:#f6f7f9;border-radius:.4em;padding:.25em .5em}
+.ok{color:var(--pos);font-weight:600}
+.fx{background:#eef3fb;border-radius:.4em;padding:.2em .5em;font-size:.92em;line-height:1.55}
+.hint{color:var(--mut);font-size:.86em}
+h3{margin:.1em 0 0;font-size:.95em;color:var(--mut);font-weight:600}
+</style>
+</head>
+<body>
+<div id="app">
+<header><h1>Curl &amp; Stokes' theorem</h1>
+<div class="cap" id="cap"></div></header>
+<main>
+<section id="stage"><canvas id="cv"></canvas></section>
+<aside>
+<div class="seg" id="fieldSeg"><button data-f="uniform">Uniform</button><button data-f="rotation" class="on">Rotation</button><button data-f="shear">Shear</button><button data-f="wire">Wire</button></div>
+<h3>Small loop at the paddle wheel</h3>
+<div class="row"><label>Δ = <b id="vD"></b></label><input type="range" id="D" min="0.02" max="0.8" step="0.01" value="0.5"></div>
+<div class="seg"><button id="shrink">▶ Shrink loop Δ → 0</button></div>
+<div class="read" id="readSmall"></div>
+<h3>Stokes check (big loop)</h3>
+<div class="row"><label>R = <b id="vR"></b></label><input type="range" id="R" min="0.2" max="1.6" step="0.02" value="0.9"></div>
+<div class="read" id="readBig"></div>
+<div class="fx" id="fx"></div>
+<div class="hint">Drag the paddle wheel; drag the big dashed loop to move it. Shading: red = curl out of page (+z), blue = into page.</div>
+</aside>
+</main>
+</div>
+
+<script id="physics">
+/* ===== Physics core (portable, no DOM). Generic units: lengths in m, H in A/m. ===== */
+const CURL = (function () {
+  const K = 1;           // field strength scale
+  const WIRE = { a: 0.8, J: 2 };   // wire radius (m) and current density (A/m²) for the "inside a wire" preset
+  const fields = {
+    uniform: (x, y) => [K, 0],
+    rotation: (x, y) => [-K * y, K * x],                      // ∇×H = 2K a_z
+    shear: (x, y) => [K * y, 0],                              // ∇×H = −K a_z
+    wire: (x, y) => {                                         // wire along z, J out of page
+      const r2 = x * x + y * y, a = WIRE.a, J = WIRE.J;
+      const f = r2 <= a * a ? J / 2 : (J * a * a) / (2 * r2);
+      return [-f * y, f * x];
+    }
+  };
+  const exactCurl = {
+    uniform: () => 0, rotation: () => 2 * K, shear: () => -K,
+    wire: (x, y) => (x * x + y * y < WIRE.a * WIRE.a ? WIRE.J : 0)
+  };
+  // (∇×H)_z by central differences
+  function curlZ(F, x, y, h = 1e-4) {
+    return (F(x + h, y)[1] - F(x - h, y)[1]) / (2 * h) - (F(x, y + h)[0] - F(x, y - h)[0]) / (2 * h);
+  }
+  // circulation around a square of side d centred at (x,y), counter-clockwise, Gauss–Legendre-ish midpoint with n pts/side
+  function squareCirculation(F, x, y, d, n = 200) {
+    const h = d / 2; let s = 0; const ds = d / n;
+    for (let i = 0; i < n; i++) {
+      const t = -h + (i + 0.5) * ds;
+      s += F(x + t, y - h)[0] * ds;   // bottom, +x
+      s += F(x + h, y + t)[1] * ds;   // right,  +y
+      s -= F(x - t, y + h)[0] * ds;   // top,    −x
+      s -= F(x - h, y - t)[1] * ds;   // left,   −y
+    }
+    return s;
+  }
+  function circleCirculation(F, cx, cy, R, n = 2000) {
+    let s = 0;
+    for (let i = 0; i < n; i++) {
+      const t = (2 * Math.PI * (i + 0.5)) / n, x = cx + R * Math.cos(t), y = cy + R * Math.sin(t);
+      const f = F(x, y); s += (f[0] * -Math.sin(t) + f[1] * Math.cos(t)) * R * (2 * Math.PI / n);
+    }
+    return s;
+  }
+  // ∬(∇×H)_z dS over a disc by a polar midpoint grid using numeric curl
+  function discCurlFlux(F, cx, cy, R, nr = 160, nt = 160) {
+    let s = 0;
+    for (let i = 0; i < nr; i++) {
+      const r = (R * (i + 0.5)) / nr;
+      for (let j = 0; j < nt; j++) {
+        const t = (2 * Math.PI * (j + 0.5)) / nt;
+        s += curlZ(F, cx + r * Math.cos(t), cy + r * Math.sin(t)) * r * (R / nr) * (2 * Math.PI / nt);
+      }
+    }
+    return s;
+  }
+  return { K, WIRE, fields, exactCurl, curlZ, squareCirculation, circleCirculation, discCurlFlux };
+})();
+if (typeof module !== 'undefined') module.exports = CURL;
+</script>
+
+<script>
+/* ===== UI ===== */
+const $ = id => document.getElementById(id);
+const tex = (el, s) => { if (window.katex) { try { katex.render(s, el, { throwOnError: false }); return; } catch (e) {} } el.textContent = s; };
+const f3 = v => (Math.abs(v) < 5e-5 ? 0 : v).toFixed(3);
+const S = { f: 'rotation', wheel: { x: 0.6, y: 0.3, ang: 0 }, D: 0.5, big: { x: 0, y: 0, R: 0.9 }, shrinking: false, hist: [] };
+const cv = $('cv'), ctx = cv.getContext('2d');
+let scale = 1, ox = 0, oy = 0, heat = null, heatKey = '';
+const fsPx = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
+const P = (x, y) => [ox + x * scale, oy - y * scale];
+const Wd = (px, py) => [(px - ox) / scale, (oy - py) / scale];
+const F = () => CURL.fields[S.f];
+
+const caps = {
+  uniform: '<b>Notice:</b> a uniform field has no rotation — the paddle never turns and every loop has zero circulation.',
+  rotation: '<b>Notice:</b> the paddle spins at the same rate everywhere — curl is uniform (2K), not only at the centre.',
+  shear: '<b>Notice:</b> H = y a<sub>x</sub> has straight field lines but nonzero curl: the top of the paddle is pushed harder than the bottom.',
+  wire: '<b>Notice:</b> inside the conductor ∇×H = J; outside, H still circles but the curl is zero and the paddle stops.'
+};
+const forms = {
+  uniform: '\\mathbf H = K\\,\\mathbf a_x,\\quad \\nabla\\times\\mathbf H=0',
+  rotation: '\\mathbf H = K(-y\\,\\mathbf a_x + x\\,\\mathbf a_y),\\quad \\nabla\\times\\mathbf H = 2K\\,\\mathbf a_z',
+  shear: '\\mathbf H = K y\\,\\mathbf a_x,\\quad \\nabla\\times\\mathbf H = -K\\,\\mathbf a_z',
+  wire: 'H_\\phi=\\tfrac{J\\rho}{2}\\;(\\rho<a),\\;\\; \\tfrac{Ja^2}{2\\rho}\\;(\\rho>a)'
+};
+function texts() {
+  $('cap').innerHTML = caps[S.f];
+  $('fx').innerHTML = `<span data-t="(\\nabla\\times\\mathbf H)_z=\\lim_{\\Delta S\\to0}\\dfrac{\\oint\\mathbf H\\cdot d\\mathbf L}{\\Delta S}"></span><br><span data-t="\\oint_C\\mathbf H\\cdot d\\mathbf L=\\int_S(\\nabla\\times\\mathbf H)\\cdot d\\mathbf S"></span>${forms[S.f].split(',\\quad').map(x => `<br><span data-t="${x}"></span>`).join('')}`;
+  $('fx').querySelectorAll('[data-t]').forEach(e => tex(e, e.dataset.t));
+}
+document.querySelectorAll('#fieldSeg button').forEach(b => b.onclick = () => { S.f = b.dataset.f; document.querySelectorAll('#fieldSeg button').forEach(x => x.classList.toggle('on', x === b)); S.hist = []; texts(); });
+$('D').oninput = () => { S.D = +$('D').value; S.shrinking = false; };
+$('R').oninput = () => { S.big.R = +$('R').value; };
+$('shrink').onclick = () => { S.shrinking = true; S.D = 0.8; S.hist = []; };
+
+function buildHeat(W, Hh) {
+  const key = S.f + W + 'x' + Hh + scale; if (key === heatKey) return; heatKey = key;
+  const n = 4, nx = Math.ceil(W / n), ny = Math.ceil(Hh / n), oc = document.createElement('canvas'); oc.width = nx; oc.height = ny;
+  const c = oc.getContext('2d'), im = c.createImageData(nx, ny), Fn = F(), cmax = 2.2;
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const [x, y] = Wd((i + 0.5) * n, (j + 0.5) * n), v = Math.max(-1, Math.min(1, CURL.exactCurl[S.f](x, y) / cmax)), k = (j * nx + i) * 4;
+    if (v >= 0) { im.data[k] = 255; im.data[k + 1] = 255 - 70 * v; im.data[k + 2] = 255 - 75 * v; }
+    else { im.data[k] = 255 + 75 * v; im.data[k + 1] = 255 + 45 * v; im.data[k + 2] = 255; }
+    im.data[k + 3] = 255;
+  }
+  c.putImageData(im, 0, 0); heat = oc;
+}
+function arrow(c, x, y, ux, uy, len, col, w) {
+  const hl = Math.max(4, len * .33), tx = x + ux * len / 2, ty = y + uy * len / 2;
+  c.strokeStyle = c.fillStyle = col; c.lineWidth = w;
+  c.beginPath(); c.moveTo(x - ux * len / 2, y - uy * len / 2); c.lineTo(tx, ty); c.stroke();
+  c.beginPath(); c.moveTo(tx, ty); c.lineTo(tx - ux * hl - uy * hl * .5, ty - uy * hl + ux * hl * .5); c.lineTo(tx - ux * hl + uy * hl * .5, ty - uy * hl - ux * hl * .5); c.closePath(); c.fill();
+}
+
+let lastT = performance.now(), stokesKey = '', stokesVal = [0, 0];
+function frame(t) {
+  const dt = Math.min(0.05, (t - lastT) / 1000); lastT = t;
+  const W = cv.width, Hh = cv.height, dpr = window.devicePixelRatio || 1, fs = fsPx() * dpr;
+  scale = Math.min(W, Hh) / 4.0; ox = W / 2; oy = Hh / 2;
+  const Fn = F();
+  buildHeat(W, Hh); ctx.imageSmoothingEnabled = true; ctx.drawImage(heat, 0, 0, W, Hh);
+  // axes
+  ctx.strokeStyle = 'rgba(0,0,0,.15)'; ctx.lineWidth = dpr; ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(W, oy); ctx.moveTo(ox, 0); ctx.lineTo(ox, Hh); ctx.stroke();
+  ctx.fillStyle = '#56616e'; ctx.font = `${0.85 * fs}px system-ui`; ctx.fillText('x', W - fs, oy - .4 * fs); ctx.fillText('y', ox + .4 * fs, fs);
+  if (S.f === 'wire') { const [cx, cy] = P(0, 0); ctx.setLineDash([6 * dpr, 5 * dpr]); ctx.strokeStyle = '#a33'; ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); ctx.arc(cx, cy, CURL.WIRE.a * scale, 0, 7); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#a33'; ctx.fillText('conductor (J ⊙)', cx + CURL.WIRE.a * scale * .72, cy - CURL.WIRE.a * scale * .72 - .3 * fs); }
+  // field arrows
+  const step = Math.max(2.2 * fs, 28 * dpr); let ref = 0; const arr = [];
+  for (let py = step / 2; py < Hh; py += step) for (let px = step / 2; px < W; px += step) { const [x, y] = Wd(px, py), h = Fn(x, y), m = Math.hypot(h[0], h[1]); ref = Math.max(ref, m); arr.push([px, py, h, m]); }
+  for (const [px, py, h, m] of arr) { if (m < 1e-9) continue; const q = m / ref; arrow(ctx, px, py, h[0] / m, -h[1] / m, step * (0.25 + 0.55 * q), `rgba(40,30,90,${0.3 + 0.55 * q})`, 1.5 * dpr); }
+  // big loop with Stokes
+  const B = S.big, [bx, by] = P(B.x, B.y);
+  ctx.setLineDash([10 * dpr, 6 * dpr]); ctx.strokeStyle = '#1c64d6'; ctx.lineWidth = 3 * dpr; ctx.beginPath(); ctx.arc(bx, by, B.R * scale, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+  for (const a of [0.3, 2.4, 4.5]) { const x = bx + B.R * scale * Math.cos(a), y = by - B.R * scale * Math.sin(a); arrow(ctx, x, y, -Math.sin(a), -Math.cos(a), 1.1 * fs, '#1c64d6', 2.5 * dpr); }
+  ctx.fillStyle = '#1c64d6'; ctx.font = `bold ${0.9 * fs}px system-ui`; ctx.fillText('C', bx + B.R * scale * 0.71 + .3 * fs, by + B.R * scale * 0.71 + .9 * fs);
+  // paddle wheel
+  const w = S.wheel, curl = CURL.curlZ(Fn, w.x, w.y);
+  w.ang += 0.9 * curl * dt;  // angular velocity ∝ local curl (ω = curl/2 for a fluid, scaled ×1.8 for visibility)
+  if (S.shrinking) { S.D = Math.max(0.02, S.D * Math.pow(0.55, dt)); $('D').value = S.D; if (S.D <= 0.021) S.shrinking = false; }
+  $('vD').textContent = S.D.toFixed(2) + ' m'; $('vR').textContent = S.big.R.toFixed(2) + ' m';
+  const [wx, wy] = P(w.x, w.y), wr = Math.max(1.5 * fs, 0.22 * scale);
+  // small loop
+  const d = S.D * scale; ctx.strokeStyle = '#2b8a3e'; ctx.lineWidth = 2.5 * dpr; ctx.strokeRect(wx - d / 2, wy - d / 2, d, d);
+  if (d > 2.5 * fs) { arrow(ctx, wx, wy + d / 2, 1, 0, .9 * fs, '#2b8a3e', 2.2 * dpr); arrow(ctx, wx + d / 2, wy, 0, -1, .9 * fs, '#2b8a3e', 2.2 * dpr); }
+  ctx.save(); ctx.translate(wx, wy); ctx.rotate(-w.ang);
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 3.5 * dpr;
+  for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(wr * Math.cos(a), wr * Math.sin(a)); ctx.stroke(); ctx.fillStyle = k ? '#d9480f' : '#1c64d6'; ctx.fillRect(wr * Math.cos(a) - 0.2 * fs, wr * Math.sin(a) - 0.2 * fs, 0.4 * fs, 0.4 * fs); }
+  ctx.restore(); ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(wx, wy, 0.3 * fs, 0, 7); ctx.fill();
+  // readouts
+  const circ = CURL.squareCirculation(Fn, w.x, w.y, S.D), ratio = circ / (S.D * S.D);
+  if (S.shrinking || !S.hist.length || Math.abs(S.hist[S.hist.length - 1][0] - S.D) > 0.005) { S.hist.push([S.D, ratio]); if (S.hist.length > 300) S.hist.shift(); }
+  $('readSmall').innerHTML = `∮H·dL = ${f3(circ)} A<br>∮H·dL / Δ² = <b>${f3(ratio)} A/m²</b><br>(∇×H)<sub>z</sub> at wheel = <b>${f3(curl)}</b> A/m²${Math.abs(ratio - curl) < 0.01 * Math.max(1, Math.abs(curl)) ? ' <span class="ok">✓</span>' : ''}`;
+  const sk = [S.f, B.x, B.y, B.R].join();
+  if (sk !== stokesKey) { stokesKey = sk; stokesVal = [CURL.circleCirculation(Fn, B.x, B.y, B.R, 2000), CURL.discCurlFlux(Fn, B.x, B.y, B.R, drag ? 60 : 200, drag ? 80 : 200)]; if (drag) stokesKey = ''; }
+  const [line, surf] = stokesVal;
+  $('readBig').innerHTML = `∮<sub>C</sub> H·dL = <b>${f3(line)} A</b><br>∬ (∇×H)·dS = <b>${f3(surf)} A</b> ${Math.abs(line - surf) < 0.01 * Math.max(0.1, Math.abs(line)) ? '<span class="ok">✓ Stokes</span>' : ''}`;
+  // inset chart: ratio vs Δ
+  const cw = 13 * fs, chh = 7.5 * fs, cx0 = W - cw - .5 * fs, cy0 = Hh - chh - .5 * fs;
+  ctx.fillStyle = 'rgba(255,255,255,.93)'; ctx.strokeStyle = '#c8d0da'; ctx.lineWidth = dpr; ctx.fillRect(cx0, cy0, cw, chh); ctx.strokeRect(cx0, cy0, cw, chh);
+  const L = cx0 + 2.6 * fs, R = cx0 + cw - .6 * fs, T = cy0 + 1.8 * fs, Bt = cy0 + chh - 1.5 * fs;
+  const ys = S.hist.map(h => h[1]).concat([curl, 0]), ymin = Math.min(...ys), ymax = Math.max(...ys), pad = (ymax - ymin) * 0.15 + 0.1;
+  const X = dd => L + dd / 0.8 * (R - L), Y = v => Bt - (v - (ymin - pad)) / (ymax - ymin + 2 * pad) * (Bt - T);
+  ctx.strokeStyle = '#8994a1'; ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, Bt); ctx.lineTo(R, Bt); ctx.stroke();
+  ctx.setLineDash([5 * dpr, 4 * dpr]); ctx.strokeStyle = '#d9480f'; ctx.beginPath(); ctx.moveTo(L, Y(curl)); ctx.lineTo(R, Y(curl)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = '#2b8a3e'; for (const [dd, v] of S.hist) { ctx.beginPath(); ctx.arc(X(dd), Y(v), 2.2 * dpr, 0, 7); ctx.fill(); }
+  ctx.beginPath(); ctx.arc(X(S.D), Y(ratio), 0.3 * fs, 0, 7); ctx.fill();
+  ctx.fillStyle = '#16202a'; ctx.font = `${0.8 * fs}px system-ui`; ctx.fillText('∮H·dL / ΔS', cx0 + .4 * fs, cy0 + 1.1 * fs); ctx.fillStyle = '#d9480f'; ctx.fillText('(∇×H)z', R - 4 * fs, cy0 + 1.1 * fs);
+  ctx.fillStyle = '#56616e'; ctx.fillText('Δ →', R - 2 * fs, Bt + 1.1 * fs); ctx.fillText('0', L - .3 * fs, Bt + 1.1 * fs);
+  ctx.fillText(ymax.toFixed(1), cx0 + .3 * fs, Y(ymax) + .3 * fs);
+  requestAnimationFrame(frame);
+}
+
+let drag = null;
+cv.addEventListener('pointerdown', e => {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, px = (e.clientX - r.left) * dpr, py = (e.clientY - r.top) * dpr, [x, y] = Wd(px, py);
+  if (Math.hypot(x - S.wheel.x, y - S.wheel.y) < Math.max(0.3, 2 * fsPx() * dpr / scale)) drag = { o: S.wheel, dx: S.wheel.x - x, dy: S.wheel.y - y, wheel: true };
+  else drag = { o: S.big, dx: S.big.x - x, dy: S.big.y - y };
+  cv.setPointerCapture(e.pointerId);
+});
+cv.addEventListener('pointermove', e => {
+  if (!drag) return; const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, [x, y] = Wd((e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr);
+  drag.o.x = x + drag.dx; drag.o.y = y + drag.dy; if (drag.wheel) S.hist = [];
+});
+cv.addEventListener('pointerup', () => drag = null);
+new ResizeObserver(() => { const dpr = window.devicePixelRatio || 1; cv.width = Math.max(1, Math.round(cv.clientWidth * dpr)); cv.height = Math.max(1, Math.round(cv.clientHeight * dpr)); heatKey = ''; }).observe($('stage'));
+texts(); window.addEventListener('load', texts);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

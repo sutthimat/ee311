@@ -1,0 +1,829 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cylindrical Coordinates at P</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@700&family=IBM+Plex+Sans:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one rotatable textbook-style figure with a narrow control column beside it, equations and results below.
+   In a slide (<html data-host="slide">, CircuitView Live) only the figure shows, at the frame's own aspect, with the
+   controls in a drawer from the bottom.
+   Surfaces: rho = const (blue cylinder), phi = const (orange half-plane), z = const (green plane), shaded in the
+   textbook manner: soft continuous gradients (hi -> mid -> deep), far and top edges fading toward the paper.
+   Each unit vector takes the colour of the surface it is normal to. */
+:root {
+  --bg: #f4f6f7; --surface: #ffffff; --paper: #ffffff; --ink: #15191d; --muted: #5a6670; --line: #dbe1e5; --band: #eef3f6;
+  --accent: #0a6fb0; --on-accent: #ffffff; --axis: #7d868e;
+  --c1: #0868a0; --c2: #b4460a; --c3: #237233;
+  --e-rho: #3f86b8; --e-phi: #b8621f; --e-z: #3f8a56;
+  --cy-hi: #eef8fd; --cy-mid: #b9dff2; --cy-deep: #8ccbe9; --cy-fade: .42;
+  --ph-hi: #fff4e8; --ph-mid: #fbdcbd; --ph-deep: #f3c193;
+  --zp-hi: #f2faf4; --zp-mid: #d5eedc; --zp-deep: #b5dec1;
+  --serif: 'STIX Two Text', 'Times New Roman', Times, serif;
+  --sans-fig: 'Arimo', Arial, Helvetica, sans-serif;
+  --ui: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a; --band: #1c2329;
+    --accent: #4cb8f0; --on-accent: #0f1317; --axis: #6b7681;
+    --c1: #4cb8f0; --c2: #ff8a4c; --c3: #5fd07a;
+    --e-rho: #7cbbe3; --e-phi: #f0a466; --e-z: #79cf93;
+    --cy-hi: #6aaad2; --cy-mid: #3b77a1; --cy-deep: #285a7d; --cy-fade: .16;
+    --ph-hi: #9a6a40; --ph-mid: #7a5331; --ph-deep: #5c3e24;
+    --zp-hi: #3c6c49; --zp-mid: #2d5338; --zp-deep: #203d29;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a; --band: #1c2329;
+  --accent: #4cb8f0; --on-accent: #0f1317; --axis: #6b7681;
+  --c1: #4cb8f0; --c2: #ff8a4c; --c3: #5fd07a;
+  --e-rho: #7cbbe3; --e-phi: #f0a466; --e-z: #79cf93;
+  --cy-hi: #6aaad2; --cy-mid: #3b77a1; --cy-deep: #285a7d; --cy-fade: .16;
+  --ph-hi: #9a6a40; --ph-mid: #7a5331; --ph-deep: #5c3e24;
+  --zp-hi: #3c6c49; --zp-mid: #2d5338; --zp-deep: #203d29;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 28px 56px; }
+h1 { font-size: clamp(1.5rem, 3.4vw, 2rem); line-height: 1.2; margin: 0 0 6px; font-weight: 600; text-wrap: balance; }
+h2 { font-size: .92rem; font-weight: 600; color: var(--muted); margin: 0 0 8px; line-height: 1.5; text-transform: none; }
+.lede { margin: 0 0 18px; color: var(--muted); max-width: 74ch; }
+i, .m { font-family: var(--serif); font-style: italic; }
+.v { font-family: var(--serif); font-weight: 700; font-style: normal; }
+.u { font-style: normal; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 16px; min-width: 0; margin-bottom: 16px; }
+.eqs { display: grid; gap: 4px 28px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); font-family: var(--serif); font-size: 1.08rem; line-height: 1.9; overflow-x: auto; }
+.band { background: var(--band); padding: 6px 14px; margin-top: 8px; font-family: var(--serif); font-size: 1.04rem; line-height: 1.9; overflow-x: auto; }
+.nw { white-space: nowrap; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; margin: 16px 0; }
+@media (max-width: 960px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.fig { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 12px; min-width: 0; }
+.fig svg { display: block; width: 100%; height: auto; max-width: 100%; cursor: grab; touch-action: none; }
+.fig svg.drag { cursor: grabbing; }
+.fig figcaption { font-size: .85rem; line-height: 1.55; color: var(--muted); padding: 6px 10px 0; }
+.fig figcaption summary { cursor: pointer; font-weight: 500; }
+.panel { display: grid; gap: 12px; min-width: 0; }
+.grp { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px 12px; min-width: 0; }
+.row { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) 4.4rem; align-items: center; gap: 10px; padding-block: 2px; line-height: 1.5; }
+.row label { font-size: .88rem; }
+.row input[type="range"] { width: 100%; min-width: 0; height: 24px; margin: 0; accent-color: var(--accent); }
+.row input[type="number"] { width: 100%; min-width: 0; font: inherit; font-size: .85rem; font-variant-numeric: tabular-nums; text-align: right; padding: 3px 6px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; }
+.chk { display: flex; align-items: center; gap: 8px; min-height: 28px; padding-block: 2px; font-size: .88rem; line-height: 1.5; cursor: pointer; }
+.chk input { accent-color: var(--accent); width: 18px; height: 18px; margin: 3px; flex: none; }
+.sw { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid; flex: none; }
+.sw1 { background: linear-gradient(90deg, var(--cy-mid), var(--cy-hi) 33%, var(--cy-mid) 65%, var(--cy-deep)); border-color: var(--e-rho); }
+.sw2 { background: linear-gradient(180deg, var(--ph-hi), var(--ph-mid)); border-color: var(--e-phi); }
+.sw3 { background: linear-gradient(180deg, var(--zp-hi), var(--zp-mid)); border-color: var(--e-z); }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.btns button { font: inherit; font-size: .85rem; line-height: 1.4; min-height: 32px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.btns button:hover { border-color: var(--accent); }
+.btns button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.note { font-size: .8rem; color: var(--muted); margin: 6px 0 0; }
+.out { display: grid; gap: 16px 28px; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); }
+.kv { display: grid; grid-template-columns: auto 1fr; column-gap: 16px; row-gap: 2px; margin: 0; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; text-align: right; }
+.tablewrap { overflow-x: auto; max-width: 100%; }
+table.ft { border-collapse: collapse; width: 100%; min-width: 300px; font-size: .9rem; font-variant-numeric: tabular-nums; }
+table.ft th, table.ft td { padding: 5px 10px; text-align: right; border-bottom: 1px solid var(--line); }
+table.ft th:first-child, table.ft td:first-child { text-align: left; }
+table.ft th { font-weight: 600; color: var(--muted); font-size: .8rem; }
+.q1 { color: var(--c1); } .q2 { color: var(--c2); } .q3 { color: var(--c3); }
+/* drawing: stroke classes (k-), arrowhead fills (h-); hidden parts get .gh (faint, dashed). Surface boundaries are
+   thin tint lines at 40 % or less, never dark outlines. */
+#fg polyline { fill: none; stroke-linejoin: round; }
+.k-ax { stroke: var(--axis); stroke-width: 1.8; stroke-linecap: round; }
+.k-axn { stroke: var(--axis); stroke-width: 1.2; stroke-dasharray: 5 4; }
+.k-gd { stroke: var(--ink); stroke-width: 1.1; stroke-dasharray: 5 4; }
+.k-rv { stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
+.k-arc { stroke: var(--ink); stroke-width: 1.3; stroke-linecap: round; }
+.k-cl { stroke: var(--muted); stroke-width: 1.2; stroke-linecap: round; }
+.k-u1 { stroke: var(--c1); stroke-width: 3.6; stroke-linecap: round; }
+.k-u2 { stroke: var(--c2); stroke-width: 3.6; stroke-linecap: round; }
+.k-u3 { stroke: var(--c3); stroke-width: 3.6; stroke-linecap: round; }
+.k-e1 { stroke: var(--e-rho); stroke-width: 1.1; stroke-linecap: round; opacity: .4; }
+.k-e1t { stroke: var(--e-rho); stroke-width: 1; stroke-linecap: round; opacity: .28; }
+.k-e2 { stroke: var(--e-phi); stroke-width: 1.1; stroke-linecap: round; opacity: .4; }
+.k-e3 { stroke: var(--e-z); stroke-width: 1.1; stroke-linecap: round; opacity: .4; }
+.h-ax { fill: var(--axis); } .h-ink { fill: var(--ink); }
+.h-u1 { fill: var(--c1); } .h-u2 { fill: var(--c2); } .h-u3 { fill: var(--c3); }
+#fg .gh { stroke-width: 1.1px; stroke-dasharray: 2 4; opacity: .65; stroke-linecap: butt; }
+#fg polygon.ghh { opacity: .4; }
+.dot { fill: var(--ink); }
+.gp { fill: var(--paper); stroke: var(--ink); stroke-width: 1.2; opacity: .75; }
+/* figure text: sizes are set per label from the frame (page: 640-wide viewBox; slide: screen px) */
+.plate { fill: var(--paper); }
+svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3.5px; stroke-linejoin: round; font-family: var(--sans-fig); user-select: none; -webkit-user-select: none; pointer-events: none; }
+.ta { font-family: var(--serif); font-style: italic; fill: var(--muted); }
+.tl { font-family: var(--serif); font-style: italic; fill: var(--ink); }
+.tu1, .tu2, .tu3 { font-family: var(--serif); font-weight: 700; }
+.tu1 { fill: var(--c1); } .tu2 { fill: var(--c2); } .tu3 { fill: var(--c3); }
+.ts1, .ts2, .ts3 { font-family: var(--serif); }
+.ts1 { fill: var(--c1); } .ts2 { fill: var(--c2); } .ts3 { fill: var(--c3); }
+.sub { font-style: italic; font-weight: 400; }
+.ctl-toggle { display: none; }
+/* inside a slide frame (any size, often a narrow box at the slide's right): the figure fills the frame; the controls
+   are a drawer from the bottom, opened and closed by the round button at the bottom right. An open drawer takes the
+   lower part of the frame and the figure shrinks into the upper part, so nothing covers it. */
+[data-host="slide"] body { overflow: hidden; font-size: 13px; margin: 0; }
+[data-host="slide"] .wrap { max-width: none; height: 100vh; box-sizing: border-box; padding: 0; }
+[data-host="slide"] h1, [data-host="slide"] .lede, [data-host="slide"] .wrap > .card, [data-host="slide"] .fig figcaption { display: none; }
+[data-host="slide"] .layout { position: relative; display: block; height: 100%; margin: 0; overflow: hidden; }
+[data-host="slide"] { --dh: 46%; }
+[data-host="slide"] .fig { position: absolute; inset: 0; border: 0; border-radius: 0; padding: 4px; transition: bottom .2s ease; }
+[data-host="slide"] .fig svg { width: 100%; height: 100%; }
+[data-host="slide"] svg text { stroke-width: 3px; }
+[data-host="slide"] .panel { position: absolute; left: 0; right: 0; bottom: 0; height: var(--dh); box-sizing: border-box; gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr)); padding: 8px 60px 8px 8px; overflow: auto;
+  align-content: start; background: var(--bg); border-top: 1px solid var(--line);
+  transform: translateY(101%); visibility: hidden; transition: transform .2s ease, visibility .2s; }
+[data-host="slide"].ctl-open .panel { transform: none; visibility: visible; }
+[data-host="slide"].ctl-open .fig { bottom: var(--dh); }
+[data-host="slide"] .grp { padding: 7px 10px 9px; }
+[data-host="slide"] .row { grid-template-columns: 4.6rem minmax(0, 1fr) 3.8rem; gap: 6px; }
+[data-host="slide"] .ctl-toggle { display: flex; align-items: center; justify-content: center; position: fixed; right: 10px; bottom: 10px; z-index: 5;
+  width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  cursor: pointer; box-shadow: 0 1px 4px rgba(0, 0, 0, .18); opacity: .75; }
+[data-host="slide"] .ctl-toggle:hover, [data-host="slide"].ctl-open .ctl-toggle { opacity: 1; }
+.ctl-toggle svg { width: 20px; height: 20px; }
+@media (prefers-reduced-motion: reduce) { [data-host="slide"] .fig, [data-host="slide"] .panel { transition: none; } }
+</style>
+
+<main class="wrap">
+  <h1>Cylindrical Coordinates at P</h1>
+  <p class="lede">A point <i>P</i> in cylindrical coordinates is fixed by <i>ρ</i>, <i>φ</i> and <i>z</i>. It is the point where three coordinate surfaces meet: the cylinder <i>ρ</i> = constant, the half-plane <i>φ</i> = constant and the plane <i>z</i> = constant. Drag the figure to turn it, and change the values to see how the unit vectors <b class="v">a</b><sub class="u"><i>ρ</i></sub>, <b class="v">a</b><sub class="u"><i>φ</i></sub>, <b class="v">a</b><sub class="u"><i>z</i></sub> change direction from point to point.</p>
+
+  <div class="layout">
+    <figure class="fig">
+      <svg id="fg" viewBox="0 0 640 560" role="img" aria-label="The three cylindrical coordinate surfaces meeting at P, with the unit vectors a_rho, a_phi, a_z"></svg>
+      <figcaption><details id="cap" open><summary>About this figure</summary>Cylinder <i>ρ</i> = constant (blue), half-plane <i>φ</i> = constant (orange) and plane <i>z</i> = constant (green), each drawn only near <i>P</i>; the true surfaces extend without limit. The dark grey lines are where two surfaces meet, and all three pass through <i>P</i>. Each unit vector is normal to the surface of its own colour. Parts hidden behind a surface are drawn faint and dashed. Orthographic view: lengths and angles on the page may be foreshortened.</details></figcaption>
+    </figure>
+    <button type="button" class="ctl-toggle" id="ctl-toggle" aria-controls="panel" aria-expanded="false" title="Show controls">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="6" cy="4.5" r="2" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="9" r="2" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/><circle cx="7.5" cy="13.5" r="2" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/></svg>
+    </button>
+    <aside class="panel" id="panel">
+      <section class="grp" id="g-p"><h2>Point <i>P</i></h2></section>
+      <section class="grp">
+        <h2>Coordinate surfaces through <i>P</i></h2>
+        <label class="chk"><input type="checkbox" id="f-s1" checked><span class="sw sw1"></span><span><i>ρ</i> = constant (cylinder)</span></label>
+        <label class="chk"><input type="checkbox" id="f-s2" checked><span class="sw sw2"></span><span><i>φ</i> = constant (half-plane)</span></label>
+        <label class="chk"><input type="checkbox" id="f-s3" checked><span class="sw sw3"></span><span><i>z</i> = constant (plane)</span></label>
+      </section>
+      <section class="grp" id="g-cam">
+        <h2>View</h2>
+        <div class="btns" id="cam-btns">
+          <button type="button" id="btn-book" aria-pressed="true">Default view</button>
+          <button type="button" id="btn-top" aria-pressed="false">Top view</button>
+        </div>
+        <p class="note">Drag the figure to turn it: left–right changes the azimuth, up–down the elevation.</p>
+      </section>
+      <section class="grp" id="g-v">
+        <h2>Display</h2>
+        <label class="chk"><input type="checkbox" id="f-gd" checked><span>Reference lines and surface intersections</span></label>
+        <label class="chk"><input type="checkbox" id="f-uv" checked><span>Unit vectors at <i>P</i></span></label>
+        <label class="chk"><input type="checkbox" id="f-lb" checked><span>Labels</span></label>
+        <div class="btns"><button type="button" id="btn-reset">Reset all</button></div>
+      </section>
+    </aside>
+  </div>
+
+  <section class="card">
+    <h2>Coordinate relations</h2>
+    <div class="eqs">
+      <div><i>x</i> = <i>ρ</i> cos <i>φ</i></div>
+      <div><i>y</i> = <i>ρ</i> sin <i>φ</i></div>
+      <div><i>z</i> = <i>z</i></div>
+    </div>
+    <div class="band"><span class="nw"><i>ρ</i> = √(<i>x</i>² + <i>y</i>²)</span> &nbsp;&nbsp; <span class="nw"><i>φ</i> = tan⁻¹(<i>y</i>/<i>x</i>)</span> &nbsp;&nbsp; <span class="nw"><i>z</i> = <i>z</i></span> &nbsp;&nbsp; <span class="nw">with <i>ρ</i> ≥ 0, 0 ≤ <i>φ</i> &lt; 360°, −∞ &lt; <i>z</i> &lt; ∞</span></div>
+  </section>
+
+  <section class="card">
+    <h2>Computed values</h2>
+    <div class="out">
+      <div>
+        <dl class="kv" id="o-xyz"></dl>
+        <p class="note" id="o-back"></p>
+      </div>
+      <div>
+        <div class="tablewrap">
+          <table class="ft">
+            <thead><tr><th>Unit vector</th><th><b class="v">a</b><sub class="u"><i>x</i></sub></th><th><b class="v">a</b><sub class="u"><i>y</i></sub></th><th><b class="v">a</b><sub class="u"><i>z</i></sub></th></tr></thead>
+            <tbody id="o-uv"></tbody>
+          </table>
+        </div>
+        <p class="note" id="o-chk"></p>
+      </div>
+    </div>
+    <div class="band">
+      <b class="v">a</b><sub class="u"><i>ρ</i></sub> = cos <i>φ</i> <b class="v">a</b><sub class="u"><i>x</i></sub> + sin <i>φ</i> <b class="v">a</b><sub class="u"><i>y</i></sub><br>
+      <b class="v">a</b><sub class="u"><i>φ</i></sub> = − sin <i>φ</i> <b class="v">a</b><sub class="u"><i>x</i></sub> + cos <i>φ</i> <b class="v">a</b><sub class="u"><i>y</i></sub><br>
+      <b class="v">a</b><sub class="u"><i>z</i></sub> = <b class="v">a</b><sub class="u"><i>z</i></sub>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var D2R = Math.PI / 180, W = 640, H = 560, root = document.documentElement;
+  function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function add(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+  function mul(a, s) { return [a[0] * s, a[1] * s, a[2] * s]; }
+  function len(a) { return Math.hypot(a[0], a[1], a[2]); }
+  function lerp(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+  function unit(a) { var l = len(a) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+  function M(n, d) { var s = Math.abs(n).toFixed(d); var neg = n < 0 && parseFloat(s) !== 0; return (neg ? '−' : '') + s; }
+  /* three significant figures (an exact zero, to rounding, prints as 0) */
+  function M3(n) { var a = Math.abs(n); if (a < 5e-4) return '0'; return M(n, Math.max(0, 2 - Math.floor(Math.log10(a * (1 + 1e-12))))); }
+  function f1(n) { return n.toFixed(1); }
+  function cyl(r, ph, z) { return [r * Math.cos(ph), r * Math.sin(ph), z]; }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function ss(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+
+  /* orthographic camera: azimuth az from +x toward +y, elevation el above the xy-plane; z stays up on screen.
+     The light is fixed to the camera (upper left, in front), so the highlight always sits on the left of the cylinder. */
+  var RT, UP, FW, LT, Vt = { s: 1, cx: 0, cy: 0 };
+  function setCam(az, el) {
+    var ca = Math.cos(az * D2R), sa = Math.sin(az * D2R), ce = Math.cos(el * D2R), se = Math.sin(el * D2R);
+    RT = [-sa, ca, 0]; UP = [-se * ca, -se * sa, ce]; FW = [ce * ca, ce * sa, se];
+    LT = unit(add(add(mul(RT, -0.35), mul(UP, 0.75)), mul(FW, 0.55)));
+  }
+  function ps(p) { return { x: Vt.cx + Vt.s * dot(p, RT), y: Vt.cy - Vt.s * dot(p, UP) }; }
+  function dep(p) { return dot(p, FW); }
+  /* Scale: from the bounding sphere (so the figure keeps its size while it turns), allowed 8 % larger, and reduced
+     only when the projected drawing would not fit; the drawing is centred on its own projected box, so views from
+     above or below leave no empty band. mg = margin kept for labels. */
+  function fitSphere(pts, mg) {
+    var lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
+    pts.forEach(function (p) { for (var k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], p[k]); hi[k] = Math.max(hi[k], p[k]); } });
+    var c = mul(add(lo, hi), 0.5), r = 1e-6, x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    pts.forEach(function (p) {
+      r = Math.max(r, len(sub(p, c)));
+      var x = dot(p, RT), y = -dot(p, UP); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+    });
+    var s0 = Math.max(8, Math.min(W, H) / 2 - mg) / (0.82 * r);
+    var sb = Math.min(Math.max(8, W - 2 * mg) / Math.max(x1 - x0, 1e-6), Math.max(8, H - 2 * mg) / Math.max(y1 - y0, 1e-6));
+    var s = Math.min(1.08 * s0, sb);
+    Vt = { s: s, cx: W / 2 - s * (x0 + x1) / 2, cy: H / 2 - s * (y0 + y1) / 2 };
+  }
+
+  /* Figure frame: 640 x 560 on the page. In a slide the viewBox is the figure box in CSS px (re-fitted on resize), so
+     the label sizes in FS are screen px there; a page figure shown narrower than 600 px (a phone) does the same at
+     the page's 640:560 aspect, so its labels stay readable. KO is the corner under the drawer button while the drawer
+     is closed. */
+  var FS, SL = false, KO = null;
+  function frame() {
+    var svgE = document.getElementById('fg'), slide = root.getAttribute('data-host') === 'slide', bb = svgE.getBoundingClientRect();
+    SL = slide ? bb.width > 40 && bb.height > 40 : bb.width > 40 && bb.width < 600;
+    if (SL) {
+      W = Math.round(bb.width); H = slide ? Math.round(bb.height) : Math.round(W * 560 / 640);
+      var g = slide ? 0 : W / 640;   /* a narrow page figure never gets smaller labels than the plain scaled-down one */
+      FS = { main: Math.max(15, Math.round(21 * g)), small: Math.max(13, Math.round(17 * g)), sub: Math.max(12, Math.round(15 * g)), q: 0.75 };
+    }
+    else { W = 640; H = 560; FS = { main: 21, small: 17, sub: 15, q: 1 }; }
+    svgE.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    KO = slide && SL && !root.classList.contains('ctl-open') ? { l: W - 52, r: W + 8, t: H - 52, b: H + 8 } : null;
+  }
+
+  /* colours come from the theme tokens so both themes shade correctly */
+  var css;
+  function tok(n) { return css.getPropertyValue(n).trim(); }
+  function hex(h) {
+    h = h.replace('#', ''); if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+  }
+  function mixc(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  function rgb(c) { return 'rgb(' + c.map(function (v) { return clamp(Math.round(v), 0, 255); }).join(',') + ')'; }
+  /* tone t: 0 = highlight, 0.5 = mid, 1 = deep */
+  function ramp(T3, t) { return t < 0.5 ? mixc(T3[0], T3[1], t / 0.5) : mixc(T3[1], T3[2], (t - 0.5) / 0.5); }
+  /* Cylinder tone across its silhouette, u = -1 (left, lit) ... +1 (right): mid at the silhouette, a pale band a third
+     in from the lit side, deeper toward the shadow side. The inside (seen through the open top or bottom) is lit on the
+     opposite side and a little deeper overall. One smooth function each, so the facets show no seams. */
+  function tOut(u) { return (0.5 + 0.45 * ss(-0.2, 0.95, u)) * (1 - Math.exp(-Math.pow((u + 0.33) / 0.32, 2))); }
+  function tIn(u) { return clamp(0.72 + 0.23 * ss(-0.9, 0.7, -u) - 0.42 * Math.exp(-Math.pow((u - 0.45) / 0.42, 2)), 0, 1); }
+  /* fade toward the paper over the upper part of the wall (v = 0 bottom rim, 1 top rim) */
+  var FADE = 0.42;
+  function fadeV(v) { return FADE * ss(0.4, 1, v); }
+  var defs;
+  function linGrad(id, a, b, stops) {
+    if (Math.hypot(b.x - a.x, b.y - a.y) < 1) b = { x: a.x + 1, y: a.y };
+    defs += '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="' + f1(a.x) + '" y1="' + f1(a.y) + '" x2="' + f1(b.x) + '" y2="' + f1(b.y) + '">' +
+      stops.map(function (s) { return '<stop offset="' + s[0].toFixed(3) + '" stop-color="' + rgb(s[1]) + '"/>'; }).join('') + '</linearGradient>';
+    return 'url(#' + id + ')';
+  }
+
+  /* Surfaces are opaque polygons in painter's order (every break line runs through P, so none pierces another).
+     Lines are not sorted with them: each short piece is ray-cast toward the camera, drawn solid when nothing is in
+     front of it and faint/dashed (.gh) when a surface hides it, so lines lying on a surface never flicker. */
+  var polys, lines, heads, G;
+  function hidden(p) {
+    var tol = 1e-3 * G.Hs, t, q;
+    if (G.s1) {
+      var a = FW[0] * FW[0] + FW[1] * FW[1];
+      if (a > 1e-12) {
+        var b = 2 * (p[0] * FW[0] + p[1] * FW[1]), c = p[0] * p[0] + p[1] * p[1] - G.R * G.R, disc = b * b - 4 * a * c;
+        if (disc >= 0) {
+          var sq = Math.sqrt(disc), ts = [(-b - sq) / (2 * a), (-b + sq) / (2 * a)];
+          for (var i = 0; i < 2; i++) { t = ts[i]; if (t > tol) { var z = p[2] + t * FW[2]; if (z >= G.zlo && z <= G.zhi) return true; } }
+        }
+      }
+    }
+    if (G.s2) {
+      var nF = dot(G.ef, FW);
+      if (Math.abs(nF) > 1e-12) {
+        t = -dot(G.ef, p) / nF;
+        if (t > tol) { q = add(p, mul(FW, t)); var r = dot(q, G.er); if (r >= 0 && r <= G.Rp && q[2] >= G.zlo && q[2] <= G.zhi) return true; }
+      }
+    }
+    if (G.s3 && Math.abs(FW[2]) > 1e-12) {
+      t = (G.Z - p[2]) / FW[2];
+      if (t > tol) { q = add(p, mul(FW, t)); if (Math.hypot(q[0], q[1]) <= G.Rp) return true; }
+    }
+    return false;
+  }
+  /* a grid of quads with vertices pt(i, j), i < nu, j < nv; each vertex is projected once. A facet is filled and
+     stroked with the same paint (a shared gradient), so neighbouring facets show no seam. */
+  /* The u edges are sampled sub times finer (pt takes a fractional u index), so curved outlines stay smooth while the
+     facet count stays low; the depth of a facet is the mean of its four corners. */
+  function addGrid(nu, nv, pt, paint, sub) {
+    sub = sub || 1;
+    var nf = (nu - 1) * sub + 1, sv = [], dv = [], i, j, m;
+    for (j = 0; j < nv; j++) { sv.push([]); dv.push([]); for (m = 0; m < nf; m++) { var p = pt(m / sub, j), q = ps(p); sv[j].push(f1(q.x) + ',' + f1(q.y)); dv[j].push(dep(p)); } }
+    for (i = 0; i < nu - 1; i++) for (j = 0; j < nv - 1; j++) {
+      var a = i * sub, b = a + sub, st = 'M' + sv[j][a] + 'L';
+      for (m = a + 1; m <= b; m++) st += sv[j][m] + ' ';
+      for (m = b; m >= a; m--) st += sv[j + 1][m] + (m > a ? ' ' : 'Z');
+      polys.push({ d: (dv[j][a] + dv[j][b] + dv[j + 1][a] + dv[j + 1][b]) / 4, f: paint(i, j), s: st });
+    }
+  }
+  /* after the depth sort, runs of facets with the same paint become one path (same look, far fewer elements) */
+  function polysSvg() {
+    var out = '', run = '', cur = null;
+    var flush = function () { if (cur) out += '<path d="' + run + '" fill="' + cur + '" stroke="' + cur + '" stroke-width="0.8" stroke-linejoin="round"/>'; };
+    polys.forEach(function (it) { if (it.f !== cur) { flush(); cur = it.f; run = ''; } run += it.s; });
+    flush();
+    return out;
+  }
+  /* a 3D polyline; ghost = draw its hidden parts faintly (false: leave them out, e.g. rims) */
+  function addPath(pts, cls, ghost, n, mids) {
+    var dense = [], i, j;
+    n = n || 1;
+    for (i = 0; i < pts.length - 1; i++) for (j = 0; j < n; j++) dense.push(lerp(pts[i], pts[i + 1], j / n));
+    dense.push(pts[pts.length - 1]);
+    lines.push({ pts: dense, cls: cls, ghost: ghost, mids: n === 1 ? mids : null });
+  }
+  /* a circle arc about the z-axis (radius r, height z, angles a0..a1 in n steps). Visibility is tested at points ON
+     the circle (the angle midpoints), not at chord midpoints, which lie inside a cylinder of the same radius. */
+  function addArc(r, z, a0, a1, n, cls, ghost) {
+    var pts = [], mids = [], k;
+    for (k = 0; k <= n; k++) pts.push(cyl(r, a0 + (a1 - a0) * k / n, z));
+    for (k = 0; k < n; k++) mids.push(cyl(r, a0 + (a1 - a0) * (k + 0.5) / n, z));
+    addPath(pts, cls, ghost, 1, mids);
+    return pts;
+  }
+  function addLine(a, b, cls, ghost, n) { addPath([a, b], cls, ghost, n || 24); }
+  function addHead(tail3, tip3, cls, hl, hw, nt) {
+    var a = ps(tail3), b = ps(tip3), dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy);
+    if (L < 3) return 0;
+    var ux = dx / L, uy = dy / L, nx = -uy, ny = ux, h = Math.min(hl, L * 0.9), w = hw * h / hl;
+    var bx = b.x - ux * h, by = b.y - uy * h, qx = b.x - ux * (h - nt), qy = b.y - uy * (h - nt);
+    heads.push({ p: lerp(tail3, tip3, 1 - 0.5 * h / L), cls: cls,
+      pts: [b, { x: bx + nx * w, y: by + ny * w }, { x: qx, y: qy }, { x: bx - nx * w, y: by - ny * w }], s: f1(b.x) + ',' + f1(b.y) + ' ' + f1(bx + nx * w) + ',' + f1(by + ny * w) + ' ' + f1(qx) + ',' + f1(qy) + ' ' + f1(bx - nx * w) + ',' + f1(by - ny * w) });
+    return (h - nt) / L;
+  }
+  function addArrow(a, b, kcls, hcls, hl, hw, nt) {
+    var cut = addHead(a, b, hcls, hl || 12, hw || 4.4, nt || 3);
+    addLine(a, lerp(a, b, 1 - cut), kcls, true);
+  }
+  /* break points through list, at most step apart (steps: one step per interval, or a single step for all) */
+  function brk(list, steps) {
+    var o = [list[0]];
+    for (var i = 0; i < list.length - 1; i++) {
+      var st = Array.isArray(steps) ? steps[i] : steps, n = Math.max(1, Math.ceil(Math.abs(list[i + 1] - list[i]) / st - 1e-9));
+      for (var j = 1; j <= n; j++) o.push(list[i] + (list[i + 1] - list[i]) * j / n);
+    }
+    return o;
+  }
+  var segs;
+  function linesSvg() {
+    var out = '';
+    lines.forEach(function (L) {
+      var run = [], state = null;
+      var flush = function () {
+        if (run.length > 1 && (!state || L.ghost)) {
+          out += '<polyline class="' + L.cls + (state ? ' gh' : '') + '" points="' + run.map(function (q) { return f1(q.x) + ',' + f1(q.y); }).join(' ') + '"/>';
+          for (var k = 0; k < run.length - 1; k++) segs.push([run[k].x, run[k].y, run[k + 1].x, run[k + 1].y]);
+        }
+      };
+      for (var i = 0; i < L.pts.length - 1; i++) {
+        var hid = hidden(L.mids ? L.mids[i] : lerp(L.pts[i], L.pts[i + 1], 0.5));
+        if (hid !== state) { flush(); run = state === null ? [ps(L.pts[i])] : [run[run.length - 1]]; state = hid; }
+        run.push(ps(L.pts[i + 1]));
+      }
+      flush();
+    });
+    heads.forEach(function (h) {
+      out += '<polygon class="' + h.cls + (hidden(h.p) ? ' ghh' : '') + '" points="' + h.s + '"/>';
+      for (var k = 0; k < 4; k++) segs.push([h.pts[k].x, h.pts[k].y, h.pts[(k + 1) % 4].x, h.pts[(k + 1) % 4].y]);
+    });
+    return out;
+  }
+
+  /* labels: a part is [text, subscript, 'i' for an italic scalar]; sizes from FS (main labels, small = surface values) */
+  function fsOf(c) { return /^ts/.test(c) ? FS.small : FS.main; }
+  function T(x, y, parts, cls) {
+    var f = fsOf(cls), dy = f1(0.2 * f), s = '<text x="' + f1(x) + '" y="' + f1(y + 0.32 * f) + '" class="' + cls + '" style="font-size:' + f + 'px" text-anchor="middle">', down = false;
+    parts.forEach(function (p) {
+      s += '<tspan' + (p[2] === 'i' ? ' font-style="italic"' : '') + (down ? ' dy="-' + dy + '"' : '') + '>' + p[0] + '</tspan>'; down = false;
+      if (p[1]) { s += '<tspan class="sub" style="font-size:' + FS.sub + 'px" dy="' + dy + '">' + p[1] + '</tspan>'; down = true; }
+    });
+    return s + '</text>';
+  }
+  /* Label boxes from the measured text widths (canvas, same fonts; re-measured once the web fonts arrive). */
+  var mctx = null, wcache = {};
+  function tw(str, f, ital, bold) {
+    var key = str + '|' + f + '|' + (ital ? 1 : 0) + (bold ? 1 : 0);
+    if (wcache[key] === undefined) {
+      if (!mctx) { try { mctx = document.createElement('canvas').getContext('2d'); } catch (err) { mctx = false; } }
+      if (mctx) { mctx.font = (ital ? 'italic ' : '') + (bold ? '700 ' : '400 ') + f + "px 'STIX Two Text', 'Times New Roman', Times, serif"; wcache[key] = mctx.measureText(str).width; }
+      else wcache[key] = 0.52 * f * str.length;
+    }
+    return wcache[key];
+  }
+  function lbox(l) {
+    var f = fsOf(l.c);
+    if (l.w === undefined) {   /* width measured once per label */
+      var w = 0, sub = false, it = /^t[al]/.test(l.c), bd = /^tu/.test(l.c);
+      l.p.forEach(function (q) { w += tw(q[0], f, it || q[2] === 'i', bd); if (q[1]) { w += tw(q[1], FS.sub, true, false); sub = true; } });
+      l.w = w; l.dn = (sub ? 0.62 : 0.5) * f;
+    }
+    return { l: l.x - l.w / 2, r: l.x + l.w / 2, t: l.y - 0.42 * f, b: l.y + l.dn };
+  }
+  function overlaps(A, B, m) { return Math.min(A.r, B.r) - Math.max(A.l, B.l) > -m && Math.min(A.b, B.b) - Math.max(A.t, B.t) > -m; }
+  /* does the segment s cross the box B (Liang-Barsky clip) */
+  function segHits(sg, B) {
+    var t0 = 0, t1 = 1, dx = sg[2] - sg[0], dy = sg[3] - sg[1], P4 = [-dx, dx, -dy, dy], Q4 = [sg[0] - B.l, B.r - sg[0], sg[1] - B.t, B.b - sg[1]];
+    for (var i = 0; i < 4; i++) {
+      if (P4[i] === 0) { if (Q4[i] < 0) return false; }
+      else { var r = Q4[i] / P4[i]; if (P4[i] < 0) { if (r > t1) return false; if (r > t0) t0 = r; } else { if (r < t0) return false; if (r < t1) t1 = r; } }
+    }
+    return true;
+  }
+  /* Label placement (PAGE_RULES, the shared method): every drawn segment, visible or ghost, is an obstacle. Each
+     label, in priority order, tries its base spot and 36 more around it (12 directions at 7, 14 and 20 px), and,
+     when that is not clean, a few alternative anchors on what it names (around P, along its line or arc, elsewhere
+     on its surface), each with a small ring; score = segments crossing the box padded 2 px (more for the glyph box itself), boxes of labels
+     already placed, obstacles (P, the drawer button), frame, distance. A label whose glyph box still crosses a line
+     gets a small paper plate, so the lines stop at it; an optional one (a surface value) is dropped instead. */
+  function placeLabels(labs, obs) {
+    var CS = 24, NX = Math.ceil(W / CS) + 2, grid = [], mark = new Int32Array(segs.length), stamp = 0, k;
+    var cellOf = function (gx, gy) { return (clamp(gy, -1, 1e4) + 1) * NX + clamp(gx, -1, NX - 2) + 1; };
+    segs.forEach(function (sg, n) {
+      var gx0 = Math.floor(Math.min(sg[0], sg[2]) / CS), gx1 = Math.floor(Math.max(sg[0], sg[2]) / CS), gy0 = Math.floor(Math.min(sg[1], sg[3]) / CS), gy1 = Math.floor(Math.max(sg[1], sg[3]) / CS);
+      for (var gx = gx0; gx <= gx1; gx++) for (var gy = gy0; gy <= gy1; gy++) { var key = cellOf(gx, gy); (grid[key] || (grid[key] = [])).push(n); }
+    });
+    var crossings = function (B) {
+      var c = 0; stamp++;
+      for (var gx = Math.floor(B.l / CS); gx <= Math.floor(B.r / CS); gx++) for (var gy = Math.floor(B.t / CS); gy <= Math.floor(B.b / CS); gy++) {
+        var cell = grid[cellOf(gx, gy)]; if (!cell) continue;
+        for (var j = 0; j < cell.length; j++) { var n = cell[j]; if (mark[n] === stamp) continue; mark[n] = stamp; if (segHits(segs[n], B)) c++; }
+      }
+      return c;
+    };
+    var placed = [], full = [[0, 0]], quick = [[0, 0]];
+    [7, 14, 20].forEach(function (rr) { for (k = 0; k < 12; k++) full.push([rr * Math.cos(k * Math.PI / 6), rr * Math.sin(k * Math.PI / 6)]); });
+    [8, 15].forEach(function (rr) { for (k = 0; k < 8; k++) quick.push([rr * Math.cos(k * Math.PI / 4), rr * Math.sin(k * Math.PI / 4)]); });
+    labs.sort(function (a, b) { return a.pri - b.pri; });
+    labs.forEach(function (l) {
+      var best = null;
+      var tryAt = function (bx, by, offs, pen) {
+        offs.forEach(function (o) {
+          l.x = bx + o[0]; l.y = by + o[1];
+          var B = lbox(l), sc = Math.hypot(o[0], o[1]) * 0.5 + pen;
+          if (B.l < 2 || B.r > W - 2 || B.t < 1 || B.b > H - 1) sc += 1e6;
+          for (var i = 0; i < placed.length; i++) if (overlaps(placed[i], B, 2)) sc += 1e4;
+          for (i = 0; i < obs.length; i++) if (overlaps(obs[i], B, 0)) sc += 1e4;
+          if (best && sc >= best.sc) return;
+          var cr = crossings({ l: B.l - 2, r: B.r + 2, t: B.t - 2, b: B.b + 2 }), cr0 = cr ? crossings({ l: B.l + 1, r: B.r - 1, t: B.t + 1, b: B.b - 1 }) : 0;
+          sc += 100 * cr + 400 * cr0;
+          if (!best || sc < best.sc) best = { sc: sc, x: l.x, y: l.y, cr: cr0 };
+        });
+      };
+      var x0 = l.x, y0 = l.y;
+      tryAt(x0, y0, full, 0);
+      /* alternative anchors only when the own spot is not clean: their centre and a small ring each */
+      if (best.sc >= 100) (l.alts || []).forEach(function (a) { tryAt(a.x, a.y, quick, 4); });
+      l.x = best.x; l.y = best.y; l.plate = best.cr > 0;
+      /* an optional label (surface values, priority 3 and 4) is left out rather than plated or stacked on another */
+      if (best.sc < 1e6 && l.pri >= 3 && l.pri <= 4 && (best.sc >= 1e4 || best.cr > 0)) { l.drop = true; return; }
+      if (best.sc >= 1e6) { var B2 = lbox(l), f = fsOf(l.c); if (B2.l < 2) l.x += 2 - B2.l; else if (B2.r > W - 2) l.x -= B2.r - W + 2; l.y = clamp(l.y, 0.42 * f + 1, H - 0.62 * f - 1); }
+      placed.push(lbox(l));
+    });
+  }
+
+  function dir2(a, b) { var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1; return { x: dx / L, y: dy / L }; }
+  /* the visible candidate point farthest (on screen) from P and from labels already placed, for a surface's own label */
+  function pickSpot(cands, Pp, avoid) {
+    var best = null, bd = -1;
+    cands.forEach(function (c) {
+      if (hidden(c)) return;
+      var q = ps(c), d = Math.hypot(q.x - Pp.x, q.y - Pp.y);
+      avoid.forEach(function (a) { d = Math.min(d, 1.4 * Math.hypot(q.x - a.x, q.y - a.y)); });
+      if (d > bd) { bd = d; best = q; }
+    });
+    return best;
+  }
+
+  var BOOK = { az: 55, el: 28 }, TOP = { az: 0, el: 90 };
+  var DEFS = { rho: 3, ph: 30, z: 2.4, az: BOOK.az, el: BOOK.el };
+  var S = { rho: 3, ph: 30, z: 2.4, az: BOOK.az, el: BOOK.el };
+  var flags = { s1: true, s2: true, s3: true, gd: true, uv: true, lb: true };
+  var reg = [];
+
+  function render() {
+    css = getComputedStyle(root);
+    frame();
+    setCam(S.az, S.el);
+    var R = S.rho, P0 = S.ph * D2R, Z = S.z, Hs = Math.max(R, Math.abs(Z), 1.5), q = FS.q;
+    /* each surface is drawn as a band around P: far enough below P to read, just above P so the inside stays visible */
+    var zlo = Z - 0.4 * Hs, zhi = Z + 0.25 * Hs, Rp = 1.3 * R;
+    var Lu = 0.4 * Hs, Lx = 1.55 * R + 0.2 * Hs, Lzp = Math.max(zhi, 0) + 0.8 * Hs, Lzn = Math.max(0.35 * Hs, 0.3 * Hs - zlo);
+    var er = [Math.cos(P0), Math.sin(P0), 0], ef = [-Math.sin(P0), Math.cos(P0), 0], ez = [0, 0, 1];
+    G = { R: R, Z: Z, zlo: zlo, zhi: zhi, Rp: Rp, Hs: Hs, er: er, ef: ef, s1: flags.s1, s2: flags.s2, s3: flags.s3 };
+    polys = []; lines = []; heads = []; segs = []; defs = '';
+
+    var fit = [[Lx, 0, 0], [-0.35 * Lx, 0, 0], [0, Lx, 0], [0, -0.35 * Lx, 0], [0, 0, Lzp], [0, 0, -Lzn]], i, j, k;
+    for (k = 0; k < 12; k++) { var a = k * Math.PI / 6; fit.push(cyl(Rp, a, Z), cyl(R, a, zlo), cyl(R, a, zhi), cyl(R + Lu, a, Z + Lu)); }
+    fitSphere(fit, SL ? Math.max(20, 1.6 * FS.main) : 34);
+
+    var P = cyl(R, P0, Z), F = cyl(R, P0, 0), O = [0, 0, 0], A = [0, 0, Z];
+
+    var step = 0.2 * Hs;
+    /* surface facets every 7.5 degrees, their curved edges (and all circles) sampled every 2.5 degrees; the cylinder
+       and the plane share these angles, so their edges coincide */
+    var NC = 48, SUB = 3, angAt = function (u) { return P0 + 2 * Math.PI * u / NC; };
+    var rs = brk([0, R, Rp], step);
+    var pap = hex(tok('--paper'));
+    var CY = ['--cy-hi', '--cy-mid', '--cy-deep'].map(function (n) { return hex(tok(n)); });
+    var PH = ['--ph-hi', '--ph-mid', '--ph-deep'].map(function (n) { return hex(tok(n)); });
+    var ZP = ['--zp-hi', '--zp-mid', '--zp-deep'].map(function (n) { return hex(tok(n)); });
+    FADE = parseFloat(tok('--cy-fade')) || 0.42;
+    if (flags.s1) {
+      /* The wall's look is painted once per frame into two screen-space patterns (outside, inside), and every wall
+         facet fills from them, so the shading is one continuous picture whatever the facets: a horizontal tone
+         gradient across the silhouette, under a paper-coloured fade toward the top rim. */
+      var zs = brk([zlo, Z, zhi], step), Ca = ps([0, 0, Z]), xa = { x: Ca.x - Vt.s * R, y: 0 }, xb = { x: Ca.x + Vt.s * R, y: 0 }, NS = 15, so = [], si = [];
+      for (k = 0; k < NS; k++) { var u = -1 + 2 * k / (NS - 1); so.push([k / (NS - 1), ramp(CY, tOut(u))]); si.push([k / (NS - 1), ramp(CY, tIn(u))]); }
+      var gO = linGrad('gco', xa, xb, so), gI = linGrad('gci', xa, xb, si), azr = Math.atan2(FW[1], FW[0]), Re = R + 3 / Vt.s;
+      /* The fade toward the paper follows the circles z = const in NF levels, each one 8-bit level paler than the
+         one below (levels from the inverse of the smooth fade function), so it reads as one continuous gradient
+         with no seams and no visible steps. */
+      var zf0 = zlo + 0.4 * (zhi - zlo), ztop = zhi + 4 / Vt.s, pc = rgb(pap), lv = [], m2;
+      var span = Math.max.apply(null, CY[1].map(function (v, i3) { return Math.abs(v - pap[i3]); }));
+      var NF = clamp(Math.ceil(FADE * span), 3, 60);
+      for (m2 = 1; m2 <= NF; m2++) {   /* z where the fade reaches m2/NF of its full amount (bisection) */
+        var target = FADE * (m2 - 0.5) / NF, lo2 = zf0, hi2 = zhi;
+        for (var it = 0; it < 24; it++) { var md = (lo2 + hi2) / 2; if (fadeV((md - zlo) / (zhi - zlo)) < target) lo2 = md; else hi2 = md; }
+        lv.push((lo2 + hi2) / 2);
+      }
+      /* the wall's own screen box: the patterns and masks paint only there */
+      var wb = { l: 1e9, r: -1e9, t: 1e9, b: -1e9 };
+      for (k = 0; k < 24; k++) [zlo, ztop].forEach(function (zz) { var q2 = ps(cyl(Re, 2 * Math.PI * k / 24, zz)); wb.l = Math.min(wb.l, q2.x); wb.r = Math.max(wb.r, q2.x); wb.t = Math.min(wb.t, q2.y); wb.b = Math.max(wb.b, q2.y); });
+      var wbs = ' x="' + f1(wb.l - 6) + '" y="' + f1(wb.t - 6) + '" width="' + f1(wb.r - wb.l + 12) + '" height="' + f1(wb.b - wb.t + 12) + '"';
+      var pattern = function (id, paint, front) {
+        var body = '<rect' + wbs + ' fill="' + paint + '"/>', a0 = azr + (front ? -0.53 : 0.47) * Math.PI, NSEG = 16, n2;
+        var arc = function (z, rev) { var o = []; for (n2 = 0; n2 <= NSEG; n2++) { var q2 = ps(cyl(Re, a0 + 1.06 * Math.PI * (rev ? NSEG - n2 : n2) / NSEG, z)); o.push(f1(q2.x) + ',' + f1(q2.y)); } return o.join(' '); };
+        var top = arc(ztop, true);
+        if (Math.abs(UP[2]) * Vt.s * (ztop - zf0) > 1) {
+          /* the fade amount lives in a luminance mask: nested OPAQUE grey bands, each painted over the last, so the
+             levels never add up rounding errors; the paper colour is laid over the tone through this mask */
+          var mk = '<mask id="' + id + 'm" maskUnits="userSpaceOnUse"' + wbs + ' color-interpolation="sRGB" style="mask-type:luminance">';
+          for (m2 = 0; m2 < NF; m2++) { var gv = Math.round(255 * FADE * (m2 + 1) / NF); mk += '<polygon points="' + arc(lv[m2], false) + ' ' + top + '" fill="rgb(' + gv + ',' + gv + ',' + gv + ')"/>'; }
+          defs += mk + '</mask>';
+          body += '<rect' + wbs + ' fill="' + pc + '" mask="url(#' + id + 'm)"/>';
+        }
+        defs += '<pattern id="' + id + '" patternUnits="userSpaceOnUse" x="0" y="0" width="' + W + '" height="' + H + '">' + body + '</pattern>';
+        return 'url(#' + id + ')';
+      };
+      var pO = pattern('pco', gO, true), pI = pattern('pci', gI, false), outer = [];
+      for (k = 0; k < NC; k++) { var am = angAt(k + 0.5); outer.push(Math.cos(am) * FW[0] + Math.sin(am) * FW[1] >= 0); }
+      addGrid(NC + 1, zs.length, function (u2, b2) { return cyl(R, angAt(u2), zs[b2]); }, function (a2) { return outer[a2] ? pO : pI; }, SUB);
+      addArc(R, zhi, P0, P0 + 2 * Math.PI, NC * SUB, 'k-e1t', false);
+      addArc(R, zlo, P0, P0 + 2 * Math.PI, NC * SUB, 'k-e1', false);
+    }
+    if (flags.s2) {
+      /* faint linear gradient from the bottom (axis side) to the top outer corner, which fades toward the paper;
+         a touch deeper when the side in view faces away from the light */
+      var away2 = dot(ef, FW) * dot(ef, LT) < 0 ? 0.3 : 0;
+      var p2 = linGrad('gp2', ps(cyl(0, P0, zlo)), ps(cyl(Rp, P0, zhi)), [[0, ramp(PH, 0.5 + away2)], [0.55, ramp(PH, 0.3 + away2)], [1, mixc(ramp(PH, 0.1 + away2), pap, 0.35)]]);
+      var zs2 = brk([zlo, Z, zhi], step), rs2 = brk([0, R, Rp], step);
+      addGrid(rs2.length, zs2.length, function (a2, b2) { return cyl(rs2[a2], P0, zs2[b2]); }, function () { return p2; });
+      addPath([[0, 0, zlo], cyl(Rp, P0, zlo), cyl(Rp, P0, zhi), [0, 0, zhi]], 'k-e2', false, 12);
+    }
+    if (flags.s3) {
+      /* faint linear gradient: the near side (toward the viewer and away from the light) mid, the far side pale.
+         dw turns smoothly from "far" (side views) to "left" (top view), so the gradient never jumps while turning. */
+      var dw = unit(add(mul([FW[0], FW[1], 0], -1), mul(RT, -0.5))), C3 = [0, 0, Z], under = FW[2] < 0 ? 0.3 : 0;
+      var p3 = linGrad('gp3', ps(add(C3, mul(dw, -Rp))), ps(add(C3, mul(dw, Rp))), [[0, ramp(ZP, 0.5 + under)], [0.5, ramp(ZP, 0.3 + under)], [1, mixc(ramp(ZP, 0.1 + under), pap, 0.4)]]);
+      addGrid(NC + 1, rs.length, function (u2, b2) { return cyl(rs[b2], angAt(u2), Z); }, function () { return p3; }, SUB);
+      addArc(Rp, Z, P0, P0 + 2 * Math.PI, NC * SUB, 'k-e3', false);
+    }
+
+    /* axes; the negative halves are dashed */
+    var tips = [[Lx, 0, 0], [0, Lx, 0], [0, 0, Lzp]], negs = [[-0.35 * Lx, 0, 0], [0, -0.35 * Lx, 0], [0, 0, -Lzn]];
+    for (k = 0; k < 3; k++) { addArrow(O, tips[k], 'k-ax', 'h-ax', 13, 4.8, 3.2); addLine(O, negs[k], 'k-axn', true, 8); }
+
+    if (flags.gd) {
+      /* lines where two coordinate surfaces meet: each is a coordinate line through P */
+      if (flags.s1 && flags.s2) addLine(cyl(R, P0, zlo), cyl(R, P0, zhi), 'k-cl', true);
+      if (flags.s1 && flags.s3) addArc(R, Z, P0, P0 + 2 * Math.PI, NC * SUB, 'k-cl', true);
+      if (flags.s2 && flags.s3) addLine(A, cyl(Rp, P0, Z), 'k-cl', true);
+      addLine(O, F, 'k-gd', true);
+      addLine(P, F, 'k-gd', true);
+    }
+    /* phi arc on the xy-plane, rho from the z-axis to P */
+    if (P0 > 0.02) {
+      var arc = [];
+      for (k = 0; k <= 48; k++) arc.push(cyl(0.42 * R, P0 * k / 48, 0));
+      var cutA = addHead(arc[44], arc[48], 'h-ink', 10, 3.8, 2.6);
+      addArc(0.42 * R, 0, 0, P0 * 44 / 48, 44, 'k-arc', true);
+      addLine(arc[44], lerp(arc[44], arc[48], 1 - cutA), 'k-arc', true, 4);
+    }
+    addArrow(A, P, 'k-rv', 'h-ink', 11, 4, 2.8);
+
+    var utips = [add(P, mul(er, Lu)), add(P, mul(ef, Lu)), add(P, mul(ez, Lu))];
+    if (flags.uv) for (k = 0; k < 3; k++) addArrow(P, utips[k], 'k-u' + (k + 1), 'h-u' + (k + 1), 15, 6.4, 4.2);
+
+    polys.sort(function (p, q2) { return p.d - q2.d; });
+    var s = polysSvg() + linesSvg();
+    var Pp = ps(P);
+    s += hidden(P) ? '<circle class="gp" cx="' + f1(Pp.x) + '" cy="' + f1(Pp.y) + '" r="5"/>' : '<circle class="dot" cx="' + f1(Pp.x) + '" cy="' + f1(Pp.y) + '" r="5.5"/>';
+
+    /* labels: placed, then pushed apart and away from P */
+    var Oo = ps(O), labs = [];
+    /* alternative anchors: a ring around a point, or points beside a screen segment a-b (fractions ts, both sides) */
+    var ring = function (c0, rr, n3) { var o = []; for (var k3 = 0; k3 < n3; k3++) o.push({ x: c0.x + rr * Math.cos(2 * Math.PI * k3 / n3), y: c0.y + rr * Math.sin(2 * Math.PI * k3 / n3) }); return o; };
+    var beside = function (a, b, ts, dd) { var o = [], d = dir2(a, b); ts.forEach(function (t) { var mx = a.x + (b.x - a.x) * t, my = a.y + (b.y - a.y) * t; o.push({ x: mx + d.y * dd, y: my - d.x * dd }, { x: mx - d.y * dd, y: my + d.x * dd }); }); return o; };
+    ['x', 'y', 'z'].forEach(function (nm, k2) { var t = ps(tips[k2]), d = dir2(Oo, t); labs.push({ x: t.x + d.x * 16 * q, y: t.y + d.y * 16 * q, p: [[nm]], c: 'ta', pri: 5, alts: [{ x: t.x + d.y * 16 * q, y: t.y - d.x * 16 * q }, { x: t.x - d.y * 16 * q, y: t.y + d.x * 16 * q }] }); });
+    if (flags.lb) {
+      var ud = { x: 0, y: 0 };
+      if (flags.uv) {
+        var un = [[['a', 'ρ']], [['a', 'φ']], [['a', 'z']]];
+        utips.forEach(function (tp, k2) {
+          var t = ps(tp), d = dir2(Pp, t); ud.x += d.x; ud.y += d.y;
+          labs.push({ x: t.x + d.x * 20 * q, y: t.y + d.y * 16 * q, p: un[k2], c: 'tu' + (k2 + 1), pri: 1, alts: ring(t, 22 * q, 8) });
+        });
+      }
+      var ul = Math.hypot(ud.x, ud.y);
+      labs.push({ x: Pp.x + (ul ? -ud.x / ul : -0.7) * 22 * q, y: Pp.y + (ul ? -ud.y / ul : 0.7) * 22 * q, p: [['P']], c: 'tl', pri: 0, alts: ring(Pp, 20 * q, 12) });
+      var Ap = ps(A), mid = ps(lerp(A, P, 0.5)), rd = dir2(Ap, Pp), nr = { x: rd.y, y: -rd.x };
+      if (nr.y > 0) { nr.x = -nr.x; nr.y = -nr.y; }
+      /* the guide labels rho, phi, z only in figures large enough for them; in small frames they would bunch into
+         misleading pairs, and the surface values (and the controls) still carry the numbers */
+      var guides = Math.min(W, H) >= 400;
+      if (guides) labs.push({ x: mid.x + nr.x * 14 * q, y: mid.y + nr.y * 14 * q, p: [['ρ']], c: 'tl', pri: 2, alts: beside(Ap, Pp, [0.3, 0.5, 0.7], 14 * q) });
+      if (guides && P0 > 0.02) {
+        var fp = ps(cyl(0.62 * R, P0 / 2, 0)), fa = [];
+        [0.62, 0.78, 0.28].forEach(function (rf) { [0.3, 0.5, 0.7].forEach(function (tf) { fa.push(ps(cyl(rf * R, P0 * tf, 0))); }); });
+        labs.push({ x: fp.x, y: fp.y + 4 * q, p: [['φ']], c: 'tl', pri: 2, alts: fa });
+      }
+      /* the height z is labelled only where its dashed line is long enough on screen to carry it */
+      var Fp = ps(F);
+      if (guides && flags.gd && Math.abs(Z) > 0.2 && Math.hypot(Pp.x - Fp.x, Pp.y - Fp.y) > 1.6 * FS.main) {
+        var zm = ps(lerp(P, F, 0.5)), zd = Pp.x >= Oo.x ? 1 : -1;
+        labs.push({ x: zm.x + zd * 14 * q, y: zm.y, p: [['z']], c: 'tl', pri: 2, alts: beside(Pp, Fp, [0.3, 0.5, 0.7], 14 * q) });
+      }
+      /* each surface carries its own value, so the three can be told apart without colour */
+      var spots = [], cand;
+      var altSpots = function (cs, chosen, dy0) {   /* the other visible spots on the same surface, as fallbacks */
+        return cs.filter(function (c) { return !hidden(c); }).map(ps).filter(function (p2) { return Math.hypot(p2.x - chosen.x, p2.y - chosen.y) > 1; }).map(function (p2) { return { x: p2.x, y: p2.y + dy0 }; });
+      };
+      if (flags.s1) {
+        cand = []; for (k = 2; k < 11; k++) cand.push(cyl(R, P0 + k * Math.PI / 6, zhi));
+        var wall = []; for (k = 1; k < 24; k++) wall.push(cyl(R, P0 + k * Math.PI / 12, zlo + 0.45 * (Z - zlo)));
+        var q1 = pickSpot(cand, Pp, spots); if (q1) { spots.push(q1); labs.push({ x: q1.x, y: q1.y - 14 * q, p: [['ρ', 0, 'i'], [' = ' + M3(R) + ' m']], c: 'ts1', pri: 3, alts: altSpots(cand, q1, -14 * q).concat(altSpots(wall, q1, 0)) }); }
+      }
+      if (flags.s3) {
+        cand = []; for (k = 2; k < 11; k++) cand.push(cyl(Rp, P0 + k * Math.PI / 6, Z));
+        var ann = []; for (k = 1; k < 24; k++) ann.push(cyl(0.5 * (R + Rp), P0 + k * Math.PI / 12, Z), cyl(0.55 * R, P0 + k * Math.PI / 12, Z));
+        var q3 = pickSpot(cand, Pp, spots); if (q3) { spots.push(q3); labs.push({ x: q3.x, y: q3.y + 14 * q, p: [['z', 0, 'i'], [' = ' + M3(Z) + ' m']], c: 'ts3', pri: 4, alts: altSpots(cand, q3, 14 * q).concat(altSpots(ann, q3, 0)) }); }
+      }
+      if (flags.s2) {
+        cand = [cyl(Rp, P0, zhi), cyl(Rp, P0, zlo), cyl(0.6 * Rp, P0, zhi), cyl(0.6 * Rp, P0, zlo)];   /* away from the z-axis */
+        var half2 = []; [0.6, 0.85, 1.15].forEach(function (rf) { [0.2, 0.5, 0.8].forEach(function (zf) { half2.push(cyl(rf * R, P0, zlo + zf * (zhi - zlo))); }); });
+        /* and just outside its outer edges, pushed away from its middle (it is often seen nearly edge-on) */
+        var hc = ps(cyl(0.6 * Rp, P0, 0.5 * (zlo + zhi))), outside = [cyl(Rp, P0, zhi), cyl(Rp, P0, zlo), cyl(Rp, P0, 0.5 * (zlo + zhi)), cyl(0.5 * Rp, P0, zhi), cyl(0.5 * Rp, P0, zlo)].map(function (e3) {
+          var e = ps(e3), d = dir2(hc, e); return { x: e.x + d.x * 30 * q, y: e.y + d.y * 30 * q };
+        });
+        var q2 = pickSpot(cand, Pp, spots);
+        if (q2) labs.push({ x: q2.x, y: q2.y - 14 * q, p: [['φ', 0, 'i'], [' = ' + Math.round(S.ph) + '°']], c: 'ts2', pri: 4, alts: altSpots(cand, q2, -14 * q).concat(altSpots(half2, q2, 0), outside) });
+      }
+    }
+    /* labels keep off the point P and the drawer button; lines are handled by the placer */
+    var obs = [{ l: Pp.x - 7, r: Pp.x + 7, t: Pp.y - 7, b: Pp.y + 7 }];
+    if (KO) obs.push(KO);
+    if (flags.s1) {   /* the wall's silhouette edges are outlines too */
+      [-0.5, 0.5].forEach(function (h2) { var a3 = Math.atan2(FW[1], FW[0]) + h2 * Math.PI, u1 = ps(cyl(R, a3, zlo)), u2 = ps(cyl(R, a3, zhi)); segs.push([u1.x, u1.y, u2.x, u2.y]); });
+    }
+    placeLabels(labs, obs);
+    labs = labs.filter(function (l) { return !l.drop; });
+    labs.forEach(function (l) {
+      if (l.plate) { var B = lbox(l); s += '<rect class="plate" x="' + f1(B.l - 1) + '" y="' + f1(B.t - 1) + '" width="' + f1(B.r - B.l + 2) + '" height="' + f1(B.b - B.t + 2) + '" rx="3"/>'; }
+      s += T(l.x, l.y, l.p, l.c);
+    });
+    document.getElementById('fg').innerHTML = (defs ? '<defs>' + defs + '</defs>' : '') + s;
+    window.__cylLabels = labs.map(function (l) { var B = lbox(l); return { t: l.p.map(function (p) { return p[0] + (p[1] || ''); }).join(''), c: l.c, f: fsOf(l.c), plate: !!l.plate, l: B.l, r: B.r, t0: B.t, b: B.b }; });
+
+    document.getElementById('btn-book').setAttribute('aria-pressed', String(S.az === BOOK.az && S.el === BOOK.el));
+    document.getElementById('btn-top').setAttribute('aria-pressed', String(S.az === TOP.az && S.el === TOP.el));
+    var el = function (id) { return document.getElementById(id); };
+    el('o-xyz').innerHTML = '<dt>(<i>ρ</i>, <i>φ</i>, <i>z</i>)</dt><dd>(' + M3(R) + ' m, ' + M(S.ph, 0) + '°, ' + M3(Z) + ' m)</dd>' +
+      '<dt><i>x</i> = <i>ρ</i> cos <i>φ</i></dt><dd>' + M3(P[0]) + ' m</dd><dt><i>y</i> = <i>ρ</i> sin <i>φ</i></dt><dd>' + M3(P[1]) + ' m</dd><dt><i>z</i></dt><dd>' + M3(P[2]) + ' m</dd>';
+    var rb = Math.hypot(P[0], P[1]), pb = Math.atan2(P[1], P[0]) / D2R; if (pb < 0) pb += 360;
+    el('o-back').innerHTML = 'Back to cylindrical: <i>ρ</i> = ' + M3(rb) + ' m, <i>φ</i> = ' + M(pb, 0) + '°, <i>z</i> = ' + M3(P[2]) + ' m. The signs of <i>x</i> and <i>y</i> fix the quadrant of <i>φ</i>.';
+    var rows = [['<b class="v q1">a</b><sub class="u q1"><i>ρ</i></sub>', er], ['<b class="v q2">a</b><sub class="u q2"><i>φ</i></sub>', ef], ['<b class="v q3">a</b><sub class="u q3"><i>z</i></sub>', ez]];
+    el('o-uv').innerHTML = rows.map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + M3(r[1][0]) + '</td><td>' + M3(r[1][1]) + '</td><td>' + M3(r[1][2]) + '</td></tr>'; }).join('');
+    var c = cross(er, ef), dif = len(sub(c, ez));
+    el('o-chk').innerHTML = 'Check: <b class="v">a</b><sub class="u"><i>ρ</i></sub>·<b class="v">a</b><sub class="u"><i>φ</i></sub> = ' + M3(dot(er, ef)) + ', <b class="v">a</b><sub class="u"><i>ρ</i></sub>·<b class="v">a</b><sub class="u"><i>z</i></sub> = ' + M3(dot(er, ez)) + ', <b class="v">a</b><sub class="u"><i>φ</i></sub>·<b class="v">a</b><sub class="u"><i>z</i></sub> = ' + M3(dot(ef, ez)) + ', so the three are mutually perpendicular, and <b class="v">a</b><sub class="u"><i>ρ</i></sub> × <b class="v">a</b><sub class="u"><i>φ</i></sub> = <b class="v">a</b><sub class="u"><i>z</i></sub> (difference ' + M3(dif) + '): a right-handed system.';
+  }
+
+  var queued = false;
+  /* one redraw per frame; the timer is a fallback for hosts that pause animation frames while the page is hidden */
+  function schedule() {
+    if (queued) return; queued = true;
+    var run = function () { if (!queued) return; queued = false; render(); };
+    requestAnimationFrame(run); setTimeout(run, 120);
+  }
+
+  function makeRow(host, id, label, min, max, step, value, onChange, tag) {
+    var row = document.createElement('div'); row.className = 'row';
+    var lab = document.createElement('label'); lab.htmlFor = 'n-' + id; lab.textContent = label;
+    var rng = document.createElement('input'); rng.type = 'range'; rng.id = 'r-' + id; rng.setAttribute('aria-label', label);
+    var num = document.createElement('input'); num.type = 'number'; num.id = 'n-' + id;
+    [rng, num].forEach(function (e) { e.min = min; e.max = max; e.step = step; e.value = value; });
+    rng.addEventListener('input', function () { num.value = rng.value; onChange(parseFloat(rng.value)); });
+    num.addEventListener('input', function () { var v = parseFloat(num.value); if (isNaN(v)) return; v = clamp(v, min, max); rng.value = v; onChange(v); });
+    row.appendChild(lab); row.appendChild(rng); row.appendChild(num); host.appendChild(row);
+    reg.push({ tag: tag, rng: rng, num: num });
+  }
+  function setRow(tag, v) { reg.forEach(function (it) { if (it.tag === tag) { it.rng.value = v; it.num.value = v; } }); }
+  function setView(az, el) { S.az = az; S.el = el; setRow('az', Math.round(az)); setRow('el', Math.round(el)); schedule(); }
+
+  var gp = document.getElementById('g-p'), gc = document.getElementById('g-cam'), cb = document.getElementById('cam-btns');
+  makeRow(gp, 'rho', 'ρ (m)', 0.5, 5, 0.1, S.rho, function (v) { S.rho = v; schedule(); }, 'rho');
+  makeRow(gp, 'ph', 'φ (deg)', 0, 359, 1, S.ph, function (v) { S.ph = v; schedule(); }, 'ph');
+  makeRow(gp, 'z', 'z (m)', -4, 5, 0.1, S.z, function (v) { S.z = v; schedule(); }, 'z');
+  var tmp = document.createElement('div'); gc.insertBefore(tmp, cb);
+  makeRow(tmp, 'az', 'azimuth (°)', -180, 180, 1, S.az, function (v) { S.az = v; schedule(); }, 'az');
+  makeRow(tmp, 'el', 'elevation (°)', -30, 90, 1, S.el, function (v) { S.el = v; schedule(); }, 'el');
+
+  [['f-s1', 's1'], ['f-s2', 's2'], ['f-s3', 's3'], ['f-gd', 'gd'], ['f-uv', 'uv'], ['f-lb', 'lb']].forEach(function (p) {
+    var box = document.getElementById(p[0]); flags[p[1]] = box.checked;
+    box.addEventListener('change', function (e) { flags[p[1]] = e.target.checked; schedule(); });
+  });
+  document.getElementById('btn-book').addEventListener('click', function () { setView(BOOK.az, BOOK.el); });
+  document.getElementById('btn-top').addEventListener('click', function () { setView(TOP.az, TOP.el); });
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    Object.keys(DEFS).forEach(function (k) { S[k] = DEFS[k]; setRow(k, S[k]); });
+    ['f-s1', 'f-s2', 'f-s3', 'f-gd', 'f-uv', 'f-lb'].forEach(function (id) { document.getElementById(id).checked = true; });
+    Object.keys(flags).forEach(function (k) { flags[k] = true; });
+    schedule();
+  });
+
+  /* drag on the figure to turn it */
+  var svg = document.getElementById('fg'), drag = null;
+  svg.addEventListener('pointerdown', function (e) {
+    drag = { x: e.clientX, y: e.clientY, az: S.az, el: S.el }; svg.classList.add('drag');
+    try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  svg.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var k = 300 / (svg.getBoundingClientRect().width || 600), az = drag.az - (e.clientX - drag.x) * k;
+    az = ((az + 180) % 360 + 360) % 360 - 180;
+    setView(az, clamp(drag.el + (e.clientY - drag.y) * k, -30, 90));
+  });
+  function endDrag() { drag = null; svg.classList.remove('drag'); }
+  svg.addEventListener('pointerup', endDrag); svg.addEventListener('pointercancel', endDrag);
+
+  /* in a slide: the controls drawer starts closed so the figure has the whole frame */
+  var tg = document.getElementById('ctl-toggle');
+  tg.addEventListener('click', function () {
+    var open = root.classList.toggle('ctl-open');
+    tg.setAttribute('aria-expanded', String(open)); tg.title = open ? 'Hide controls' : 'Show controls';
+    schedule();
+  });
+
+  /* redraw when the theme changes, since surface shades are computed from the tokens */
+  try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', schedule); } catch (err) {}
+  new MutationObserver(schedule).observe(root, { attributes: true, attributeFilter: ['data-theme', 'data-host', 'class'] });
+  /* slide frames (and narrow page figures) re-fit on resize; on a phone the long caption starts folded */
+  var lastW = 0;
+  try { new ResizeObserver(function (en) { var w = Math.round(en[0].contentRect.width); if (root.getAttribute('data-host') === 'slide' || (w !== lastW && (w < 600 || lastW < 600))) schedule(); lastW = w; }).observe(svg); } catch (err) {}
+  if (window.matchMedia('(max-width: 640px)').matches) document.getElementById('cap').open = false;
+  try { document.fonts.ready.then(function () { wcache = {}; schedule(); }); } catch (err) {}
+  window.__cylRender = render; window.__cylState = S; window.__cylFlags = flags;
+  render();
+})();
+</script>

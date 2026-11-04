@@ -1,0 +1,455 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Cylindrical Differential Volume</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@700&family=IBM+Plex+Sans:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one textbook-style figure with a narrow control column beside it, results card below. Both spherical-coordinate pages share these tokens. */
+:root {
+  --bg: #f4f6f7; --surface: #ffffff; --paper: #ffffff; --ink: #15191d; --muted: #5a6670; --line: #dbe1e5; --band: #eef3f6;
+  --accent: #0a8fd6; --axis: #b4bac0;
+  --sph0: #f6fbff; --sph1: #8ccbf1; --sph-edge: #7fb9de;
+  --el0: #b4babf; --el1: #f4f5f6; --elr: #ecedee; --elt: #cdd1d4; --elp: #aeb4b9;
+  --c1: #0a8fd6; --c2: #d9480f; --c3: #2b8a3e;
+  --serif: 'STIX Two Text', 'Times New Roman', Times, serif;
+  --sans-fig: 'Arimo', Arial, Helvetica, sans-serif;
+  --ui: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a; --band: #1c2329;
+    --accent: #4cb8f0; --axis: #5c6672;
+    --sph0: #3a6f90; --sph1: #153448; --sph-edge: #2f6585;
+    --el0: #4a535b; --el1: #8c97a0; --elr: #8f9aa3; --elt: #636d76; --elp: #4c555d;
+    --c1: #4cb8f0; --c2: #ff8a4c; --c3: #5fd07a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a; --band: #1c2329;
+  --accent: #4cb8f0; --axis: #5c6672;
+  --sph0: #3a6f90; --sph1: #153448; --sph-edge: #2f6585;
+  --el0: #4a535b; --el1: #8c97a0; --elr: #8f9aa3; --elt: #636d76; --elp: #4c555d;
+  --c1: #4cb8f0; --c2: #ff8a4c; --c3: #5fd07a;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 28px 56px; }
+h1 { font-size: clamp(1.5rem, 3.4vw, 2rem); line-height: 1.2; margin: 0 0 6px; font-weight: 600; text-wrap: balance; }
+h2 { font-size: .8rem; font-weight: 600; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; line-height: 1.5; }
+.lede { margin: 0 0 18px; color: var(--muted); max-width: 74ch; }
+i, .m { font-family: var(--serif); font-style: italic; }
+.v { font-family: var(--serif); font-weight: 700; font-style: italic; }
+.u { font-style: normal; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 16px; min-width: 0; }
+.eqs { display: grid; gap: 4px 28px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); font-family: var(--serif); font-size: 1.08rem; line-height: 1.9; overflow-x: auto; }
+.band { background: var(--band); padding: 6px 14px; margin-top: 8px; font-family: var(--serif); font-size: 1.04rem; line-height: 1.9; overflow-x: auto; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; margin: 16px 0; }
+@media (max-width: 960px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.figs { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 16px; margin: 16px 0; }
+@media (max-width: 860px) { .figs { grid-template-columns: minmax(0, 1fr); } }
+.fig { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 12px; min-width: 0; }
+.fig svg { display: block; width: 100%; height: auto; max-width: 100%; }
+.fig figcaption { font-size: .85rem; line-height: 1.55; color: var(--muted); padding: 6px 10px 0; }
+.panel { display: grid; gap: 12px; min-width: 0; }
+.grp { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px 12px; min-width: 0; }
+.row { display: grid; grid-template-columns: 6rem minmax(0, 1fr) 4.4rem; align-items: center; gap: 10px; padding-block: 2px; line-height: 1.5; }
+.row label { font-size: .88rem; }
+.row input[type="range"] { width: 100%; min-width: 0; accent-color: var(--accent); }
+.row input[type="number"] { width: 100%; min-width: 0; font: inherit; font-size: .85rem; font-variant-numeric: tabular-nums; text-align: right; padding: 3px 6px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; }
+.chk { display: flex; align-items: center; gap: 8px; padding-block: 2px; font-size: .88rem; line-height: 1.5; }
+.chk input { accent-color: var(--accent); width: 16px; height: 16px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.btns button { font: inherit; font-size: .85rem; line-height: 1.4; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.btns button:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.note { font-size: .8rem; color: var(--muted); margin: 6px 0 0; }
+.out { display: grid; gap: 16px 28px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.kv { display: grid; grid-template-columns: auto 1fr; column-gap: 16px; row-gap: 2px; margin: 0; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; text-align: right; }
+.tablewrap { overflow-x: auto; max-width: 100%; }
+table.ft { border-collapse: collapse; width: 100%; min-width: 380px; font-size: .9rem; font-variant-numeric: tabular-nums; }
+table.ft th, table.ft td { padding: 5px 10px; text-align: right; border-bottom: 1px solid var(--line); }
+table.ft th:first-child, table.ft td:first-child { text-align: left; }
+table.ft th { font-weight: 600; color: var(--muted); font-size: .8rem; }
+.meaning { margin: 10px 0 0; max-width: 74ch; }
+/* drawing */
+.vec line { stroke: var(--c); stroke-width: var(--w); }
+.vec polygon { fill: var(--c); }
+.vax { --c: var(--axis); --w: 1.8; }
+.vthin { --c: var(--ink); --w: 1.5; }
+.vuv { --c: var(--ink); --w: 4; }
+.vc1 { --c: var(--c1); --w: 1.6; } .vc2 { --c: var(--c2); --w: 1.6; } .vc3 { --c: var(--c3); --w: 1.6; }
+.s0 { stop-color: var(--sph0); } .s1 { stop-color: var(--sph1); }
+.e0 { stop-color: var(--el0); } .e1 { stop-color: var(--el1); }
+.sph { stroke: var(--sph-edge); stroke-width: 1; }
+.dash { stroke: var(--ink); stroke-width: 1.1; stroke-dasharray: 5 4; fill: none; opacity: .8; }
+.dashg { stroke: var(--muted); stroke-width: 1.1; stroke-dasharray: 5 4; fill: none; }
+.arc { stroke: var(--ink); stroke-width: 1.3; fill: none; }
+.dot { fill: var(--ink); }
+.eh { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 3; stroke-linejoin: round; }
+.ev { stroke: var(--ink); stroke-width: 1.1; stroke-linejoin: round; }
+.ed { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3.6; }
+.ed.c1 { stroke: var(--c1); } .ed.c2 { stroke: var(--c2); } .ed.c3 { stroke: var(--c3); }
+svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3.5px; stroke-linejoin: round; font-family: var(--sans-fig); user-select: none; -webkit-user-select: none; }
+.ta { font-family: var(--serif); font-style: italic; fill: var(--axis); font-size: 20px; }
+.tl { font-family: var(--serif); font-style: italic; fill: var(--ink); font-size: 21px; }
+.tb { font-family: var(--serif); font-weight: 700; fill: var(--ink); font-size: 21px; }
+.tc1 { font-family: var(--serif); font-style: italic; font-size: 21px; fill: var(--c1); }
+.tc2 { font-family: var(--serif); font-style: italic; font-size: 21px; fill: var(--c2); }
+.tc3 { font-family: var(--serif); font-style: italic; font-size: 21px; fill: var(--c3); }
+.zc1 { font-family: var(--serif); font-style: italic; font-weight: 700; font-size: 19px; fill: var(--c1); stroke-width: 5px; }
+.zc2 { font-family: var(--serif); font-style: italic; font-weight: 700; font-size: 19px; fill: var(--c2); stroke-width: 5px; }
+.zc3 { font-family: var(--serif); font-style: italic; font-weight: 700; font-size: 19px; fill: var(--c3); stroke-width: 5px; }
+.sub { font-size: .7em; font-style: normal; }
+.cwall { stroke: var(--sph-edge); stroke-width: 1; }
+.ctop { fill: var(--sph0); fill-opacity: .75; stroke: var(--sph-edge); stroke-width: 1; }
+.cfloor { fill: var(--sph1); fill-opacity: .28; stroke: var(--ink); stroke-width: 1.1; }
+.thin { stroke: var(--ink); stroke-width: 1; fill: none; }
+
+</style>
+
+<main class="wrap">
+  <h1>Cylindrical Differential Volume</h1>
+  <p class="lede">Increasing <i>ρ</i>, <i>φ</i>, <i>z</i> by small amounts gives a small curved box with sides <i>dρ</i>, <i>ρ dφ</i> and <i>dz</i>. Change the values and compare the volume from the formula with the exact volume. The smaller the element, the closer the two values.</p>
+
+  <section class="card">
+    <div class="eqs">
+      <div>d<i>L</i><sub class="u"><i>ρ</i></sub> = d<i>ρ</i></div>
+      <div>d<i>L</i><sub class="u"><i>φ</i></sub> = <i>ρ</i> d<i>φ</i></div>
+      <div>d<i>L</i><sub class="u"><i>z</i></sub> = d<i>z</i></div>
+    </div>
+    <div class="band">d<i>v</i> = <i>ρ</i> d<i>ρ</i> d<i>φ</i> d<i>z</i> &nbsp;&nbsp; d<i>S</i><sub class="u"><i>ρ</i></sub> = <i>ρ</i> d<i>φ</i> d<i>z</i> &nbsp;&nbsp; d<i>S</i><sub class="u"><i>φ</i></sub> = d<i>ρ</i> d<i>z</i> &nbsp;&nbsp; d<i>S</i><sub class="u"><i>z</i></sub> = <i>ρ</i> d<i>ρ</i> d<i>φ</i></div>
+  </section>
+
+  <div class="figs">
+    <figure class="fig">
+      <svg id="fg" viewBox="0 0 620 520" role="img" aria-label="Differential volume element in cylindrical coordinates, labelled dρ, ρ dφ, dz"></svg>
+      <figcaption>The element spans <i>ρ</i> to <i>ρ</i> + d<i>ρ</i>, <i>φ</i> to <i>φ</i> + d<i>φ</i>, <i>z</i> to <i>z</i> + d<i>z</i>. The shaded area on the <i>xy</i> plane is the shadow of the element. Dashed lines run from the corners of the element down to the plane and to the <i>z</i> axis.</figcaption>
+    </figure>
+    <figure class="fig">
+      <svg id="zm" viewBox="0 0 480 520" role="img" aria-label="Enlarged view of the element with the length of each side"></svg>
+      <figcaption>Enlarged view of the element. The coloured lines are the three sides that meet at the corner nearest the viewer. Each value shown is the true length of that side. The dashed lines are the edges of the back surfaces.</figcaption>
+    </figure>
+  </div>
+
+  <div class="layout">
+    <section class="card">
+      <h2>Computed values</h2>
+      <div class="out">
+        <div>
+          <dl class="kv" id="o-edges"></dl>
+          <div class="tablewrap" style="margin-top:10px">
+            <table class="ft">
+              <thead><tr><th>Surface</th><th>Area (m²)</th></tr></thead>
+              <tbody id="o-faces"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <dl class="kv" id="o-vol"></dl>
+          <p class="meaning" id="o-mean"></p>
+        </div>
+      </div>
+    </section>
+    <aside class="panel">
+      <section class="grp" id="g-p"><h2>Position of the element (starting point)</h2></section>
+      <section class="grp" id="g-d">
+        <h2>Element size</h2>
+        <div class="btns" style="margin-top:0"><button type="button" id="btn-half">Halve the size</button><button type="button" id="btn-reset">Default values</button></div>
+      </section>
+      <section class="grp" id="g-v">
+        <h2>Display</h2>
+        <label class="chk"><input type="checkbox" id="f-full"> Full angle range</label>
+        <label class="chk"><input type="checkbox" id="f-sph" checked> Shadow on the <i>xy</i> plane</label>
+        <label class="chk"><input type="checkbox" id="f-gd" checked> Dashed reference lines</label>
+        <label class="chk"><input type="checkbox" id="f-lb" checked> Labels</label>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script>
+(function () {
+  var D2R = Math.PI / 180;
+  function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function add(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+  function mul(a, s) { return [a[0] * s, a[1] * s, a[2] * s]; }
+  function len(a) { return Math.hypot(a[0], a[1], a[2]); }
+  function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+  function unit(a) { var l = len(a) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+  function M(n, d) { var s = Math.abs(n).toFixed(d); var neg = n < 0 && parseFloat(s) !== 0; return (neg ? '−' : '') + s; }
+  function f1(n) { return n.toFixed(1); }
+  function cart(r, th, ph) { return [r * Math.sin(th) * Math.cos(ph), r * Math.sin(th) * Math.sin(ph), r * Math.cos(th)]; }
+
+  /* oblique projection like the textbook: x down-left, y right, z up */
+  var Aa = -0.6, Bb = 0.6, VW = [1, 0.6, 0.6], Vt = { s: 1, ox: 0, oy: 0 };
+  function setView(al) { var c = Math.cos(al * D2R), s = Math.sin(al * D2R); Aa = -0.85 * c; Bb = 0.85 * s; VW = [1, -Aa, Bb]; }
+  function pr(p) { return { x: Aa * p[0] + p[1], y: Bb * p[0] - p[2] }; }
+  function fitTo(pts, W, H, m) {
+    var minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
+    pts.forEach(function (p) { var q = pr(p); minx = Math.min(minx, q.x); maxx = Math.max(maxx, q.x); miny = Math.min(miny, q.y); maxy = Math.max(maxy, q.y); });
+    var w = Math.max(maxx - minx, 1e-6), h = Math.max(maxy - miny, 1e-6), s = Math.min((W - 2 * m) / w, (H - 2 * m) / h);
+    return { s: s, ox: W / 2 - s * (minx + maxx) / 2, oy: H / 2 - s * (miny + maxy) / 2 };
+  }
+  function ps(p) { var q = pr(p); return { x: Vt.ox + Vt.s * q.x, y: Vt.oy + Vt.s * q.y }; }
+
+  function arrow(a, b, cls, hl, hw, nt) {
+    hl = hl || 12; hw = hw || 4.4; nt = nt || 3;
+    var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy);
+    if (L < 3) return '';
+    var ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+    var h = Math.min(hl, L * 0.9), w = hw * h / hl;
+    var bx = b.x - ux * h, by = b.y - uy * h, qx = b.x - ux * (h - nt), qy = b.y - uy * (h - nt);
+    return '<g class="vec ' + cls + '"><line x1="' + f1(a.x) + '" y1="' + f1(a.y) + '" x2="' + f1(qx) + '" y2="' + f1(qy) + '"/>' +
+      '<polygon points="' + f1(b.x) + ',' + f1(b.y) + ' ' + f1(bx + nx * w) + ',' + f1(by + ny * w) + ' ' + f1(qx) + ',' + f1(qy) + ' ' + f1(bx - nx * w) + ',' + f1(by - ny * w) + '"/></g>';
+  }
+  function polyl(pts, cls) { return '<polyline class="' + cls + '" points="' + pts.map(function (p) { return f1(p.x) + ',' + f1(p.y); }).join(' ') + '"/>'; }
+  function polyg(pts, cls, extra) { return '<polygon class="' + cls + '" ' + (extra || '') + ' points="' + pts.map(function (p) { return f1(p.x) + ',' + f1(p.y); }).join(' ') + '"/>'; }
+  function T(x, y, parts, cls, anchor) {
+    var s = '<text x="' + f1(x) + '" y="' + f1(y + 6) + '" class="' + cls + '" text-anchor="' + (anchor || 'middle') + '">', down = false;
+    parts.forEach(function (p) {
+      s += '<tspan' + (down ? ' dy="-4"' : '') + '>' + p[0] + '</tspan>'; down = false;
+      if (p[1]) { s += '<tspan class="sub" dy="4">' + p[1] + '</tspan>'; down = true; }
+    });
+    return s + '</text>';
+  }
+  function samp(fn, t0, t1, n) { var o = []; for (var i = 0; i <= n; i++) o.push(ps(fn(t0 + (t1 - t0) * i / n))); return o; }
+  function headedArc(pts) {
+    var n = pts.length; if (n < 6) return '';
+    return polyl(pts, 'arc') + arrow(pts[n - 5], pts[n - 1], 'vthin', 10, 3.8, 2.6);
+  }
+  function unitTo(a, b) { var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1; return { x: dx / L, y: dy / L }; }
+
+  /* shaded octant of the sphere of radius R, as in the figure */
+  function sphereOctant(R) {
+    var pts = [], n = 44, i;
+    for (i = 0; i <= n; i++) { var t = Math.PI / 2 * i / n; pts.push(ps([0, R * Math.sin(t), R * Math.cos(t)])); }
+    for (i = 1; i <= n; i++) { var s2 = Math.PI / 2 * (1 - i / n); pts.push(ps([R * Math.cos(s2), R * Math.sin(s2), 0])); }
+    for (i = 1; i < n; i++) { var u = Math.PI / 2 * (1 - i / n); pts.push(ps([R * Math.sin(u), 0, R * Math.cos(u)])); }
+    var hc = ps(mul(unit(VW), 0.45 * R)), rg = Vt.s * R * 1.3;
+    return '<defs><radialGradient id="sph" gradientUnits="userSpaceOnUse" cx="' + f1(hc.x) + '" cy="' + f1(hc.y) + '" r="' + f1(rg) + '" fx="' + f1(hc.x) + '" fy="' + f1(hc.y) + '"><stop class="s0" offset="0"/><stop class="s1" offset="1"/></radialGradient></defs>' +
+      polyg(pts, 'sph', 'fill="url(#sph)"');
+  }
+  function sphereFit(R) {
+    var o = [], i;
+    for (i = 0; i <= 24; i++) { var t = Math.PI / 2 * i / 24; o.push([0, R * Math.sin(t), R * Math.cos(t)], [R * Math.cos(t), R * Math.sin(t), 0], [R * Math.sin(t), 0, R * Math.cos(t)]); }
+    return o;
+  }
+  function axesSvg(R, full) {
+    var O = ps([0, 0, 0]), s = '', ends = [[1.2 * R, 0, 0], [0, 1.2 * R, 0], [0, 0, 1.2 * R]], lab = ['x', 'y', 'z'], k;
+    for (k = 0; k < 3; k++) {
+      if (full) { var ng = [0, 0, 0]; ng[k] = -0.45 * R; s += '<line class="dashg" x1="' + f1(O.x) + '" y1="' + f1(O.y) + '" x2="' + f1(ps(ng).x) + '" y2="' + f1(ps(ng).y) + '"/>'; }
+      var tip = ps(ends[k]); s += arrow(O, tip, 'vax', 13, 4.8, 3.2);
+      var d = unitTo(O, tip); s += T(tip.x + d.x * 15, tip.y + d.y * 15, [[lab[k]]], 'ta');
+    }
+    return s;
+  }
+  function makeRow(host, id, label, min, max, step, value, onChange, reg, tag) {
+    var row = document.createElement('div'); row.className = 'row';
+    var lab = document.createElement('label'); lab.htmlFor = 'n-' + id; lab.textContent = label;
+    var rng = document.createElement('input'); rng.type = 'range'; rng.id = 'r-' + id; rng.setAttribute('aria-label', label);
+    var num = document.createElement('input'); num.type = 'number'; num.id = 'n-' + id;
+    [rng, num].forEach(function (e) { e.min = min; e.max = max; e.step = step; e.value = value; });
+    rng.addEventListener('input', function () { num.value = rng.value; onChange(parseFloat(rng.value)); });
+    num.addEventListener('input', function () { var v = parseFloat(num.value); if (isNaN(v)) return; rng.value = v; onChange(v); });
+    row.appendChild(lab); row.appendChild(rng); row.appendChild(num); host.appendChild(row);
+    reg.push({ tag: tag, rng: rng, num: num });
+  }
+  function setRow(reg, tag, v, min, max) {
+    reg.forEach(function (it) { if (it.tag === tag) { if (min !== undefined) { it.rng.min = min; it.num.min = min; it.rng.max = max; it.num.max = max; } it.rng.value = v; it.num.value = v; } });
+  }
+
+  function cyl(r, ph, z) { return [r * Math.cos(ph), r * Math.sin(ph), z]; }
+  /* axes with separate lengths (x,y,z) */
+  function axesXYZ(L, full) {
+    var O = ps([0, 0, 0]), s = '', lab = ['x', 'y', 'z'], k;
+    for (k = 0; k < 3; k++) {
+      var e = [0, 0, 0]; e[k] = L[k];
+      if (full) { var ng = [0, 0, 0]; ng[k] = -0.35 * L[k]; s += '<line class="dashg" x1="' + f1(O.x) + '" y1="' + f1(O.y) + '" x2="' + f1(ps(ng).x) + '" y2="' + f1(ps(ng).y) + '"/>'; }
+      var tip = ps(e); s += arrow(O, tip, 'vax', 13, 4.8, 3.2);
+      var d = unitTo(O, tip); s += T(tip.x + d.x * 15, tip.y + d.y * 15, [[lab[k]]], 'ta');
+    }
+    return s;
+  }
+  var DEFS = { rho: 3, ph: 40, z: 2, drho: 0.8, dph: 20, dz: 1, al: 45 };
+  var S = {}; Object.keys(DEFS).forEach(function (k) { S[k] = DEFS[k]; });
+  var flags = { sph: true, gd: true, lb: true, full: false };
+  var reg = [];
+
+  function facePoly(kind, idx, r0, r1, p0, p1, z0, z1) {
+    var N = 8, pts = [], i;
+    if (kind === 'r') {
+      var rr = idx ? r1 : r0;
+      for (i = 0; i <= N; i++) pts.push(cyl(rr, p0 + (p1 - p0) * i / N, z0));
+      pts.push(cyl(rr, p1, z1));
+      for (i = N; i >= 0; i--) pts.push(cyl(rr, p0 + (p1 - p0) * i / N, z1));
+    } else if (kind === 'p') {
+      var pp = idx ? p1 : p0;
+      pts.push(cyl(r0, pp, z0), cyl(r1, pp, z0), cyl(r1, pp, z1), cyl(r0, pp, z1));
+    } else {
+      var zz = idx ? z1 : z0;
+      for (i = 0; i <= N; i++) pts.push(cyl(r0, p0 + (p1 - p0) * i / N, zz));
+      for (i = N; i >= 0; i--) pts.push(cyl(r1, p0 + (p1 - p0) * i / N, zz));
+    }
+    return pts;
+  }
+
+  function buildElem() {
+    var r0 = S.rho, r1 = r0 + S.drho, p0 = S.ph * D2R, p1 = (S.ph + S.dph) * D2R, z0 = S.z, z1 = S.z + S.dz;
+    var pm = (p0 + p1) / 2, mr = (r0 + r1) / 2, zm = (z0 + z1) / 2;
+    var er = [Math.cos(pm), Math.sin(pm), 0], ef = [-Math.sin(pm), Math.cos(pm), 0], ez = [0, 0, 1];
+    var faces = [];
+    [['r', er], ['p', ef], ['z', ez]].forEach(function (k) {
+      [0, 1].forEach(function (i) {
+        var n = mul(k[1], i ? 1 : -1);
+        faces.push({ kind: k[0], idx: i, n: n, pts: facePoly(k[0], i, r0, r1, p0, p1, z0, z1), vis: dot(n, VW) > 0 });
+      });
+    });
+    var rc = dot(cyl(r1, pm, zm), VW) > dot(cyl(r0, pm, zm), VW) ? [r1, r0] : [r0, r1];
+    var pc = dot(cyl(mr, p1, zm), VW) > dot(cyl(mr, p0, zm), VW) ? [p1, p0] : [p0, p1];
+    var zc = dot([0, 0, z1], VW) > dot([0, 0, z0], VW) ? [z1, z0] : [z0, z1];
+    var edges = [
+      { c: 'c1', pts: [cyl(rc[0], pc[0], zc[0]), cyl(rc[1], pc[0], zc[0])], len: Math.abs(S.drho) },
+      { c: 'c2', pts: [], len: rc[0] * Math.abs(p1 - p0), outer: rc[0] === r1 },
+      { c: 'c3', pts: [cyl(rc[0], pc[0], zc[0]), cyl(rc[0], pc[0], zc[1])], len: Math.abs(S.dz) }
+    ];
+    for (var i = 0; i <= 14; i++) edges[1].pts.push(cyl(rc[0], pc[0] + (pc[1] - pc[0]) * i / 14, zc[0]));
+    var all = []; faces.forEach(function (f) { f.pts.forEach(function (p) { all.push(p); }); });
+    return { r0: r0, r1: r1, p0: p0, p1: p1, z0: z0, z1: z1, faces: faces, edges: edges, all: all, center: cyl(mr, pm, zm) };
+  }
+  function faceFill(f) { return f.kind === 'r' ? 'var(--elr)' : f.kind === 'p' ? 'var(--elt)' : 'var(--elp)'; }
+
+  function render() {
+    setView(S.al);
+    var E = buildElem(), s = '', i;
+    var Rm = E.r1, Lz = E.z1 + 0.9, L = [1.2 * Rm, 1.25 * Rm, Lz];
+    var fit = [[L[0], 0, 0], [0, L[1], 0], [0, 0, L[2]], [0, -0.55 * Rm, 0]].concat(E.all);
+    for (i = 0; i <= 12; i++) fit.push(cyl(Rm, Math.PI / 2 * i / 12, 0));
+    if (flags.full) fit.push([-0.35 * L[0], 0, 0], [0, -0.35 * L[1], 0], [0, 0, -0.35 * L[2]]);
+    Vt = fitTo(fit, 620, 520, 50);
+    var O = ps([0, 0, 0]);
+
+    /* floor shadow */
+    if (flags.sph) {
+      var fl = [], N = 16;
+      for (i = 0; i <= N; i++) fl.push(ps(cyl(E.r0, E.p0 + (E.p1 - E.p0) * i / N, 0)));
+      for (i = N; i >= 0; i--) fl.push(ps(cyl(E.r1, E.p0 + (E.p1 - E.p0) * i / N, 0)));
+      s += polyg(fl, 'cfloor');
+    }
+    if (flags.gd) {
+      [E.p0, E.p1].forEach(function (a) {
+        var q = ps(cyl(E.r1, a, 0)); s += '<line class="dash" x1="' + f1(O.x) + '" y1="' + f1(O.y) + '" x2="' + f1(q.x) + '" y2="' + f1(q.y) + '"/>';
+      });
+      [[E.r0, E.p0], [E.r1, E.p0], [E.r0, E.p1], [E.r1, E.p1]].forEach(function (c) {
+        var a = ps(cyl(c[0], c[1], 0)), b = ps(cyl(c[0], c[1], E.z0));
+        s += '<line class="dash" x1="' + f1(a.x) + '" y1="' + f1(a.y) + '" x2="' + f1(b.x) + '" y2="' + f1(b.y) + '"/>';
+      });
+      var pmid = (E.p0 + E.p1) / 2;
+      [E.z0, E.z1].forEach(function (zz) {
+        var a = ps([0, 0, zz]), b = ps(cyl(E.r0, pmid, zz));
+        s += '<line class="dash" x1="' + f1(a.x) + '" y1="' + f1(a.y) + '" x2="' + f1(b.x) + '" y2="' + f1(b.y) + '"/>';
+      });
+    }
+    s += axesXYZ(L, flags.full);
+    /* element */
+    E.faces.forEach(function (f) { if (!f.vis) s += polyg(f.pts.map(ps), 'eh'); });
+    E.faces.forEach(function (f) { if (f.vis) s += polyg(f.pts.map(ps), 'ev', 'fill="' + faceFill(f) + '"'); });
+    E.edges.forEach(function (e) { s += polyl(e.pts.map(ps), 'ed ' + e.c); });
+
+    if (flags.lb) {
+      /* phi arcs and rho rays on the floor */
+      var ra = 0.4 * E.r0, rb = 0.62 * E.r0;
+      s += headedArc(samp(function (a) { return cyl(ra, a, 0); }, 0, E.p0, 40));
+      s += headedArc(samp(function (a) { return cyl(rb, a, 0); }, 0, E.p1, 40));
+      var l1 = ps(cyl(0.3 * E.r0, E.p0 * 0.55, 0)), l2 = ps(cyl(0.78 * E.r0, E.p1 * 0.6, 0));
+      s += T(l1.x - 4, l1.y + 22, [['φ']], 'tl') + T(l2.x - 30, l2.y + 24, [['φ + dφ']], 'tl', 'middle');
+      var m0 = ps(cyl(E.r0 * 0.5, E.p0, 0)), m1 = ps(cyl(E.r1 * 0.5, E.p1 + 0.02, 0));
+      /* z marks on the axis */
+      var a0 = ps([0, 0, E.z0]), a1 = ps([0, 0, E.z1]);
+      s += T(a0.x - 12, a0.y + 4, [['z']], 'tl', 'end') + T(a1.x - 12, a1.y - 8, [['z + dz']], 'tl', 'end');
+      /* rho labels on shadow */
+      var q0 = ps(cyl(E.r0, E.p0, 0)), q1 = ps(cyl(E.r1, E.p1, 0));
+      s += T(q0.x - 6, q0.y + 28, [['ρ']], 'tl') + T(q1.x + 8, q1.y + 30, [['ρ + dρ']], 'tl', 'start');
+      /* callouts */
+      var cen = ps(E.center), right = cen.x < 380, sg = right ? 1 : -1, an = right ? 'start' : 'end';
+      var defs = [
+        { e: E.edges[0], dx: 70, dy: -70, parts: [['dρ']], cls: 'tc1', vc: 'vc1' },
+        { e: E.edges[1], dx: 78, dy: 46, parts: [['ρ dφ']], cls: 'tc2', vc: 'vc2' },
+        { e: E.edges[2], dx: 58, dy: -4, parts: [['dz']], cls: 'tc3', vc: 'vc3' }
+      ];
+      defs.forEach(function (d) {
+        var mp = ps(d.e.pts[Math.floor(d.e.pts.length / 2)]);
+        var lx = cen.x + sg * d.dx, ly = cen.y + d.dy;
+        s += arrow({ x: lx - sg * 6, y: ly }, mp, d.vc, 9, 3.4, 2.4);
+        s += T(lx, ly, d.parts, d.cls, an);
+      });
+    }
+    document.getElementById('fg').innerHTML = s;
+
+    /* zoom */
+    Vt = fitTo(E.all, 480, 520, 92);
+    var z = '', cc = ps(E.center);
+    E.faces.forEach(function (f) { if (!f.vis) z += polyg(f.pts.map(ps), 'eh'); });
+    E.faces.forEach(function (f) { if (f.vis) z += polyg(f.pts.map(ps), 'ev', 'fill="' + faceFill(f) + '"'); });
+    E.edges.forEach(function (e) { z += polyl(e.pts.map(ps), 'ed ' + e.c); });
+    var zl = [['dρ', 'zc1'], ['ρ dφ', 'zc2'], ['dz', 'zc3']];
+    E.edges.forEach(function (e, k) {
+      var mp = ps(e.pts[Math.floor(e.pts.length / 2)]), d = unitTo(cc, mp);
+      var nm = (k === 1 && e.outer) ? '(ρ+dρ) dφ' : zl[k][0]; var txt = nm + ' = ' + M(e.len, 2) + ' m';
+      var lx = mp.x + d.x * 44, ly = mp.y + d.y * 48;
+      var an2 = d.x > 0.35 ? 'start' : d.x < -0.35 ? 'end' : 'middle';
+      if (an2 === 'end') lx = Math.max(lx, 175); else if (an2 === 'start') lx = Math.min(lx, 480 - 175); else lx = Math.min(Math.max(lx, 100), 380);
+      z += '<text x="' + f1(lx) + '" y="' + f1(ly + 6) + '" class="' + zl[k][1] + '" text-anchor="' + an2 + '">' + txt + '</text>';
+    });
+    document.getElementById('zm').innerHTML = z;
+
+    /* readouts */
+    var el = function (id) { return document.getElementById(id); };
+    var dph = E.p1 - E.p0, r = S.rho;
+    el('o-edges').innerHTML = '<dt>d<i>ρ</i></dt><dd>' + M(S.drho, 3) + ' m</dd><dt><i>ρ</i> d<i>φ</i></dt><dd>' + M(r * dph, 3) + ' m</dd><dt>d<i>z</i></dt><dd>' + M(S.dz, 3) + ' m</dd>';
+    el('o-faces').innerHTML = [
+      ['d<i>S</i><sub class="u"><i>ρ</i></sub> = <i>ρ</i> d<i>φ</i> d<i>z</i>', r * dph * S.dz],
+      ['d<i>S</i><sub class="u"><i>φ</i></sub> = d<i>ρ</i> d<i>z</i>', S.drho * S.dz],
+      ['d<i>S</i><sub class="u"><i>z</i></sub> = <i>ρ</i> d<i>ρ</i> d<i>φ</i>', r * S.drho * dph]
+    ].map(function (x) { return '<tr><td>' + x[0] + '</td><td>' + M(x[1], 4) + '</td></tr>'; }).join('');
+    var apx = r * S.drho * dph * S.dz;
+    var ex = (E.r1 * E.r1 - E.r0 * E.r0) / 2 * dph * S.dz;
+    var err = (apx / ex - 1) * 100;
+    el('o-vol').innerHTML = '<dt>d<i>v</i> = <i>ρ</i> d<i>ρ</i> d<i>φ</i> d<i>z</i></dt><dd>' + M(apx, 5) + ' m³</dd>' +
+      '<dt>Exact volume ∫∫∫ <i>ρ</i> d<i>ρ</i> d<i>φ</i> d<i>z</i></dt><dd>' + M(ex, 5) + ' m³</dd>' +
+      '<dt>Formula vs. exact value</dt><dd>' + (err >= 0 ? '+' : '') + M(err, 2) + ' %</dd>';
+    el('o-mean').innerHTML = 'The formula for d<i>v</i> uses the value of <i>ρ</i> at the inner edge of the element for the whole element. The outer edge is longer, so the formula gives a slightly smaller volume. The <i>z</i> direction adds no error. Press “Halve the size” several times and watch the error decrease.';
+  }
+
+  function build() {
+    var g = document.getElementById('g-p');
+    makeRow(g, 'rho', 'ρ (m)', 0.5, 5, 0.1, S.rho, function (v) { S.rho = v; render(); }, reg, 'rho');
+    makeRow(g, 'ph', 'φ (°)', 0, 70, 1, S.ph, function (v) { S.ph = v; render(); }, reg, 'ph');
+    makeRow(g, 'z', 'z (m)', 0.3, 4, 0.1, S.z, function (v) { S.z = v; render(); }, reg, 'z');
+    var d = document.getElementById('g-d'), b = d.querySelector('.btns'), tmp = document.createElement('div');
+    makeRow(tmp, 'drho', 'dρ (m)', 0.02, 1.5, 0.01, S.drho, function (v) { S.drho = v; render(); }, reg, 'drho');
+    makeRow(tmp, 'dph', 'dφ (°)', 1, 30, 0.5, S.dph, function (v) { S.dph = v; render(); }, reg, 'dph');
+    makeRow(tmp, 'dz', 'dz (m)', 0.02, 1.5, 0.01, S.dz, function (v) { S.dz = v; render(); }, reg, 'dz');
+    while (tmp.firstChild) d.insertBefore(tmp.firstChild, b);
+    makeRow(document.getElementById('g-v'), 'al', 'x-axis angle (°)', 20, 70, 1, S.al, function (v) { S.al = v; render(); }, reg, 'al');
+  }
+  function ranges() {
+    var pM = flags.full ? 330 : 70;
+    S.ph = Math.min(S.ph, pM); setRow(reg, 'ph', S.ph, 0, pM);
+  }
+  function syncAll() { ['rho', 'ph', 'z', 'drho', 'dph', 'dz', 'al'].forEach(function (k) { setRow(reg, k, S[k]); }); }
+  build(); render();
+  document.getElementById('f-full').addEventListener('change', function (e) { flags.full = e.target.checked; ranges(); render(); });
+  [['f-sph', 'sph'], ['f-gd', 'gd'], ['f-lb', 'lb']].forEach(function (p) {
+    document.getElementById(p[0]).addEventListener('change', function (e) { flags[p[1]] = e.target.checked; render(); });
+  });
+  document.getElementById('btn-reset').addEventListener('click', function () { Object.keys(DEFS).forEach(function (k) { S[k] = DEFS[k]; }); syncAll(); ranges(); render(); });
+  document.getElementById('btn-half').addEventListener('click', function () {
+    S.drho = Math.max(0.005, S.drho / 2); S.dph = Math.max(0.25, S.dph / 2); S.dz = Math.max(0.005, S.dz / 2);
+    ['drho', 'dph', 'dz'].forEach(function (k) { reg.forEach(function (it) { if (it.tag === k) { it.rng.min = 0; it.num.min = 0; } }); });
+    syncAll(); render();
+  });
+})();
+</script>
+
+</body></html>

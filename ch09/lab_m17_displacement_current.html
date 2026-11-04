@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Displacement Current</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+:root{--bg:#f4f6f9;--panel:#fff;--ink:#16202a;--mut:#56616e;--line:#d5dbe3;--acc:#1c64d6;--pos:#2b8a3e;--fs:clamp(11px,min(1.6vw,2.8vh),26px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:var(--fs)}
+#app{height:100%;display:grid;grid-template-rows:auto 1fr}
+header{padding:.3em .8em;display:flex;align-items:baseline;gap:1em;border-bottom:1px solid var(--line);background:var(--panel)}
+h1{font-size:1.2em;margin:0;white-space:nowrap}
+.cap{color:var(--mut);font-size:.9em;flex:1;min-width:0}.cap b{color:var(--ink)}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,32%);min-height:0}
+#stage{position:relative;min-width:0;min-height:0;overflow:hidden}
+#stage canvas{position:absolute;left:0;top:0;width:100%;height:100%}
+aside{background:var(--panel);border-left:1px solid var(--line);padding:.4em .7em;overflow:auto;display:flex;flex-direction:column;gap:.34em}
+.row{display:grid;grid-template-columns:minmax(0,10em) minmax(0,1fr);align-items:center;gap:.5em}
+.row label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+input[type=range]{width:100%;accent-color:var(--acc);margin:0}
+.seg{display:flex;gap:3px}
+button{font:inherit;font-size:.86em;padding:.12em .35em;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:.35em;cursor:pointer;flex:1}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+select{font:inherit;font-size:.9em;width:100%;padding:.1em}
+.read{font-variant-numeric:tabular-nums;font-size:.88em;line-height:1.36;background:#f6f7f9;border-radius:.4em;padding:.25em .5em}
+.ok{color:var(--pos);font-weight:600}
+.fx{background:#eef3fb;border-radius:.4em;padding:.15em .5em;font-size:.92em;line-height:1.55}
+</style>
+</head>
+<body>
+<div id="app">
+<header><h1>Displacement current</h1>
+<div class="cap" id="cap"></div></header>
+<main>
+<section id="stage"><canvas id="cv"></canvas></section>
+<aside>
+<div class="seg" id="surfSeg"><button data-s="flat" class="on">Surface: flat disk (cuts wire)</button><button data-s="bulge">Bulging (between plates)</button></div>
+<div class="row"><label>f = <b id="vF"></b></label><input type="range" id="F" min="1" max="9" step="0.05" value="3"></div>
+<div class="row"><label>V<sub>0</sub> = <b id="vV0"></b></label><input type="range" id="V0" min="1" max="100" step="1" value="10"></div>
+<div class="row"><label>radius a = <b id="vA"></b></label><input type="range" id="A" min="2" max="20" step="0.5" value="10"></div>
+<div class="row"><label>gap d = <b id="vD"></b></label><input type="range" id="D" min="0.5" max="10" step="0.1" value="2"></div>
+<div class="row"><label>slow-motion</label><input type="range" id="Slow" min="0.1" max="1" step="0.05" value="0.5"></div>
+<div class="read" id="read"></div>
+<div class="row"><label>material</label><select id="mat"></select></div>
+<div class="read" id="readMat"></div>
+<div class="fx" id="fx"></div>
+</aside>
+</main>
+</div>
+
+<script id="physics">
+/* ===== Physics core (portable, no DOM). SI units. Ideal parallel-plate capacitor, fringing neglected. ===== */
+const DISP = (function () {
+  const EPS0 = 8.854e-12, MU0 = 4 * Math.PI * 1e-7;
+  const capacitance = (epsr, S, d) => (epsr * EPS0 * S) / d;
+  // source v(t) = V0 sin(ωt)
+  const voltage = (V0, w, t) => V0 * Math.sin(w * t);
+  const conductionCurrent = (C, V0, w, t) => C * V0 * w * Math.cos(w * t);         // i_c = C dV/dt
+  const Efield = (V0, w, t, d) => voltage(V0, w, t) / d;                             // E = V/d
+  const Jd = (epsr, V0, w, t, d) => (epsr * EPS0 * V0 * w * Math.cos(w * t)) / d;  // J_d = ε ∂E/∂t
+  const displacementCurrent = (epsr, S, V0, w, t, d) => Jd(epsr, V0, w, t, d) * S;  // i_d = ∫J_d·dS
+  // ∮H·dL around a circle of radius r coaxial with the wire/plates (by symmetry H_φ uniform on the circle).
+  // Flat surface: pierced by the wire ⇒ i_c. Bulging surface between plates: J_d flux through the part of the plate area
+  // inside the bulge — the whole plate area S when the surface encloses the plates (r ≥ plate radius at its rim).
+  const circFlat = (ic) => ic;
+  function circBulge(epsr, a, V0, w, t, d) { return displacementCurrent(epsr, Math.PI * a * a, V0, w, t, d); }
+  // H between the plates at radius ρ (from ∮H·dL = ∫J_d·dS)
+  function HinGap(epsr, a, V0, w, t, d, rho) { const j = Jd(epsr, V0, w, t, d); return rho <= a ? (j * rho) / 2 : (j * a * a) / (2 * rho); }
+  // ratio of conduction to displacement current density amplitude in a lossy dielectric
+  const lossRatio = (sigma, f, epsr) => sigma / (2 * Math.PI * f * epsr * EPS0);
+  const crossoverFreq = (sigma, epsr) => sigma / (2 * Math.PI * epsr * EPS0);
+  // numeric C dV/dt by central difference
+  const numericIc = (C, V0, w, t, h) => (C * (voltage(V0, w, t + h) - voltage(V0, w, t - h))) / (2 * h);
+  const MATERIALS = [
+    { name: 'Copper', sigma: 5.8e7, epsr: 1 },
+    { name: 'Sea water', sigma: 4, epsr: 81 },
+    { name: 'Wet soil', sigma: 1e-2, epsr: 10 },
+    { name: 'Distilled water', sigma: 2e-4, epsr: 80 },
+    { name: 'Dry soil', sigma: 1e-4, epsr: 3 },
+    { name: 'Glass', sigma: 1e-12, epsr: 6 },
+    { name: 'Polystyrene', sigma: 1e-16, epsr: 2.56 }
+  ];
+  return { EPS0, MU0, capacitance, voltage, conductionCurrent, Efield, Jd, displacementCurrent, circFlat, circBulge, HinGap, lossRatio, crossoverFreq, numericIc, MATERIALS };
+})();
+if (typeof module !== 'undefined') module.exports = DISP;
+</script>
+
+<script>
+/* ===== UI ===== */
+const $ = id => document.getElementById(id);
+const tex = (el, s) => { if (window.katex) { try { katex.render(s, el, { throwOnError: false }); return; } catch (e) {} } el.textContent = s; };
+function eng(v, u = '', p = 3) { if (!isFinite(v)) return '—'; if (Math.abs(v) < 1e-30) return '0 ' + u; const P = [[1e12, 'T'], [1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p']]; const a = Math.abs(v); for (const [s, n] of P) if (a >= s * 0.9995) return parseFloat((v / s).toPrecision(p)) + ' ' + n + u; return v.toExponential(2) + ' ' + u; }
+const cv = $('cv'), ctx = cv.getContext('2d');
+const fsPx = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
+const S = { surf: 'flat', f: 1e3, V0: 10, a: 0.1, d: 0.02, slow: 0.5, phase: 0, mat: 2, hist: [] };
+function bind(id, fn, show) { const el = $(id), o = $('v' + id); const u = () => { fn(+el.value); if (o) o.innerHTML = show(+el.value); }; el.addEventListener('input', u); u(); }
+bind('F', v => S.f = Math.pow(10, v), v => eng(Math.pow(10, v), 'Hz'));
+bind('V0', v => S.V0 = v, v => v + ' V');
+bind('A', v => S.a = v / 100, v => v + ' cm');
+bind('D', v => S.d = v / 1000, v => v.toFixed(1) + ' mm');
+bind('Slow', v => S.slow = v, v => '');
+DISP.MATERIALS.forEach((m, i) => { const o = document.createElement('option'); o.value = i; o.textContent = m.name; $('mat').appendChild(o); });
+$('mat').value = S.mat; $('mat').onchange = () => S.mat = +$('mat').value;
+document.querySelectorAll('#surfSeg button').forEach(b => b.onclick = () => { S.surf = b.dataset.s; document.querySelectorAll('#surfSeg button').forEach(x => x.classList.toggle('on', x === b)); caption(); });
+function caption() {
+  $('cap').innerHTML = S.surf === 'flat'
+    ? '<b>Notice:</b> the flat disk is crossed by the wire, so it sees only conduction current i<sub>c</sub> = C dV/dt.'
+    : '<b>Notice:</b> the bulging surface passes between the plates — no charge crosses it, yet ∫J<sub>d</sub>·dS gives exactly the same current.';
+}
+$('fx').innerHTML = '<span data-t="\\oint\\mathbf H\\cdot d\\mathbf L=\\int_S\\Big(\\mathbf J+\\dfrac{\\partial\\mathbf D}{\\partial t}\\Big)\\cdot d\\mathbf S"></span><br><span data-t="i_c=C\\dfrac{dV}{dt}=\\epsilon S\\dfrac{dE}{dt}=i_d"></span><br><span data-t="|J_c|/|J_d|=\\sigma/\\omega\\epsilon"></span>';
+function rt() { $('fx').querySelectorAll('[data-t]').forEach(e => tex(e, e.dataset.t)); }
+rt(); caption(); window.addEventListener('load', rt);
+
+function arrow(c, x1, y1, x2, y2, col, w, hl) { const dx = x2 - x1, dy = y2 - y1, m = Math.hypot(dx, dy) || 1, ux = dx / m, uy = dy / m; hl = hl || Math.max(6, w * 3.5); c.strokeStyle = c.fillStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - ux * hl * .6, y2 - uy * hl * .6); c.stroke(); c.beginPath(); c.moveTo(x2, y2); c.lineTo(x2 - ux * hl - uy * hl * .45, y2 - uy * hl + ux * hl * .45); c.lineTo(x2 - ux * hl + uy * hl * .45, y2 - uy * hl - ux * hl * .45); c.closePath(); c.fill(); }
+
+let last = performance.now();
+function frame(t) {
+  const dtR = Math.min(.05, (t - last) / 1000); last = t;
+  S.phase += dtR * 2 * Math.PI * 0.35 * S.slow;            // animation: ~0.35 cycles per second, independent of f
+  const W = cv.width, Hh = cv.height, dpr = window.devicePixelRatio || 1, fs = fsPx() * dpr;
+  const w = 2 * Math.PI * S.f, tt = S.phase / w, Sarea = Math.PI * S.a * S.a, C = DISP.capacitance(1, Sarea, S.d);
+  const V = DISP.voltage(S.V0, w, tt), ic = DISP.conductionCurrent(C, S.V0, w, tt), Id = DISP.displacementCurrent(1, Sarea, S.V0, w, tt, S.d);
+  const E = DISP.Efield(S.V0, w, tt, S.d), jd = DISP.Jd(1, S.V0, w, tt, S.d), Icmax = C * S.V0 * w;
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, Hh);
+  const sceneH = Hh * 0.66, cy = sceneH * 0.5, cx = W * 0.5;
+  // geometry on screen (schematic, not to scale)
+  const ph = Math.min(sceneH * 0.36, (0.25 + S.a / 0.2 * 0.75) * sceneH * 0.36), gap = (0.5 + S.d / 0.01 * 1.6) * fs, pt = .55 * fs;
+  const pl = cx - gap / 2 - pt, pr = cx + gap / 2;
+  // wires + AC source loop
+  const loopTop = cy - sceneH * 0.42, srcX = W * 0.1, wx2 = W * 0.9;
+  ctx.strokeStyle = '#495057'; ctx.lineWidth = 3 * dpr; ctx.beginPath();
+  ctx.moveTo(pl, cy); ctx.lineTo(srcX, cy); ctx.moveTo(pr + pt, cy); ctx.lineTo(wx2, cy); ctx.lineTo(wx2, loopTop); ctx.lineTo(srcX, loopTop); ctx.lineTo(srcX, cy - 1.4 * fs); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(srcX, cy); ctx.lineTo(srcX, cy - .6 * fs); ctx.stroke();
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(srcX, cy - 1.0 * fs, 1.0 * fs, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); for (let i = 0; i <= 20; i++) { const x = srcX - .6 * fs + 1.2 * fs * i / 20, y = cy - 1.0 * fs - .35 * fs * Math.sin(2 * Math.PI * i / 20); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke();
+  ctx.fillStyle = '#16202a'; ctx.font = `${.85 * fs}px system-ui`; ctx.fillText('V₀ sin ωt', srcX + 1.3 * fs, cy - .7 * fs);
+  // plates with charge shading
+  const q = V / S.V0;
+  ctx.fillStyle = q >= 0 ? `rgba(201,42,42,${.25 + .6 * Math.abs(q)})` : `rgba(24,100,171,${.25 + .6 * Math.abs(q)})`; ctx.fillRect(pl, cy - ph, pt, 2 * ph);
+  ctx.fillStyle = q >= 0 ? `rgba(24,100,171,${.25 + .6 * Math.abs(q)})` : `rgba(201,42,42,${.25 + .6 * Math.abs(q)})`; ctx.fillRect(pr, cy - ph, pt, 2 * ph);
+  ctx.strokeStyle = '#343a40'; ctx.lineWidth = 1.5 * dpr; ctx.strokeRect(pl, cy - ph, pt, 2 * ph); ctx.strokeRect(pr, cy - ph, pt, 2 * ph);
+  ctx.fillStyle = '#16202a'; ctx.font = `bold ${fs}px system-ui`; ctx.textAlign = 'center'; ctx.fillText(q >= 0 ? '+' : '−', pl + pt / 2, cy - ph - .4 * fs); ctx.fillText(q >= 0 ? '−' : '+', pr + pt / 2, cy - ph - .4 * fs); ctx.textAlign = 'left';
+  // conduction current: moving dots in wires (speed ∝ i_c)
+  const qi = ic / Icmax;
+  S.flow = (S.flow || 0) + dtR * qi * 2.2 * fs * 2.5;
+  const dotGap = 2.2 * fs; ctx.fillStyle = '#d9480f';
+  const wirePts = [[pl, cy, srcX, cy], [wx2, cy, pr + pt, cy]];
+  for (const [x1, y1, x2] of wirePts) { const len = Math.abs(x2 - x1), dir = Math.sign(x1 - x2); for (let s = ((S.flow % dotGap) + dotGap) % dotGap; s < len; s += dotGap) { const x = x2 + dir * s; if (Math.abs(x - srcX) < 1.2 * fs) continue; ctx.beginPath(); ctx.arc(x, y1, .22 * fs, 0, 7); ctx.fill(); } }
+  // i_c arrows on wires (direction: + means current flows into left plate from left wire)
+  if (Math.abs(qi) > 0.05) { const L = (0.6 + 1.6 * Math.abs(qi)) * fs, s = Math.sign(qi), xa = (srcX + pl) / 2 + 2 * fs, xb = (pr + pt + wx2) / 2;
+    arrow(ctx, xa - s * L / 2, cy - .9 * fs, xa + s * L / 2, cy - .9 * fs, '#d9480f', 3 * dpr); arrow(ctx, xb - s * L / 2, cy - .9 * fs, xb + s * L / 2, cy - .9 * fs, '#d9480f', 3 * dpr);
+    ctx.fillStyle = '#d9480f'; ctx.font = `bold ${.9 * fs}px system-ui`; ctx.fillText('i_c', xa - .7 * fs, cy - 1.7 * fs); }
+  // displacement current density arrows between plates
+  const qd = jd / (Icmax / Sarea); const nArr = 5;
+  for (let k = 0; k < nArr; k++) { const y = cy - ph * 0.8 + ph * 1.6 * k / (nArr - 1); if (Math.abs(qd) > 0.04) { const L = Math.min(gap * 0.9, (0.3 + 0.7 * Math.abs(qd)) * gap * 0.9), s = Math.sign(qd); arrow(ctx, cx - s * L / 2, y, cx + s * L / 2, y, `rgba(43,138,62,${0.35 + 0.65 * Math.abs(qd)})`, 2.5 * dpr, .5 * fs); } }
+  ctx.fillStyle = '#2b8a3e'; ctx.font = `bold ${.9 * fs}px system-ui`; ctx.textAlign = 'center'; ctx.fillText('J_d = ε ∂E/∂t', cx, cy + ph + 1.3 * fs); ctx.textAlign = 'left';
+  // E field (faint)
+  ctx.fillStyle = '#56616e'; ctx.font = `${.8 * fs}px system-ui`; ctx.textAlign = 'center'; ctx.fillText(`E = V/d = ${eng(E, 'V/m')}`, cx + 3 * fs, cy - ph - 1.6 * fs); ctx.textAlign = 'left';
+  // Amperian loop (ellipse seen edge-on as a vertical ellipse) and surface
+  const loopX = S.surf === 'flat' ? pl - 3.2 * fs : pl - 3.2 * fs, lr = ph * 1.15;
+  ctx.strokeStyle = '#1c64d6'; ctx.lineWidth = 3 * dpr; ctx.beginPath(); ctx.ellipse(loopX, cy, .9 * fs, lr, 0, 0, 7); ctx.stroke();
+  ctx.fillStyle = 'rgba(28,100,214,.13)';
+  if (S.surf === 'flat') { ctx.beginPath(); ctx.ellipse(loopX, cy, .9 * fs, lr, 0, 0, 7); ctx.fill(); }
+  else { ctx.beginPath(); ctx.moveTo(loopX, cy - lr); ctx.bezierCurveTo(loopX + 3 * fs, cy - lr, cx + gap * 0.1, cy - lr * 0.95, cx, cy - lr * 0.9); ctx.lineTo(cx, cy + lr * 0.9); ctx.bezierCurveTo(cx + gap * 0.1, cy + lr * 0.95, loopX + 3 * fs, cy + lr, loopX, cy + lr); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(28,100,214,.6)'; ctx.lineWidth = 1.5 * dpr; ctx.setLineDash([5 * dpr, 4 * dpr]); ctx.stroke(); ctx.setLineDash([]); }
+  ctx.fillStyle = '#1c64d6'; ctx.font = `bold ${.85 * fs}px system-ui`; ctx.textAlign = 'right'; ctx.fillText('Amperian loop C', loopX - 1.2 * fs, cy - lr + .6 * fs); ctx.textAlign = 'left';
+  ctx.textAlign = 'right'; ctx.fillText(S.surf === 'flat' ? 'surface S₁ (flat)' : 'surface S₂ (bulging)', loopX - 1.2 * fs, cy + lr); ctx.textAlign = 'left';
+  // H around the loop
+  const hq = ic / Icmax; if (Math.abs(hq) > .05) { const s = Math.sign(hq), L = (0.5 + 1.2 * Math.abs(hq)) * fs; arrow(ctx, loopX + 1.1 * fs, cy - lr * .55 - s * L / 2, loopX + 1.1 * fs, cy - lr * .55 + s * L / 2, '#5a2bb0', 3 * dpr); ctx.fillStyle = '#5a2bb0'; ctx.fillText('H', loopX + 1.6 * fs, cy - lr * .55 + .3 * fs); }
+  // chart: i_c, i_d, ∮H·dL
+  S.hist.push([S.phase, ic, Id]); while (S.hist.length && S.phase - S.hist[0][0] > 4 * Math.PI) S.hist.shift();
+  const x0 = .4 * fs, y0 = sceneH + .2 * fs, cw = W - .8 * fs, chh = Hh - y0 - .4 * fs;
+  ctx.fillStyle = '#f8f9fa'; ctx.fillRect(x0, y0, cw, chh); ctx.strokeStyle = '#dee2e6'; ctx.lineWidth = dpr; ctx.strokeRect(x0, y0, cw, chh);
+  const L = x0 + 3.2 * fs, R = x0 + cw - .6 * fs, T = y0 + 1.5 * fs, B = y0 + chh - .5 * fs, mid = (T + B) / 2;
+  ctx.strokeStyle = '#8994a1'; ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, B); ctx.moveTo(L, mid); ctx.lineTo(R, mid); ctx.stroke();
+  const X = p => R - (S.phase - p) / (4 * Math.PI) * (R - L), Y = v => mid - v / (Icmax * 1.15) * (B - T) / 2;
+  ctx.strokeStyle = '#d9480f'; ctx.lineWidth = 5 * dpr; ctx.beginPath(); S.hist.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1]))); ctx.stroke();
+  ctx.strokeStyle = '#2b8a3e'; ctx.lineWidth = 2 * dpr; ctx.setLineDash([8 * dpr, 5 * dpr]); ctx.beginPath(); S.hist.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[2])) : ctx.moveTo(X(p[0]), Y(p[2]))); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle = 'rgba(86,97,110,.6)'; ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); S.hist.forEach((p, i) => { const vv = Math.sin(p[0]) * Icmax; i ? ctx.lineTo(X(p[0]), Y(vv)) : ctx.moveTo(X(p[0]), Y(vv)); }); ctx.stroke();
+  ctx.font = `${.8 * fs}px system-ui`; let lx = L + .3 * fs;
+  [['i_c in wire', '#d9480f'], ['i_d = ∫J_d·dS', '#2b8a3e'], ['v(t) (scaled)', '#56616e']].forEach(([s, c]) => { ctx.fillStyle = c; ctx.fillText(s, lx, y0 + 1.05 * fs); lx += ctx.measureText(s).width + 1.2 * fs; });
+  ctx.fillStyle = '#56616e'; ctx.fillText('±' + eng(Icmax * 1.15, 'A', 2), x0 + .2 * fs, T + .2 * fs);
+  // readouts
+  const circ = S.surf === 'flat' ? DISP.circFlat(ic) : DISP.circBulge(1, S.a, S.V0, w, tt, S.d);
+  $('read').innerHTML = `C = ε₀S/d = <b>${eng(C, 'F')}</b><br>i<sub>c</sub> = C dV/dt = ${eng(ic, 'A')} (peak ${eng(Icmax, 'A')})<br>i<sub>d</sub> = ε S dE/dt = ${eng(Id, 'A')}<br>∮H·dL via ${S.surf === 'flat' ? 'S₁' : 'S₂'} = <b>${eng(circ, 'A')}</b> <span class="ok">same</span><br>H on loop (r = 1.15a) = ${eng(circ / (2 * Math.PI * 1.15 * S.a), 'A/m')}`;
+  const m = DISP.MATERIALS[S.mat], rr = DISP.lossRatio(m.sigma, S.f, m.epsr), fx = DISP.crossoverFreq(m.sigma, m.epsr);
+  $('readMat').innerHTML = `σ = ${m.sigma.toExponential(1)} S/m, ε<sub>r</sub> = ${m.epsr}<br>at f = ${eng(S.f, 'Hz')}: σ/ωε = <b>${rr >= 1e4 || rr < 1e-3 ? rr.toExponential(2) : rr.toPrecision(3)}</b><br>${rr > 10 ? 'good conductor — conduction dominates' : rr < 0.1 ? 'good dielectric — displacement dominates' : 'lossy — both matter'}<br>crossover f = σ/(2πε) = ${eng(fx, 'Hz')}`;
+  requestAnimationFrame(frame);
+}
+new ResizeObserver(() => { const dpr = window.devicePixelRatio || 1; cv.width = Math.max(1, Math.round(cv.clientWidth * dpr)); cv.height = Math.max(1, Math.round(cv.clientHeight * dpr)); }).observe($('stage'));
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

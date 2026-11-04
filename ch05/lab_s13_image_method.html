@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" crossorigin="anonymous"></script>
+<title>Method of Images</title>
+<style>/* ===== common UI kit (shared by all sims) ===== */
+:root{
+  --bg:#f7f8fb; --panel:#ffffff; --ink:#1b2333; --muted:#5a6478; --line:#d5dae5;
+  --accent:#1f6feb; --pos:#d1242f; --neg:#1f6feb; --ok:#1a7f37; --warn:#b35900;
+  --c1:#1f6feb; --c2:#d1242f; --c3:#1a7f37; --c4:#8250df; --c5:#b35900;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink)}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:clamp(12px,min(2.6vh,1.46vw),26px);line-height:1.25}
+.app{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100vh;width:100vw;padding:.45em .7em;gap:.4em}
+header{display:flex;align-items:baseline;gap:.8em;min-width:0}
+header h1{font-size:1.3em;margin:0;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .tag{font-size:.8em;color:#fff;background:var(--accent);border-radius:.3em;padding:.1em .45em;white-space:nowrap}
+header .modes{margin-left:auto}
+main{display:grid;grid-template-columns:minmax(0,1fr) 21em;gap:.6em;min-height:0}
+.stage{position:relative;min-height:0;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:.5em;overflow:hidden}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.panel{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:.5em;padding:.5em .7em;overflow-y:auto;overflow-x:hidden;min-height:0;display:flex;flex-direction:column;gap:.45em}
+.ctl{display:flex;flex-direction:column;gap:.05em}
+.ctl-row{display:flex;justify-content:space-between;align-items:baseline;gap:.5em}
+.ctl-row label{font-weight:600}
+.ctl-row output{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:600;white-space:nowrap}
+input[type=range]{width:100%;height:1.3em;margin:0;accent-color:var(--accent);cursor:pointer}
+.seg{display:inline-flex;border:1px solid var(--accent);border-radius:.4em;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.92em;border:0;background:#fff;color:var(--accent);padding:.18em .6em;cursor:pointer}
+.seg button+button{border-left:1px solid var(--accent)}
+.seg button.on{background:var(--accent);color:#fff}
+button.btn{font:inherit;font-size:.92em;border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:.4em;padding:.15em .6em;cursor:pointer}
+button.btn:hover,.seg button:hover:not(.on){background:#eaf1fe}
+.row{display:flex;gap:.4em;flex-wrap:wrap;align-items:center}
+.formula{border-top:1px solid var(--line);padding-top:.35em;font-size:.95em}
+.formula .katex{font-size:1.02em}
+.formula .eq{margin:.15em 0;overflow-x:auto;overflow-y:hidden}
+.readout{font-variant-numeric:tabular-nums;font-size:.95em}
+.readout b{color:var(--accent)}
+.big{font-size:1.25em;font-weight:700;color:var(--accent)}
+footer.notice{font-size:1em;background:#fff8e1;border:1px solid #f0d78c;border-radius:.4em;padding:.25em .6em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+footer.notice::before{content:"What to notice: ";font-weight:700;color:var(--warn)}
+.chk{display:flex;gap:.4em;align-items:center;cursor:pointer}
+.chk input{width:1em;height:1em;accent-color:var(--accent)}
+select{font:inherit;font-size:.92em;padding:.05em .2em}
+.hide{display:none!important}
+.small{font-size:.85em;color:var(--muted)}
+@media (max-width:760px),(max-aspect-ratio:1/1){
+  body{font-size:clamp(12px,2.2vw,20px)}
+  main{grid-template-columns:1fr;grid-template-rows:minmax(0,1.4fr) minmax(0,1fr)}
+  footer.notice{white-space:normal}
+}
+</style>
+</head><body>
+<div class="app">
+  <header><span class="tag">Session 13</span><h1>Method of Images: Point Charge above a Grounded Plane</h1><div class="modes" id="modes"></div></header>
+  <main>
+    <div class="stage"><canvas id="cv"></canvas></div>
+    <aside class="panel" id="panel">
+      <div id="ctl"></div>
+      <div class="readout" id="read"></div>
+      <div class="formula">
+        <div class="eq" data-tex="V=\dfrac{Q}{4\pi\varepsilon_0}\left(\dfrac1{R_+}-\dfrac1{R_-}\right),\ \ V\big|_{z=0}=0"></div>
+        <div class="eq" data-tex="\rho_S=\varepsilon_0E_z\big|_{0^+}=-\dfrac{Qh}{2\pi\,(r^2+h^2)^{3/2}}"></div>
+        <div class="eq" data-tex="\displaystyle\int_0^{R}\!\rho_S\,2\pi r\,dr=-Q\Big(1-\tfrac{h}{\sqrt{R^2+h^2}}\Big)\to-Q"></div>
+      </div>
+    </aside>
+  </main>
+  <footer class="notice" id="notice">Above the plane the two pictures give identical fields — the plane is the V = 0 surface of the charge + image pair.</footer>
+</div>
+
+<!-- ===================== PHYSICS (pure, testable; no DOM) ===================== -->
+<script id="physics">
+const PHYS = (() => {
+  const EPS0 = 8.854e-12, K = 1 / (4 * Math.PI * EPS0);
+  // Charge Q at (0,0,h); grounded plane z = 0. Coordinates: r = horizontal distance, z = height.
+  // Real problem (z>0) == charge Q at +h plus image -Q at -h.
+  function V(r, z, Q, h) { return K * Q * (1 / Math.hypot(r, z - h) - 1 / Math.hypot(r, z + h)); }
+  function E(r, z, Q, h) { // field in the (r,z) meridional plane; r may be negative (other side)
+    const a = Math.hypot(r, z - h) ** 3, b = Math.hypot(r, z + h) ** 3;
+    return [K * Q * (r / a - r / b), K * Q * ((z - h) / a - (z + h) / b)];
+  }
+  const rhoS = (r, Q, h) => -Q * h / (2 * Math.PI * Math.pow(r * r + h * h, 1.5));      // = eps0 * Ez(z=0+)
+  const QinAnalytic = (R, Q, h) => -Q * (1 - h / Math.hypot(R, h));
+  // purely numerical surface integral of rho_S over a disc of radius R (midpoint rule, graded mesh)
+  function QinNumeric(R, Q, h, n = 4000) {
+    // map s in [0,1] -> r = h * sinh(s*asinh(R/h)) to resolve the peak and the long tail
+    const A = Math.asinh(R / h); let sum = 0;
+    for (let i = 0; i < n; i++) { const s = (i + 0.5) / n, r = h * Math.sinh(s * A), dr = h * Math.cosh(s * A) * A / n; sum += rhoS(r, Q, h) * 2 * Math.PI * r * dr; }
+    return sum;
+  }
+  const force = (Q, h) => K * Q * Q / (4 * h * h); // attraction toward the plane
+  // trace a field line in the (r,z) plane by RK4 on the unit direction field
+  function trace(r0, z0, Q, h, { ds = 0.01, maxSteps = 4000, stopPlane = true, bounds = [-8, 8, -8, 8], sign = 1 } = {}) {
+    const pts = [[r0, z0]]; let r = r0, z = z0;
+    const dir = (r, z) => { const [er, ez] = E(r, z, Q, h); const m = Math.hypot(er, ez) || 1; return [sign * er / m, sign * ez / m]; };
+    for (let k = 0; k < maxSteps; k++) {
+      const k1 = dir(r, z), k2 = dir(r + ds / 2 * k1[0], z + ds / 2 * k1[1]), k3 = dir(r + ds / 2 * k2[0], z + ds / 2 * k2[1]), k4 = dir(r + ds * k3[0], z + ds * k3[1]);
+      let nr = r + ds / 6 * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0]), nz = z + ds / 6 * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1]);
+      if (stopPlane && nz <= 0) { const f = z / (z - nz); pts.push([r + f * (nr - r), 0]); return { pts, end: 'plane' }; }
+      r = nr; z = nz; pts.push([r, z]);
+      if (Math.hypot(r, z + h) < 0.03 * h) return { pts, end: 'image' };
+      if (r < bounds[0] || r > bounds[1] || z < bounds[2] || z > bounds[3]) return { pts, end: 'out' };
+    }
+    return { pts, end: 'max' };
+  }
+  return { EPS0, K, V, E, rhoS, QinAnalytic, QinNumeric, force, trace };
+})();
+if (typeof module !== 'undefined') module.exports = PHYS;
+</script>
+
+<script>/* ===== common UI kit (shared by all sims; no physics here) ===== */
+const UI = (() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '+': '' };
+  // scientific notation with unicode superscripts: 1.53×10⁻¹⁹
+  function sci(x, d = 3) {
+    if (!isFinite(x)) return String(x);
+    if (x === 0) return '0';
+    const e = Math.floor(Math.log10(Math.abs(x)));
+    if (e >= -2 && e <= 3) return (+x.toPrecision(d)).toString();
+    let m = x / Math.pow(10, e);
+    let ms = (+m.toPrecision(d)).toString();
+    if (Math.abs(+ms) >= 10) { ms = (+(m / 10).toPrecision(d)).toString(); return ms + '×10' + String(e + 1).split('').map(c => SUP[c]).join(''); }
+    return ms + '×10' + String(e).split('').map(c => SUP[c]).join('');
+  }
+  // engineering format with SI prefix: eng(1.5e-9,'F') -> "1.50 nF"
+  const PRE = { '-24': 'y', '-21': 'z', '-18': 'a', '-15': 'f', '-12': 'p', '-9': 'n', '-6': 'µ', '-3': 'm', '0': '', '3': 'k', '6': 'M', '9': 'G', '12': 'T' };
+  function eng(x, unit = '', d = 3) {
+    if (!isFinite(x)) return String(x);
+    if (x === 0) return '0 ' + unit;
+    let e3 = Math.floor(Math.log10(Math.abs(x)) / 3) * 3;
+    e3 = Math.max(-24, Math.min(12, e3));
+    let m = x / Math.pow(10, e3);
+    let s = m.toPrecision(d);
+    if (Math.abs(+s) >= 1000 && e3 < 12) { e3 += 3; s = (x / Math.pow(10, e3)).toPrecision(d); }
+    return s + ' ' + PRE[e3] + unit;
+  }
+  // KaTeX is loaded with `defer`; anything rendered before it arrives is queued and re-rendered on load.
+  const texQueue = [];
+  function tex(el, src, display = false) {
+    if (typeof el === 'string') el = $(el);
+    if (!el) return;
+    if (window.katex) { try { katex.render(src, el, { displayMode: display, throwOnError: false }); return; } catch (e) { } }
+    el.textContent = src; // plain-TeX fallback when KaTeX is unavailable (offline)
+    texQueue.push([el, src, display]);
+  }
+  window.addEventListener('load', () => { if (window.katex) texQueue.splice(0).forEach(a => tex(...a)); });
+  // render every element carrying data-tex="..." (static formula panels)
+  function texAll(root = document) { root.querySelectorAll('[data-tex]').forEach(e => tex(e, e.dataset.tex, e.hasAttribute('data-display'))); }
+  function fontPx() { return parseFloat(getComputedStyle(document.body).fontSize) || 18; }
+
+  // canvas with DPR + resize handling; draw(ctx, w, h) in CSS px
+  function canvas(cv, draw) {
+    const ctx = cv.getContext('2d');
+    const obj = { cv, ctx, w: 0, h: 0, draw, redraw() { const dpr = window.devicePixelRatio || 1; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, obj.w, obj.h); obj.draw(ctx, obj.w, obj.h); } };
+    function resize() {
+      const r = cv.getBoundingClientRect(); const dpr = window.devicePixelRatio || 1;
+      obj.w = Math.max(10, r.width); obj.h = Math.max(10, r.height);
+      cv.width = Math.round(obj.w * dpr); cv.height = Math.round(obj.h * dpr); obj.redraw();
+    }
+    new ResizeObserver(resize).observe(cv); resize();
+    return obj;
+  }
+  function pointer(cv, { down, move, up, hover }) {
+    const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    let dragging = false;
+    cv.addEventListener('pointerdown', e => { const p = pos(e); if (down && down(p, e) !== false) { dragging = true; cv.setPointerCapture(e.pointerId); } });
+    cv.addEventListener('pointermove', e => { const p = pos(e); if (dragging) move && move(p, e); else hover && hover(p, e); });
+    const end = e => { if (dragging) { dragging = false; up && up(pos(e), e); } };
+    cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  }
+
+  // slider: {label(html), min,max,step,value, log:bool, fmt:fn, onInput:fn}
+  function slider(parent, o) {
+    const d = document.createElement('div'); d.className = 'ctl';
+    d.innerHTML = `<div class="ctl-row"><label>${o.label}</label><output></output></div><input type="range">`;
+    const inp = d.querySelector('input'), out = d.querySelector('output');
+    const N = 1000;
+    const toS = v => o.log ? Math.round((Math.log10(v) - Math.log10(o.min)) / (Math.log10(o.max) - Math.log10(o.min)) * N) : v;
+    const fromS = s => o.log ? Math.pow(10, Math.log10(o.min) + (Math.log10(o.max) - Math.log10(o.min)) * s / N) : +s;
+    if (o.log) { inp.min = 0; inp.max = N; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step || 'any'; }
+    const api = {
+      el: d, get value() { return api._v; },
+      set(v, fire = true) { api._v = v; inp.value = toS(v); out.innerHTML = o.fmt ? o.fmt(v) : (+v).toPrecision(3); if (fire && o.onInput) o.onInput(v); },
+    };
+    inp.addEventListener('input', () => api.set(fromS(inp.value)));
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(d);
+    api.set(o.value, false);
+    return api;
+  }
+  // segmented toggle: options [[value,label],...]
+  function seg(parent, options, value, onChange) {
+    const d = document.createElement('div'); d.className = 'seg';
+    const api = { el: d, value, set(v, fire = true) { api.value = v; [...d.children].forEach(b => b.classList.toggle('on', b.dataset.v === String(v))); if (fire && onChange) onChange(v); } };
+    options.forEach(([v, l]) => { const b = document.createElement('button'); b.dataset.v = v; b.innerHTML = l; b.onclick = () => api.set(v); d.appendChild(b); });
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(d);
+    api.set(value, false); return api;
+  }
+  function check(parent, label, value, onChange) {
+    const l = document.createElement('label'); l.className = 'chk';
+    l.innerHTML = `<input type="checkbox"> <span>${label}</span>`;
+    const i = l.querySelector('input'); i.checked = value; i.onchange = () => onChange(i.checked);
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(l); return i;
+  }
+
+  // ---------- plotting ----------
+  function niceStep(range, n) {
+    const raw = range / Math.max(1, n); const p = Math.pow(10, Math.floor(Math.log10(raw))); const f = raw / p;
+    return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p;
+  }
+  function ticks(a, b, n) { const s = niceStep(b - a, n); const t = []; for (let v = Math.ceil(a / s - 1e-9) * s; v <= b + s * 1e-9; v += s) t.push(Math.abs(v) < s * 1e-9 ? 0 : v); return { t, s }; }
+  function tickLabel(v, s) {
+    if (v === 0) return '0';
+    const a = Math.abs(v);
+    if (a >= 1e5 || a < 1e-3) return sci(v, 2);
+    const dec = Math.max(0, -Math.floor(Math.log10(s) + 1e-9));
+    return v.toFixed(Math.min(dec, 4));
+  }
+  // o: {xlim:[a,b], ylim:[a,b], logx, logy, xlabel, ylabel, title, series:[{x,y,color,width,dash,label}],
+  //     points:[{x,y,color,r,label}], vlines:[{x,color,dash,label}], hlines:[...], fs, legend:true, zero:true}
+  function plot(ctx, R, o) {
+    const fs = o.fs || fontPx() * 0.85;
+    ctx.save();
+    ctx.font = `${fs}px system-ui, sans-serif`;
+    const padL = fs * (o.padL || 3.8), padB = fs * (o.xlabel ? 2.5 : 1.5), padT = fs * (o.title ? 1.5 : 0.6), padR = fs * (o.padR || 0.8);
+    const I = { x: R.x + padL, y: R.y + padT, w: Math.max(10, R.w - padL - padR), h: Math.max(10, R.h - padT - padB) };
+    const lx = v => o.logx ? Math.log10(v) : v, ly = v => o.logy ? Math.log10(v) : v;
+    const [x0, x1] = o.xlim.map(lx), [y0, y1] = o.ylim.map(ly);
+    const X = v => I.x + (lx(v) - x0) / (x1 - x0) * I.w;
+    const Y = v => I.y + I.h - (ly(v) - y0) / (y1 - y0) * I.h;
+    // background + grid
+    ctx.fillStyle = '#fff'; ctx.fillRect(I.x, I.y, I.w, I.h);
+    ctx.strokeStyle = '#e6e9f0'; ctx.lineWidth = 1; ctx.fillStyle = '#4a5468';
+    const nx = Math.max(2, Math.floor(I.w / (fs * 5))), ny = Math.max(2, Math.floor(I.h / (fs * 2.4)));
+    const logT = (a, b) => { const t = []; const st = Math.max(1, Math.ceil((b - a) / 8)); for (let e = Math.ceil(a); e <= Math.floor(b); e += st) t.push(e); return t; };
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    if (o.logx) logT(x0, x1).forEach(e => { const px = I.x + (e - x0) / (x1 - x0) * I.w; ctx.beginPath(); ctx.moveTo(px, I.y); ctx.lineTo(px, I.y + I.h); ctx.stroke(); ctx.fillText(sci(Math.pow(10, e), 1).replace(/^1×/, ''), px, I.y + I.h + fs * 0.25); });
+    else { const { t, s } = ticks(x0, x1, nx); t.forEach(v => { const px = X(v); ctx.beginPath(); ctx.moveTo(px, I.y); ctx.lineTo(px, I.y + I.h); ctx.stroke(); ctx.fillText(tickLabel(v, s), px, I.y + I.h + fs * 0.25); }); }
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    if (o.logy) logT(y0, y1).forEach(e => { const py = I.y + I.h - (e - y0) / (y1 - y0) * I.h; ctx.beginPath(); ctx.moveTo(I.x, py); ctx.lineTo(I.x + I.w, py); ctx.stroke(); ctx.fillText(sci(Math.pow(10, e), 1).replace(/^1×/, ''), I.x - fs * 0.3, py); });
+    else { const { t, s } = ticks(y0, y1, ny); t.forEach(v => { const py = Y(v); ctx.beginPath(); ctx.moveTo(I.x, py); ctx.lineTo(I.x + I.w, py); ctx.stroke(); ctx.fillText(tickLabel(v, s), I.x - fs * 0.3, py); }); }
+    // zero axis
+    ctx.strokeStyle = '#8a93a6'; ctx.lineWidth = 1.2;
+    if (!o.logy && y0 < 0 && y1 > 0) { ctx.beginPath(); ctx.moveTo(I.x, Y(0)); ctx.lineTo(I.x + I.w, Y(0)); ctx.stroke(); }
+    if (!o.logx && x0 < 0 && x1 > 0) { ctx.beginPath(); ctx.moveTo(X(0), I.y); ctx.lineTo(X(0), I.y + I.h); ctx.stroke(); }
+    ctx.strokeStyle = '#4a5468'; ctx.strokeRect(I.x, I.y, I.w, I.h);
+    // labels
+    ctx.fillStyle = '#1b2333';
+    if (o.xlabel) { ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText(o.xlabel, I.x + I.w / 2, R.y + R.h); }
+    if (o.ylabel) { ctx.save(); ctx.translate(R.x + fs * 0.1, I.y + I.h / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(o.ylabel, 0, 0); ctx.restore(); }
+    if (o.title) { ctx.font = `600 ${fs}px system-ui, sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(o.title, I.x, R.y + fs * 0.1); ctx.font = `${fs}px system-ui, sans-serif`; }
+    // data
+    ctx.save(); ctx.beginPath(); ctx.rect(I.x, I.y, I.w, I.h); ctx.clip();
+    (o.hlines || []).forEach(l => { ctx.strokeStyle = l.color || '#888'; ctx.setLineDash(l.dash || [6, 4]); ctx.lineWidth = l.width || 1.5; ctx.beginPath(); ctx.moveTo(I.x, Y(l.y)); ctx.lineTo(I.x + I.w, Y(l.y)); ctx.stroke(); });
+    (o.vlines || []).forEach(l => { ctx.strokeStyle = l.color || '#888'; ctx.setLineDash(l.dash || [6, 4]); ctx.lineWidth = l.width || 1.5; ctx.beginPath(); ctx.moveTo(X(l.x), I.y); ctx.lineTo(X(l.x), I.y + I.h); ctx.stroke(); });
+    ctx.setLineDash([]);
+    (o.series || []).forEach(s => {
+      if (s.fill) { ctx.fillStyle = s.fill; ctx.beginPath(); const yb = Y(o.logy ? o.ylim[0] : Math.max(o.ylim[0], Math.min(o.ylim[1], 0))); ctx.moveTo(X(s.x[0]), yb); for (let i = 0; i < s.x.length; i++) ctx.lineTo(X(s.x[i]), Y(s.y[i])); ctx.lineTo(X(s.x[s.x.length - 1]), yb); ctx.closePath(); ctx.fill(); }
+      ctx.strokeStyle = s.color || '#1f6feb'; ctx.lineWidth = s.width || 2.5; ctx.setLineDash(s.dash || []);
+      ctx.beginPath(); let pen = false;
+      for (let i = 0; i < s.x.length; i++) { const yv = s.y[i]; if (!isFinite(yv) || (o.logy && yv <= 0)) { pen = false; continue; } const px = X(s.x[i]), py = Y(yv); if (!pen) { ctx.moveTo(px, py); pen = true; } else ctx.lineTo(px, py); }
+      ctx.stroke(); ctx.setLineDash([]);
+    });
+    (o.points || []).forEach(p => { ctx.fillStyle = p.color || '#d1242f'; ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), p.r || fs * 0.35, 0, 7); ctx.fill(); });
+    ctx.restore();
+    (o.points || []).forEach(p => { if (p.label) { ctx.fillStyle = p.color || '#d1242f'; ctx.textAlign = p.align || 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(p.label, X(p.x) + (p.align === 'right' ? -fs * 0.5 : fs * 0.5), Y(p.y) - fs * 0.2); } });
+    // legend
+    const leg = (o.series || []).filter(s => s.label);
+    if (leg.length && o.legend !== false) {
+      let ly2 = I.y + fs * 0.4; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      const lw = Math.max(...leg.map(s => ctx.measureText(s.label).width)) + fs * 2.6;
+      const lx2 = o.legendLeft ? I.x + fs * 0.4 : I.x + I.w - lw - fs * 0.3;
+      ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(lx2 - fs * 0.2, ly2 - fs * 0.3, lw, leg.length * fs * 1.2 + fs * 0.2);
+      leg.forEach(s => { ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 2.5; ctx.setLineDash(s.dash || []); ctx.beginPath(); ctx.moveTo(lx2, ly2 + fs * .3); ctx.lineTo(lx2 + fs * 1.6, ly2 + fs * .3); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#1b2333'; ctx.fillText(s.label, lx2 + fs * 2.0, ly2 + fs * .3); ly2 += fs * 1.2; });
+    }
+    ctx.restore();
+    return { X, Y, I, fs };
+  }
+  function arrow(ctx, x0, y0, x1, y1, color, w = 2, head = 10) {
+    const a = Math.atan2(y1 - y0, x1 - x0), L = Math.hypot(x1 - x0, y1 - y0); head = Math.min(head, L * 0.6);
+    ctx.strokeStyle = ctx.fillStyle = color; ctx.lineWidth = w;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - head * 0.7 * Math.cos(a), y1 - head * 0.7 * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - head * Math.cos(a - 0.4), y1 - head * Math.sin(a - 0.4)); ctx.lineTo(x1 - head * Math.cos(a + 0.4), y1 - head * Math.sin(a + 0.4)); ctx.closePath(); ctx.fill();
+  }
+  // arrowhead in the middle of a polyline segment
+  function midHead(ctx, x, y, ang, color, s = 9) {
+    ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(x + s * Math.cos(ang), y + s * Math.sin(ang));
+    ctx.lineTo(x + s * Math.cos(ang + 2.5), y + s * Math.sin(ang + 2.5)); ctx.lineTo(x + s * Math.cos(ang - 2.5), y + s * Math.sin(ang - 2.5)); ctx.closePath(); ctx.fill();
+  }
+  // perceptual-ish colour map (blue -> cyan -> yellow -> red), t in [0,1]
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    const S = [[0, [49, 54, 149]], [0.25, [69, 117, 180]], [0.45, [171, 217, 233]], [0.6, [254, 224, 144]], [0.8, [244, 109, 67]], [1, [165, 0, 38]]];
+    for (let i = 1; i < S.length; i++) if (t <= S[i][0]) { const [a, ca] = S[i - 1], [b, cb] = S[i]; const u = (t - a) / (b - a); return ca.map((c, k) => Math.round(c + (cb[k] - c) * u)); }
+    return S[S.length - 1][1];
+  }
+  // marching-squares contour of node field f (nx*ny, row-major f[j*nx+i]); toPx(i,j)->[x,y]; mask(i,j) true = skip cell
+  function contour(ctx, f, nx, ny, level, toPx, mask) {
+    ctx.beginPath();
+    const lerp = (a, b) => (level - a) / (b - a);
+    for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+      if (mask && mask(i, j)) continue;
+      const v0 = f[j * nx + i], v1 = f[j * nx + i + 1], v2 = f[(j + 1) * nx + i + 1], v3 = f[(j + 1) * nx + i];
+      const c = (v0 > level) | ((v1 > level) << 1) | ((v2 > level) << 2) | ((v3 > level) << 3);
+      if (c === 0 || c === 15) continue;
+      const e = [];
+      if ((v0 > level) !== (v1 > level)) e.push([i + lerp(v0, v1), j]);
+      if ((v1 > level) !== (v2 > level)) e.push([i + 1, j + lerp(v1, v2)]);
+      if ((v3 > level) !== (v2 > level)) e.push([i + lerp(v3, v2), j + 1]);
+      if ((v0 > level) !== (v3 > level)) e.push([i, j + lerp(v0, v3)]);
+      for (let k = 0; k + 1 < e.length; k += 2) { const a = toPx(...e[k]), b = toPx(...e[k + 1]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    }
+    ctx.stroke();
+  }
+  function text(ctx, s, x, y, { color = '#1b2333', size, align = 'left', base = 'middle', weight = '', bg = null } = {}) {
+    const fz = size || fontPx();
+    ctx.font = `${weight} ${fz}px system-ui, sans-serif`; ctx.textAlign = align; ctx.textBaseline = base;
+    if (bg) { const wd = ctx.measureText(s).width, x0 = align === 'center' ? x - wd / 2 : align === 'right' ? x - wd : x, y0 = base === 'middle' ? y - fz * 0.6 : base === 'top' ? y - fz * 0.1 : y - fz * 1.1; ctx.fillStyle = bg; ctx.fillRect(x0 - fz * 0.2, y0, wd + fz * 0.4, fz * 1.2); }
+    ctx.fillStyle = color; ctx.fillText(s, x, y);
+  }
+  return { $, sci, eng, tex, texAll, contour, fontPx, canvas, pointer, slider, seg, check, plot, arrow, midHead, cmap, text, ticks };
+})();
+</script>
+
+<!-- ===================== UI / RENDERING ===================== -->
+<script id="app">
+(() => {
+  const { $, sci, eng, tex, texAll, canvas, slider, seg, check, plot, text, pointer, midHead, contour } = UI;
+  const S = { mode: 'real', Q: 1e-9, h: 1.0, R: 3, lines: true, equip: true, nLines: 20 };
+  seg('#modes', [['real', 'Real setup'], ['image', 'Image equivalent']], S.mode, v => { S.mode = v; recompute(); });
+  const c = $('#ctl');
+  slider(c, { label: 'Charge Q', min: 0.2, max: 3, step: 0.1, value: 1, fmt: v => v.toFixed(1) + ' nC', onInput: v => { S.Q = v * 1e-9; recompute(); } });
+  const sH = slider(c, { label: 'Height h (or drag the charge)', min: 0.3, max: 1.8, step: 0.01, value: S.h, fmt: v => v.toFixed(2) + ' m', onInput: v => { S.h = v; recompute(); } });
+  slider(c, { label: 'Integrate ρ<sub>S</sub> out to radius R', min: 0.2, max: 50, log: true, value: S.R, fmt: v => v.toFixed(v < 10 ? 2 : 1) + ' m', onInput: v => { S.R = v; C.redraw(); } });
+  slider(c, { label: 'Number of field lines', min: 8, max: 40, step: 2, value: S.nLines, fmt: v => v, onInput: v => { S.nLines = v; recompute(); } });
+  const r = document.createElement('div'); r.className = 'row'; c.appendChild(r);
+  check(r, 'Field lines', true, v => { S.lines = v; C.redraw(); });
+  check(r, 'Equipotentials', true, v => { S.equip = v; C.redraw(); });
+
+  let lines = [], grid = null;
+  const VIEW = { x0: -3.2, x1: 3.2, y0: -2.0, y1: 2.4 };
+  function recompute() {
+    const image = S.mode === 'image';
+    lines = [];
+    const N = S.nLines, rs = 0.04 * S.h;
+    for (let k = 0; k < N; k++) {
+      const a = (k + 0.5) / N * 2 * Math.PI;
+      lines.push(PHYS.trace(S.h * 0 + rs * Math.sin(a), S.h + rs * Math.cos(a), S.Q, S.h, { ds: 0.015, stopPlane: !image, bounds: [-6, 6, -6, 6] }).pts);
+    }
+    // potential grid for equipotentials
+    const nx = 161, ny = 113; const f = new Float64Array(nx * ny);
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+      const x = VIEW.x0 + (VIEW.x1 - VIEW.x0) * i / (nx - 1), y = VIEW.y1 - (VIEW.y1 - VIEW.y0) * j / (ny - 1);
+      f[j * nx + i] = (!image && y < 0) ? 0 : PHYS.V(x, y, S.Q, S.h);
+    }
+    grid = { f, nx, ny };
+    C && C.redraw();
+  }
+  let geo = null;
+  function draw(ctx, w, h) {
+    const fs = UI.fontPx(), image = S.mode === 'image';
+    const sceneH = h * 0.64;
+    const sc = Math.min(w / (VIEW.x1 - VIEW.x0), sceneH / (VIEW.y1 - VIEW.y0));
+    const ox = w / 2, oy = 4 + VIEW.y1 * sc;
+    const X = x => ox + x * sc, Y = y => oy - y * sc;
+    geo = { X, Y, sc, ox, oy };
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, Y(VIEW.y0)); ctx.clip();
+    // lower half
+    if (!image) {
+      ctx.fillStyle = '#d9dde6'; ctx.fillRect(0, Y(0), w, Y(VIEW.y0) - Y(0));
+      ctx.strokeStyle = '#b7bdca'; ctx.lineWidth = 1.5;
+      for (let x = -w; x < w; x += 18) { ctx.beginPath(); ctx.moveTo(x, Y(VIEW.y0)); ctx.lineTo(x + (Y(VIEW.y0) - Y(0)), Y(0)); ctx.stroke(); }
+      text(ctx, 'Grounded conductor (V = 0, E = 0 inside)', X(VIEW.x1) - fs * 0.6, Y(VIEW.y0) - fs * 0.9, { align: 'right', bg: 'rgba(255,255,255,.85)', size: fs * 0.85, color: '#4a5468', weight: 600 });
+    } else {
+      ctx.fillStyle = 'rgba(130,80,223,.06)'; ctx.fillRect(0, Y(0), w, Y(VIEW.y0) - Y(0));
+      text(ctx, 'No conductor: this region is NOT part of the original problem', X(VIEW.x1) - fs * 0.6, Y(VIEW.y0) - fs * 0.9, { align: 'right', bg: 'rgba(255,255,255,.85)', size: fs * 0.85, color: '#8250df', weight: 600 });
+    }
+    // equipotentials
+    if (S.equip && grid) {
+      const V0 = PHYS.K * S.Q / S.h;
+      const levels = [0.08, 0.15, 0.25, 0.4, 0.6, 0.9, 1.4];
+      const toPx = (i, j) => [X(VIEW.x0 + (VIEW.x1 - VIEW.x0) * i / (grid.nx - 1)), Y(VIEW.y1 - (VIEW.y1 - VIEW.y0) * j / (grid.ny - 1))];
+      ctx.lineWidth = 1.6; ctx.setLineDash([]);
+      levels.forEach(l => { ctx.strokeStyle = 'rgba(209,36,47,.45)'; contour(ctx, grid.f, grid.nx, grid.ny, l * V0, toPx); if (image) { ctx.strokeStyle = 'rgba(31,111,235,.45)'; contour(ctx, grid.f, grid.nx, grid.ny, -l * V0, toPx); } });
+    }
+    // field lines
+    if (S.lines) {
+      lines.forEach(pts => {
+        ctx.strokeStyle = '#1b2333'; ctx.lineWidth = 1.8; ctx.beginPath();
+        pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke();
+        // arrowheads where the line crosses distance 1.3h from the charge
+        for (let i = 1; i < pts.length; i++) { const d0 = Math.hypot(pts[i - 1][0], pts[i - 1][1] - S.h), d1 = Math.hypot(pts[i][0], pts[i][1] - S.h); if (d0 < 0.55 * S.h && d1 >= 0.55 * S.h) { midHead(ctx, X(pts[i][0]), Y(pts[i][1]), Math.atan2(-(pts[i][1] - pts[i - 1][1]), pts[i][0] - pts[i - 1][0]), '#1b2333', fs * 0.45); break; } }
+      });
+    }
+    // plane with induced charge colouring
+    if (!image) {
+      for (let x = VIEW.x0; x < VIEW.x1; x += 0.02) { const t = PHYS.rhoS(x, S.Q, S.h) / PHYS.rhoS(0, S.Q, S.h); ctx.strokeStyle = `rgba(31,111,235,${0.15 + 0.85 * t})`; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(X(x), Y(0)); ctx.lineTo(X(x + 0.021), Y(0)); ctx.stroke(); }
+      // minus signs proportional to density
+      ctx.fillStyle = '#1f6feb'; ctx.font = `700 ${fs * 0.9}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      let acc = 0; for (let x = VIEW.x0; x < VIEW.x1; x += 0.01) { acc += PHYS.rhoS(x, S.Q, S.h) / PHYS.rhoS(0, S.Q, S.h) * 0.01; if (acc > 0.14) { acc -= 0.14; ctx.fillText('−', X(x), Y(0) + 4); } }
+    } else {
+      ctx.strokeStyle = '#8250df'; ctx.lineWidth = 2.5; ctx.setLineDash([10, 7]); ctx.beginPath(); ctx.moveTo(0, Y(0)); ctx.lineTo(w, Y(0)); ctx.stroke(); ctx.setLineDash([]);
+      text(ctx, 'z = 0 is still the V = 0 surface', X(VIEW.x1) - fs * 0.5, Y(0) - fs * 0.8, { align: 'right', size: fs * 0.85, color: '#8250df', weight: 600, bg: 'rgba(255,255,255,.9)' });
+    }
+    // charges
+    const qr = fs * 0.75;
+    ctx.fillStyle = '#d1242f'; ctx.beginPath(); ctx.arc(X(0), Y(S.h), qr, 0, 7); ctx.fill();
+    text(ctx, '+Q', X(0), Y(S.h), { align: 'center', color: '#fff', size: fs * 0.8, weight: 700 });
+    if (image) { ctx.fillStyle = '#1f6feb'; ctx.beginPath(); ctx.arc(X(0), Y(-S.h), qr, 0, 7); ctx.fill(); text(ctx, '−Q', X(0), Y(-S.h), { align: 'center', color: '#fff', size: fs * 0.8, weight: 700 }); text(ctx, 'image charge', X(0) + qr * 1.5, Y(-S.h) + qr * 1.3, { color: '#1f6feb', size: fs * 0.85, weight: 600, bg: 'rgba(255,255,255,.9)' }); }
+    // h dimension
+    ctx.strokeStyle = '#5a6478'; ctx.lineWidth = 1.5; const dx = X(VIEW.x0) + fs * 1.5;
+    ctx.beginPath(); ctx.moveTo(dx, Y(S.h)); ctx.lineTo(dx, Y(0)); ctx.stroke();
+    text(ctx, 'h', dx + fs * 0.4, Y(S.h / 2), { size: fs, color: '#5a6478', weight: 600 });
+    ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(dx, Y(S.h)); ctx.lineTo(X(0), Y(S.h)); ctx.stroke(); if (image) { ctx.beginPath(); ctx.moveTo(dx, Y(-S.h)); ctx.lineTo(X(0), Y(-S.h)); ctx.stroke(); } ctx.setLineDash([]);
+    if (image) { ctx.beginPath(); ctx.moveTo(dx, Y(0)); ctx.lineTo(dx, Y(-S.h)); ctx.stroke(); text(ctx, 'h', dx + fs * 0.4, Y(-S.h / 2), { size: fs, color: '#5a6478', weight: 600 }); }
+    ctx.restore();
+    // rho_S plot
+    const xs = [], ys = []; for (let i = 0; i <= 300; i++) { const x = VIEW.x0 + (VIEW.x1 - VIEW.x0) * i / 300; xs.push(x); ys.push(PHYS.rhoS(x, S.Q, S.h) * 1e9); }
+    const ymin = PHYS.rhoS(0, S.Q, S.h) * 1e9 * 1.1;
+    const R = Math.min(S.R, VIEW.x1);
+    const sh = []; const shy = []; for (let i = 0; i <= 120; i++) { const x = -R + 2 * R * i / 120; sh.push(x); shy.push(PHYS.rhoS(x, S.Q, S.h) * 1e9); }
+    // align plot x-axis with scene x-axis
+    const padL = fs * 0.85 * 3.8;
+    plot(ctx, { x: X(VIEW.x0) - padL, y: sceneH + 6, w: (X(VIEW.x1) - X(VIEW.x0)) + padL + fs * 0.85 * 0.8, h: h - sceneH - 8 }, {
+      xlim: [VIEW.x0, VIEW.x1], ylim: [ymin, 0], title: 'Induced surface charge on the plane  ρ_S(x)  [nC/m²]  (shaded: |r| < R)', xlabel: 'x  (m)',
+      series: [{ x: sh, y: shy, color: 'rgba(0,0,0,0)', fill: 'rgba(31,111,235,.18)', width: 0 }, { x: xs, y: ys, color: '#1f6feb', width: 3 }],
+    });
+    // readout
+    const qn = PHYS.QinNumeric(S.R, S.Q, S.h) / S.Q, qinf = PHYS.QinNumeric(1e6 * S.h, S.Q, S.h) / S.Q;
+    $('#read').innerHTML = `ρ<sub>S</sub>(0) = <b>${(PHYS.rhoS(0, S.Q, S.h) * 1e9).toPrecision(3)} nC/m²</b><br>
+      Q<sub>ind</sub>(r&lt;R) numeric = <b>${qn.toFixed(4)} Q</b><br>
+      Q<sub>ind</sub>(whole plane) numeric = <span class="big">${qinf.toFixed(4)} Q</span><br>
+      Force on Q: <b>${eng(PHYS.force(S.Q, S.h), 'N')}</b> toward plane <span class="small">(= Q²/4πε₀(2h)²)</span>`;
+  }
+  const C = canvas($('#cv'), draw);
+  pointer($('#cv'), {
+    down: p => { if (!geo) return false; if (Math.hypot(p.x - geo.X(0), p.y - geo.Y(S.h)) > UI.fontPx() * 1.6) return false; },
+    move: p => { const y = (geo.oy - p.y) / geo.sc; sH.set(Math.max(0.3, Math.min(1.8, y))); },
+    hover: p => { $('#cv').style.cursor = geo && Math.hypot(p.x - geo.X(0), p.y - geo.Y(S.h)) < UI.fontPx() * 1.6 ? 'ns-resize' : 'default'; },
+  });
+  texAll(); recompute();
+})();
+</script>
+</body></html>

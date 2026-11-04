@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" crossorigin="anonymous"></script>
+<title>Capacitance of Common Geometries</title>
+<style>/* ===== common UI kit (shared by all sims) ===== */
+:root{
+  --bg:#f7f8fb; --panel:#ffffff; --ink:#1b2333; --muted:#5a6478; --line:#d5dae5;
+  --accent:#1f6feb; --pos:#d1242f; --neg:#1f6feb; --ok:#1a7f37; --warn:#b35900;
+  --c1:#1f6feb; --c2:#d1242f; --c3:#1a7f37; --c4:#8250df; --c5:#b35900;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink)}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:clamp(12px,min(2.6vh,1.46vw),26px);line-height:1.25}
+.app{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100vh;width:100vw;padding:.45em .7em;gap:.4em}
+header{display:flex;align-items:baseline;gap:.8em;min-width:0}
+header h1{font-size:1.3em;margin:0;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .tag{font-size:.8em;color:#fff;background:var(--accent);border-radius:.3em;padding:.1em .45em;white-space:nowrap}
+header .modes{margin-left:auto}
+main{display:grid;grid-template-columns:minmax(0,1fr) 21em;gap:.6em;min-height:0}
+.stage{position:relative;min-height:0;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:.5em;overflow:hidden}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.panel{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:.5em;padding:.5em .7em;overflow-y:auto;overflow-x:hidden;min-height:0;display:flex;flex-direction:column;gap:.45em}
+.ctl{display:flex;flex-direction:column;gap:.05em}
+.ctl-row{display:flex;justify-content:space-between;align-items:baseline;gap:.5em}
+.ctl-row label{font-weight:600}
+.ctl-row output{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:600;white-space:nowrap}
+input[type=range]{width:100%;height:1.3em;margin:0;accent-color:var(--accent);cursor:pointer}
+.seg{display:inline-flex;border:1px solid var(--accent);border-radius:.4em;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.92em;border:0;background:#fff;color:var(--accent);padding:.18em .6em;cursor:pointer}
+.seg button+button{border-left:1px solid var(--accent)}
+.seg button.on{background:var(--accent);color:#fff}
+button.btn{font:inherit;font-size:.92em;border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:.4em;padding:.15em .6em;cursor:pointer}
+button.btn:hover,.seg button:hover:not(.on){background:#eaf1fe}
+.row{display:flex;gap:.4em;flex-wrap:wrap;align-items:center}
+.formula{border-top:1px solid var(--line);padding-top:.35em;font-size:.95em}
+.formula .katex{font-size:1.02em}
+.formula .eq{margin:.15em 0;overflow-x:auto;overflow-y:hidden}
+.readout{font-variant-numeric:tabular-nums;font-size:.95em}
+.readout b{color:var(--accent)}
+.big{font-size:1.25em;font-weight:700;color:var(--accent)}
+footer.notice{font-size:1em;background:#fff8e1;border:1px solid #f0d78c;border-radius:.4em;padding:.25em .6em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+footer.notice::before{content:"What to notice: ";font-weight:700;color:var(--warn)}
+.chk{display:flex;gap:.4em;align-items:center;cursor:pointer}
+.chk input{width:1em;height:1em;accent-color:var(--accent)}
+select{font:inherit;font-size:.92em;padding:.05em .2em}
+.hide{display:none!important}
+.small{font-size:.85em;color:var(--muted)}
+@media (max-width:760px),(max-aspect-ratio:1/1){
+  body{font-size:clamp(12px,2.2vw,20px)}
+  main{grid-template-columns:1fr;grid-template-rows:minmax(0,1.4fr) minmax(0,1fr)}
+  footer.notice{white-space:normal}
+}
+</style>
+</head><body>
+<div class="app">
+  <header><span class="tag">Session 15</span><h1>Capacitance: Parallel-Plate, Coaxial, Spherical</h1><div class="modes" id="modes"></div></header>
+  <main>
+    <div class="stage"><canvas id="cv"></canvas></div>
+    <aside class="panel" id="panel">
+      <div id="ctlP"></div><div id="ctlC" class="hide"></div><div id="ctlS" class="hide"></div>
+      <div id="ctlV"></div>
+      <div class="readout" id="read"></div>
+      <div class="formula"><div class="eq" id="f1"></div><div class="eq" id="f2"></div></div>
+    </aside>
+  </main>
+  <footer class="notice" id="notice"></footer>
+</div>
+
+<!-- ===================== PHYSICS (pure, testable; no DOM) ===================== -->
+<script id="physics">
+const PHYS = (() => {
+  const EPS0 = 8.854e-12;
+  // ---- closed-form capacitances ----
+  const Cpp = (A, d, er) => EPS0 * er * A / d;
+  const CppSeries = (A, d1, er1, d2, er2) => EPS0 * A / (d1 / er1 + d2 / er2);
+  const CppParallel = (A1, er1, A2, er2, d) => EPS0 * (er1 * A1 + er2 * A2) / d;
+  const Ccoax = (a, b, er, L) => 2 * Math.PI * EPS0 * er * L / Math.log(b / a);
+  const Csphere = (a, b, er) => 4 * Math.PI * EPS0 * er / (1 / a - (isFinite(b) ? 1 / b : 0));
+  // ---- fields for applied voltage V0 (inner/top conductor at V0, other at 0) ----
+  const Ecoax = (rho, a, b, V0) => V0 / (rho * Math.log(b / a));
+  const Esphere = (r, a, b, V0) => V0 / (r * r * (1 / a - (isFinite(b) ? 1 / b : 0)));
+  // series layers: D the same in both; E_i = D/(eps0 er_i); D = eps0 V0/(d1/er1 + d2/er2)
+  const EppSeries = (V0, d1, er1, d2, er2) => { const D = EPS0 * V0 / (d1 / er1 + d2 / er2); return { D, E1: D / (EPS0 * er1), E2: D / (EPS0 * er2) }; };
+  // ---- independent numerical check: 1D conservative finite-difference Laplace solve ----
+  // d/dr( eps(r) g(r) dV/dr ) = 0 on [r0,r1], V(r0)=1, V(r1)=0.  g = 1 (planar), r (cyl), r^2 (sph).
+  // Returns C = Q/V where Q = -eps g dV/dr * geomFactor (A, 2 pi L, 4 pi).
+  function numericC({ r0, r1, g, epsr, factor, N = 2000 }) {
+    const h = (r1 - r0) / N, V = new Float64Array(N + 1);
+    // conductances between nodes: k_i = eps*g at midpoint / h
+    const k = new Float64Array(N); for (let i = 0; i < N; i++) { const rm = r0 + (i + 0.5) * h; k[i] = EPS0 * epsr(rm) * g(rm) / h; }
+    // tridiagonal solve (Thomas) for interior nodes 1..N-1
+    const n = N - 1, a = new Float64Array(n), b = new Float64Array(n), c = new Float64Array(n), d = new Float64Array(n);
+    for (let j = 0; j < n; j++) { const i = j + 1; a[j] = -k[i - 1]; b[j] = k[i - 1] + k[i]; c[j] = -k[i]; d[j] = 0; }
+    d[0] += k[0] * 1; // V(r0)=1
+    for (let j = 1; j < n; j++) { const m = a[j] / b[j - 1]; b[j] -= m * c[j - 1]; d[j] -= m * d[j - 1]; }
+    V[N] = 0; V[0] = 1; V[n] = d[n - 1] / b[n - 1];
+    for (let j = n - 2; j >= 0; j--) V[j + 1] = (d[j] - c[j] * V[j + 2]) / b[j];
+    const Q = k[0] * (V[0] - V[1]) * factor; // flux through first cell
+    return Q / 1;
+  }
+  return { EPS0, Cpp, CppSeries, CppParallel, Ccoax, Csphere, Ecoax, Esphere, EppSeries, numericC };
+})();
+if (typeof module !== 'undefined') module.exports = PHYS;
+</script>
+
+<script>/* ===== common UI kit (shared by all sims; no physics here) ===== */
+const UI = (() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '+': '' };
+  // scientific notation with unicode superscripts: 1.53×10⁻¹⁹
+  function sci(x, d = 3) {
+    if (!isFinite(x)) return String(x);
+    if (x === 0) return '0';
+    const e = Math.floor(Math.log10(Math.abs(x)));
+    if (e >= -2 && e <= 3) return (+x.toPrecision(d)).toString();
+    let m = x / Math.pow(10, e);
+    let ms = (+m.toPrecision(d)).toString();
+    if (Math.abs(+ms) >= 10) { ms = (+(m / 10).toPrecision(d)).toString(); return ms + '×10' + String(e + 1).split('').map(c => SUP[c]).join(''); }
+    return ms + '×10' + String(e).split('').map(c => SUP[c]).join('');
+  }
+  // engineering format with SI prefix: eng(1.5e-9,'F') -> "1.50 nF"
+  const PRE = { '-24': 'y', '-21': 'z', '-18': 'a', '-15': 'f', '-12': 'p', '-9': 'n', '-6': 'µ', '-3': 'm', '0': '', '3': 'k', '6': 'M', '9': 'G', '12': 'T' };
+  function eng(x, unit = '', d = 3) {
+    if (!isFinite(x)) return String(x);
+    if (x === 0) return '0 ' + unit;
+    let e3 = Math.floor(Math.log10(Math.abs(x)) / 3) * 3;
+    e3 = Math.max(-24, Math.min(12, e3));
+    let m = x / Math.pow(10, e3);
+    let s = m.toPrecision(d);
+    if (Math.abs(+s) >= 1000 && e3 < 12) { e3 += 3; s = (x / Math.pow(10, e3)).toPrecision(d); }
+    return s + ' ' + PRE[e3] + unit;
+  }
+  // KaTeX is loaded with `defer`; anything rendered before it arrives is queued and re-rendered on load.
+  const texQueue = [];
+  function tex(el, src, display = false) {
+    if (typeof el === 'string') el = $(el);
+    if (!el) return;
+    if (window.katex) { try { katex.render(src, el, { displayMode: display, throwOnError: false }); return; } catch (e) { } }
+    el.textContent = src; // plain-TeX fallback when KaTeX is unavailable (offline)
+    texQueue.push([el, src, display]);
+  }
+  window.addEventListener('load', () => { if (window.katex) texQueue.splice(0).forEach(a => tex(...a)); });
+  // render every element carrying data-tex="..." (static formula panels)
+  function texAll(root = document) { root.querySelectorAll('[data-tex]').forEach(e => tex(e, e.dataset.tex, e.hasAttribute('data-display'))); }
+  function fontPx() { return parseFloat(getComputedStyle(document.body).fontSize) || 18; }
+
+  // canvas with DPR + resize handling; draw(ctx, w, h) in CSS px
+  function canvas(cv, draw) {
+    const ctx = cv.getContext('2d');
+    const obj = { cv, ctx, w: 0, h: 0, draw, redraw() { const dpr = window.devicePixelRatio || 1; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, obj.w, obj.h); obj.draw(ctx, obj.w, obj.h); } };
+    function resize() {
+      const r = cv.getBoundingClientRect(); const dpr = window.devicePixelRatio || 1;
+      obj.w = Math.max(10, r.width); obj.h = Math.max(10, r.height);
+      cv.width = Math.round(obj.w * dpr); cv.height = Math.round(obj.h * dpr); obj.redraw();
+    }
+    new ResizeObserver(resize).observe(cv); resize();
+    return obj;
+  }
+  function pointer(cv, { down, move, up, hover }) {
+    const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    let dragging = false;
+    cv.addEventListener('pointerdown', e => { const p = pos(e); if (down && down(p, e) !== false) { dragging = true; cv.setPointerCapture(e.pointerId); } });
+    cv.addEventListener('pointermove', e => { const p = pos(e); if (dragging) move && move(p, e); else hover && hover(p, e); });
+    const end = e => { if (dragging) { dragging = false; up && up(pos(e), e); } };
+    cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  }
+
+  // slider: {label(html), min,max,step,value, log:bool, fmt:fn, onInput:fn}
+  function slider(parent, o) {
+    const d = document.createElement('div'); d.className = 'ctl';
+    d.innerHTML = `<div class="ctl-row"><label>${o.label}</label><output></output></div><input type="range">`;
+    const inp = d.querySelector('input'), out = d.querySelector('output');
+    const N = 1000;
+    const toS = v => o.log ? Math.round((Math.log10(v) - Math.log10(o.min)) / (Math.log10(o.max) - Math.log10(o.min)) * N) : v;
+    const fromS = s => o.log ? Math.pow(10, Math.log10(o.min) + (Math.log10(o.max) - Math.log10(o.min)) * s / N) : +s;
+    if (o.log) { inp.min = 0; inp.max = N; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step || 'any'; }
+    const api = {
+      el: d, get value() { return api._v; },
+      set(v, fire = true) { api._v = v; inp.value = toS(v); out.innerHTML = o.fmt ? o.fmt(v) : (+v).toPrecision(3); if (fire && o.onInput) o.onInput(v); },
+    };
+    inp.addEventListener('input', () => api.set(fromS(inp.value)));
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(d);
+    api.set(o.value, false);
+    return api;
+  }
+  // segmented toggle: options [[value,label],...]
+  function seg(parent, options, value, onChange) {
+    const d = document.createElement('div'); d.className = 'seg';
+    const api = { el: d, value, set(v, fire = true) { api.value = v; [...d.children].forEach(b => b.classList.toggle('on', b.dataset.v === String(v))); if (fire && onChange) onChange(v); } };
+    options.forEach(([v, l]) => { const b = document.createElement('button'); b.dataset.v = v; b.innerHTML = l; b.onclick = () => api.set(v); d.appendChild(b); });
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(d);
+    api.set(value, false); return api;
+  }
+  function check(parent, label, value, onChange) {
+    const l = document.createElement('label'); l.className = 'chk';
+    l.innerHTML = `<input type="checkbox"> <span>${label}</span>`;
+    const i = l.querySelector('input'); i.checked = value; i.onchange = () => onChange(i.checked);
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(l); return i;
+  }
+
+  // ---------- plotting ----------
+  function niceStep(range, n) {
+    const raw = range / Math.max(1, n); const p = Math.pow(10, Math.floor(Math.log10(raw))); const f = raw / p;
+    return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p;
+  }
+  function ticks(a, b, n) { const s = niceStep(b - a, n); const t = []; for (let v = Math.ceil(a / s - 1e-9) * s; v <= b + s * 1e-9; v += s) t.push(Math.abs(v) < s * 1e-9 ? 0 : v); return { t, s }; }
+  function tickLabel(v, s) {
+    if (v === 0) return '0';
+    const a = Math.abs(v);
+    if (a >= 1e5 || a < 1e-3) return sci(v, 2);
+    const dec = Math.max(0, -Math.floor(Math.log10(s) + 1e-9));
+    return v.toFixed(Math.min(dec, 4));
+  }
+  // o: {xlim:[a,b], ylim:[a,b], logx, logy, xlabel, ylabel, title, series:[{x,y,color,width,dash,label}],
+  //     points:[{x,y,color,r,label}], vlines:[{x,color,dash,label}], hlines:[...], fs, legend:true, zero:true}
+  function plot(ctx, R, o) {
+    const fs = o.fs || fontPx() * 0.85;
+    ctx.save();
+    ctx.font = `${fs}px system-ui, sans-serif`;
+    const padL = fs * (o.padL || 3.8), padB = fs * (o.xlabel ? 2.5 : 1.5), padT = fs * (o.title ? 1.5 : 0.6), padR = fs * (o.padR || 0.8);
+    const I = { x: R.x + padL, y: R.y + padT, w: Math.max(10, R.w - padL - padR), h: Math.max(10, R.h - padT - padB) };
+    const lx = v => o.logx ? Math.log10(v) : v, ly = v => o.logy ? Math.log10(v) : v;
+    const [x0, x1] = o.xlim.map(lx), [y0, y1] = o.ylim.map(ly);
+    const X = v => I.x + (lx(v) - x0) / (x1 - x0) * I.w;
+    const Y = v => I.y + I.h - (ly(v) - y0) / (y1 - y0) * I.h;
+    // background + grid
+    ctx.fillStyle = '#fff'; ctx.fillRect(I.x, I.y, I.w, I.h);
+    ctx.strokeStyle = '#e6e9f0'; ctx.lineWidth = 1; ctx.fillStyle = '#4a5468';
+    const nx = Math.max(2, Math.floor(I.w / (fs * 5))), ny = Math.max(2, Math.floor(I.h / (fs * 2.4)));
+    const logT = (a, b) => { const t = []; const st = Math.max(1, Math.ceil((b - a) / 8)); for (let e = Math.ceil(a); e <= Math.floor(b); e += st) t.push(e); return t; };
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    if (o.logx) logT(x0, x1).forEach(e => { const px = I.x + (e - x0) / (x1 - x0) * I.w; ctx.beginPath(); ctx.moveTo(px, I.y); ctx.lineTo(px, I.y + I.h); ctx.stroke(); ctx.fillText(sci(Math.pow(10, e), 1).replace(/^1×/, ''), px, I.y + I.h + fs * 0.25); });
+    else { const { t, s } = ticks(x0, x1, nx); t.forEach(v => { const px = X(v); ctx.beginPath(); ctx.moveTo(px, I.y); ctx.lineTo(px, I.y + I.h); ctx.stroke(); ctx.fillText(tickLabel(v, s), px, I.y + I.h + fs * 0.25); }); }
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    if (o.logy) logT(y0, y1).forEach(e => { const py = I.y + I.h - (e - y0) / (y1 - y0) * I.h; ctx.beginPath(); ctx.moveTo(I.x, py); ctx.lineTo(I.x + I.w, py); ctx.stroke(); ctx.fillText(sci(Math.pow(10, e), 1).replace(/^1×/, ''), I.x - fs * 0.3, py); });
+    else { const { t, s } = ticks(y0, y1, ny); t.forEach(v => { const py = Y(v); ctx.beginPath(); ctx.moveTo(I.x, py); ctx.lineTo(I.x + I.w, py); ctx.stroke(); ctx.fillText(tickLabel(v, s), I.x - fs * 0.3, py); }); }
+    // zero axis
+    ctx.strokeStyle = '#8a93a6'; ctx.lineWidth = 1.2;
+    if (!o.logy && y0 < 0 && y1 > 0) { ctx.beginPath(); ctx.moveTo(I.x, Y(0)); ctx.lineTo(I.x + I.w, Y(0)); ctx.stroke(); }
+    if (!o.logx && x0 < 0 && x1 > 0) { ctx.beginPath(); ctx.moveTo(X(0), I.y); ctx.lineTo(X(0), I.y + I.h); ctx.stroke(); }
+    ctx.strokeStyle = '#4a5468'; ctx.strokeRect(I.x, I.y, I.w, I.h);
+    // labels
+    ctx.fillStyle = '#1b2333';
+    if (o.xlabel) { ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText(o.xlabel, I.x + I.w / 2, R.y + R.h); }
+    if (o.ylabel) { ctx.save(); ctx.translate(R.x + fs * 0.1, I.y + I.h / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(o.ylabel, 0, 0); ctx.restore(); }
+    if (o.title) { ctx.font = `600 ${fs}px system-ui, sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(o.title, I.x, R.y + fs * 0.1); ctx.font = `${fs}px system-ui, sans-serif`; }
+    // data
+    ctx.save(); ctx.beginPath(); ctx.rect(I.x, I.y, I.w, I.h); ctx.clip();
+    (o.hlines || []).forEach(l => { ctx.strokeStyle = l.color || '#888'; ctx.setLineDash(l.dash || [6, 4]); ctx.lineWidth = l.width || 1.5; ctx.beginPath(); ctx.moveTo(I.x, Y(l.y)); ctx.lineTo(I.x + I.w, Y(l.y)); ctx.stroke(); });
+    (o.vlines || []).forEach(l => { ctx.strokeStyle = l.color || '#888'; ctx.setLineDash(l.dash || [6, 4]); ctx.lineWidth = l.width || 1.5; ctx.beginPath(); ctx.moveTo(X(l.x), I.y); ctx.lineTo(X(l.x), I.y + I.h); ctx.stroke(); });
+    ctx.setLineDash([]);
+    (o.series || []).forEach(s => {
+      if (s.fill) { ctx.fillStyle = s.fill; ctx.beginPath(); const yb = Y(o.logy ? o.ylim[0] : Math.max(o.ylim[0], Math.min(o.ylim[1], 0))); ctx.moveTo(X(s.x[0]), yb); for (let i = 0; i < s.x.length; i++) ctx.lineTo(X(s.x[i]), Y(s.y[i])); ctx.lineTo(X(s.x[s.x.length - 1]), yb); ctx.closePath(); ctx.fill(); }
+      ctx.strokeStyle = s.color || '#1f6feb'; ctx.lineWidth = s.width || 2.5; ctx.setLineDash(s.dash || []);
+      ctx.beginPath(); let pen = false;
+      for (let i = 0; i < s.x.length; i++) { const yv = s.y[i]; if (!isFinite(yv) || (o.logy && yv <= 0)) { pen = false; continue; } const px = X(s.x[i]), py = Y(yv); if (!pen) { ctx.moveTo(px, py); pen = true; } else ctx.lineTo(px, py); }
+      ctx.stroke(); ctx.setLineDash([]);
+    });
+    (o.points || []).forEach(p => { ctx.fillStyle = p.color || '#d1242f'; ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), p.r || fs * 0.35, 0, 7); ctx.fill(); });
+    ctx.restore();
+    (o.points || []).forEach(p => { if (p.label) { ctx.fillStyle = p.color || '#d1242f'; ctx.textAlign = p.align || 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(p.label, X(p.x) + (p.align === 'right' ? -fs * 0.5 : fs * 0.5), Y(p.y) - fs * 0.2); } });
+    // legend
+    const leg = (o.series || []).filter(s => s.label);
+    if (leg.length && o.legend !== false) {
+      let ly2 = I.y + fs * 0.4; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      const lw = Math.max(...leg.map(s => ctx.measureText(s.label).width)) + fs * 2.6;
+      const lx2 = o.legendLeft ? I.x + fs * 0.4 : I.x + I.w - lw - fs * 0.3;
+      ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(lx2 - fs * 0.2, ly2 - fs * 0.3, lw, leg.length * fs * 1.2 + fs * 0.2);
+      leg.forEach(s => { ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 2.5; ctx.setLineDash(s.dash || []); ctx.beginPath(); ctx.moveTo(lx2, ly2 + fs * .3); ctx.lineTo(lx2 + fs * 1.6, ly2 + fs * .3); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#1b2333'; ctx.fillText(s.label, lx2 + fs * 2.0, ly2 + fs * .3); ly2 += fs * 1.2; });
+    }
+    ctx.restore();
+    return { X, Y, I, fs };
+  }
+  function arrow(ctx, x0, y0, x1, y1, color, w = 2, head = 10) {
+    const a = Math.atan2(y1 - y0, x1 - x0), L = Math.hypot(x1 - x0, y1 - y0); head = Math.min(head, L * 0.6);
+    ctx.strokeStyle = ctx.fillStyle = color; ctx.lineWidth = w;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - head * 0.7 * Math.cos(a), y1 - head * 0.7 * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - head * Math.cos(a - 0.4), y1 - head * Math.sin(a - 0.4)); ctx.lineTo(x1 - head * Math.cos(a + 0.4), y1 - head * Math.sin(a + 0.4)); ctx.closePath(); ctx.fill();
+  }
+  // arrowhead in the middle of a polyline segment
+  function midHead(ctx, x, y, ang, color, s = 9) {
+    ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(x + s * Math.cos(ang), y + s * Math.sin(ang));
+    ctx.lineTo(x + s * Math.cos(ang + 2.5), y + s * Math.sin(ang + 2.5)); ctx.lineTo(x + s * Math.cos(ang - 2.5), y + s * Math.sin(ang - 2.5)); ctx.closePath(); ctx.fill();
+  }
+  // perceptual-ish colour map (blue -> cyan -> yellow -> red), t in [0,1]
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    const S = [[0, [49, 54, 149]], [0.25, [69, 117, 180]], [0.45, [171, 217, 233]], [0.6, [254, 224, 144]], [0.8, [244, 109, 67]], [1, [165, 0, 38]]];
+    for (let i = 1; i < S.length; i++) if (t <= S[i][0]) { const [a, ca] = S[i - 1], [b, cb] = S[i]; const u = (t - a) / (b - a); return ca.map((c, k) => Math.round(c + (cb[k] - c) * u)); }
+    return S[S.length - 1][1];
+  }
+  // marching-squares contour of node field f (nx*ny, row-major f[j*nx+i]); toPx(i,j)->[x,y]; mask(i,j) true = skip cell
+  function contour(ctx, f, nx, ny, level, toPx, mask) {
+    ctx.beginPath();
+    const lerp = (a, b) => (level - a) / (b - a);
+    for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+      if (mask && mask(i, j)) continue;
+      const v0 = f[j * nx + i], v1 = f[j * nx + i + 1], v2 = f[(j + 1) * nx + i + 1], v3 = f[(j + 1) * nx + i];
+      const c = (v0 > level) | ((v1 > level) << 1) | ((v2 > level) << 2) | ((v3 > level) << 3);
+      if (c === 0 || c === 15) continue;
+      const e = [];
+      if ((v0 > level) !== (v1 > level)) e.push([i + lerp(v0, v1), j]);
+      if ((v1 > level) !== (v2 > level)) e.push([i + 1, j + lerp(v1, v2)]);
+      if ((v3 > level) !== (v2 > level)) e.push([i + lerp(v3, v2), j + 1]);
+      if ((v0 > level) !== (v3 > level)) e.push([i, j + lerp(v0, v3)]);
+      for (let k = 0; k + 1 < e.length; k += 2) { const a = toPx(...e[k]), b = toPx(...e[k + 1]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    }
+    ctx.stroke();
+  }
+  function text(ctx, s, x, y, { color = '#1b2333', size, align = 'left', base = 'middle', weight = '', bg = null } = {}) {
+    const fz = size || fontPx();
+    ctx.font = `${weight} ${fz}px system-ui, sans-serif`; ctx.textAlign = align; ctx.textBaseline = base;
+    if (bg) { const wd = ctx.measureText(s).width, x0 = align === 'center' ? x - wd / 2 : align === 'right' ? x - wd : x, y0 = base === 'middle' ? y - fz * 0.6 : base === 'top' ? y - fz * 0.1 : y - fz * 1.1; ctx.fillStyle = bg; ctx.fillRect(x0 - fz * 0.2, y0, wd + fz * 0.4, fz * 1.2); }
+    ctx.fillStyle = color; ctx.fillText(s, x, y);
+  }
+  return { $, sci, eng, tex, texAll, contour, fontPx, canvas, pointer, slider, seg, check, plot, arrow, midHead, cmap, text, ticks };
+})();
+</script>
+
+<!-- ===================== UI / RENDERING ===================== -->
+<script id="app">
+(() => {
+  const { $, sci, eng, tex, canvas, slider, seg, plot, arrow, text, cmap } = UI;
+  const S = {
+    tab: 'pp', V0: 1000,
+    pp: { A: 100e-4, d: 2e-3, er: 4, layer: 'single', frac: 0.5, er1: 1, er2: 4 },
+    cx: { a: 1e-3, b: 3.5e-3, er: 2.25, L: 1 },
+    sp: { a: 2e-2, b: 5e-2, er: 1, inf: false },
+  };
+  const NOTE = {
+    pp: 'In series layers D is common, so E is largest in the layer with the LOWER ε_r — the air gap breaks down first.',
+    cx: 'E ∝ 1/ρ: the dielectric is most stressed at the inner conductor surface ρ = a; C depends only on ln(b/a).',
+    sp: 'E ∝ 1/r²: stress is highest at the inner sphere; as b → ∞, C → 4πεa (an isolated sphere).',
+  };
+  seg('#modes', [['pp', 'Parallel plate'], ['cx', 'Coaxial'], ['sp', 'Spherical']], S.tab, v => { S.tab = v; layout(); });
+  // parallel plate controls
+  const cP = $('#ctlP');
+  slider(cP, { label: 'Plate area A', min: 1, max: 400, step: 1, value: 100, fmt: v => v + ' cm²', onInput: v => { S.pp.A = v * 1e-4; upd(); } });
+  slider(cP, { label: 'Separation d', min: 0.2, max: 10, step: 0.1, value: 2, fmt: v => v.toFixed(1) + ' mm', onInput: v => { S.pp.d = v * 1e-3; upd(); } });
+  const lay = document.createElement('div'); lay.className = 'ctl'; lay.innerHTML = '<div class="ctl-row"><label>Dielectric</label></div>'; cP.appendChild(lay);
+  seg(lay, [['single', 'Single'], ['series', 'Two layers (series)'], ['side', 'Side-by-side']], 'single', v => { S.pp.layer = v; layout(); });
+  const ppSingle = document.createElement('div'), ppTwo = document.createElement('div'); cP.append(ppSingle, ppTwo);
+  slider(ppSingle, { label: 'ε<sub>r</sub>', min: 1, max: 12, step: 0.1, value: 4, fmt: v => v.toFixed(1), onInput: v => { S.pp.er = v; upd(); } });
+  const sFrac = slider(ppTwo, { label: 'Layer-1 fraction', min: 0.05, max: 0.95, step: 0.01, value: 0.5, fmt: v => (100 * v).toFixed(0) + ' %', onInput: v => { S.pp.frac = v; upd(); } });
+  slider(ppTwo, { label: 'ε<sub>r1</sub> (layer 1)', min: 1, max: 12, step: 0.1, value: 1, fmt: v => v.toFixed(1), onInput: v => { S.pp.er1 = v; upd(); } });
+  slider(ppTwo, { label: 'ε<sub>r2</sub> (layer 2)', min: 1, max: 12, step: 0.1, value: 4, fmt: v => v.toFixed(1), onInput: v => { S.pp.er2 = v; upd(); } });
+  // coax
+  const cC = $('#ctlC');
+  slider(cC, { label: 'Inner radius a', min: 0.2, max: 5, step: 0.05, value: 1, fmt: v => v.toFixed(2) + ' mm', onInput: v => { S.cx.a = v * 1e-3; if (S.cx.b <= S.cx.a * 1.05) S.cx.b = S.cx.a * 1.05; upd(); } });
+  slider(cC, { label: 'Outer radius b', min: 0.5, max: 12, step: 0.05, value: 3.5, fmt: v => v.toFixed(2) + ' mm', onInput: v => { S.cx.b = Math.max(v * 1e-3, S.cx.a * 1.05); upd(); } });
+  slider(cC, { label: 'ε<sub>r</sub>', min: 1, max: 12, step: 0.05, value: 2.25, fmt: v => v.toFixed(2), onInput: v => { S.cx.er = v; upd(); } });
+  slider(cC, { label: 'Length L', min: 0.1, max: 10, step: 0.1, value: 1, fmt: v => v.toFixed(1) + ' m', onInput: v => { S.cx.L = v; upd(); } });
+  // sphere
+  const cS = $('#ctlS');
+  slider(cS, { label: 'Inner radius a', min: 0.5, max: 10, step: 0.1, value: 2, fmt: v => v.toFixed(1) + ' cm', onInput: v => { S.sp.a = v * 1e-2; upd(); } });
+  slider(cS, { label: 'Outer radius b', min: 1, max: 30, step: 0.1, value: 5, fmt: v => v.toFixed(1) + ' cm', onInput: v => { S.sp.b = v * 1e-2; upd(); } });
+  slider(cS, { label: 'ε<sub>r</sub>', min: 1, max: 12, step: 0.1, value: 1, fmt: v => v.toFixed(1), onInput: v => { S.sp.er = v; upd(); } });
+  UI.check(cS, 'Isolated sphere (b → ∞)', false, v => { S.sp.inf = v; upd(); });
+  slider('#ctlV', { label: 'Applied voltage V<sub>0</sub>', min: 10, max: 10000, log: true, value: 1000, fmt: v => v < 1000 ? v.toFixed(0) + ' V' : (v / 1000).toFixed(2) + ' kV', onInput: v => { S.V0 = v; upd(); } });
+
+  function layout() {
+    cP.classList.toggle('hide', S.tab !== 'pp'); cC.classList.toggle('hide', S.tab !== 'cx'); cS.classList.toggle('hide', S.tab !== 'sp');
+    ppSingle.classList.toggle('hide', S.pp.layer !== 'single'); ppTwo.classList.toggle('hide', S.pp.layer === 'single');
+    sFrac.el.querySelector('label').innerHTML = S.pp.layer === 'series' ? 'Layer-1 thickness d<sub>1</sub>/d' : 'Layer-1 area A<sub>1</sub>/A';
+    $('#notice').textContent = S.tab === 'pp' && S.pp.layer === 'side' ? 'Side-by-side dielectrics: E = V/d in both, but D (and charge density on the plates) is larger over the high-ε part.' : NOTE[S.tab];
+    upd();
+  }
+  // compute current state: returns {C, profile:{x[],E[],xlabel}, Emax, where, formulas}
+  function model() {
+    const V0 = S.V0;
+    if (S.tab === 'pp') {
+      const { A, d, layer, frac, er, er1, er2 } = S.pp;
+      if (layer === 'single') return { C: PHYS.Cpp(A, d, er), Ex: x => V0 / d, xr: [0, d], unit: 'mm', xs: 1e3, where: 'uniform between the plates (fringing ignored)',
+        f1: 'C=\\dfrac{\\varepsilon_0\\varepsilon_r A}{d}', f2: 'E=\\dfrac{V_0}{d},\\quad Q=CV_0' };
+      if (layer === 'series') { const d1 = frac * d, d2 = d - d1, r = PHYS.EppSeries(V0, d1, er1, d2, er2);
+        return { C: PHYS.CppSeries(A, d1, er1, d2, er2), Ex: x => x < d1 ? r.E1 : r.E2, xr: [0, d], unit: 'mm', xs: 1e3, d1, E1: r.E1, E2: r.E2, D: r.D, where: r.E1 >= r.E2 ? 'layer 1 (lower ε_r)' : 'layer 2 (lower ε_r)',
+          f1: 'C=\\dfrac{\\varepsilon_0A}{d_1/\\varepsilon_{r1}+d_2/\\varepsilon_{r2}}\\ \\ (C_1, C_2\\text{ in series})', f2: 'D_1=D_2\\Rightarrow \\varepsilon_{r1}E_1=\\varepsilon_{r2}E_2' }; }
+      const A1 = frac * A, A2 = A - A1;
+      return { C: PHYS.CppParallel(A1, er1, A2, er2, d), Ex: x => V0 / d, xr: [0, d], unit: 'mm', xs: 1e3, A1, where: 'same E = V₀/d in both parts',
+        f1: 'C=\\dfrac{\\varepsilon_0(\\varepsilon_{r1}A_1+\\varepsilon_{r2}A_2)}{d}\\ \\ (C_1, C_2\\text{ in parallel})', f2: 'E_1=E_2=\\dfrac{V_0}{d},\\ \\ D_i=\\varepsilon_0\\varepsilon_{ri}E' };
+    }
+    if (S.tab === 'cx') { const { a, b, er, L } = S.cx;
+      return { C: PHYS.Ccoax(a, b, er, L), Ex: r => PHYS.Ecoax(r, a, b, V0), xr: [a, b], unit: 'mm', xs: 1e3, where: 'at the inner conductor, ρ = a',
+        f1: 'C=\\dfrac{2\\pi\\varepsilon_0\\varepsilon_r L}{\\ln(b/a)}', f2: 'E_\\rho=\\dfrac{V_0}{\\rho\\ln(b/a)},\\quad E_{\\max}=\\dfrac{V_0}{a\\ln(b/a)}' }; }
+    const { a, er } = S.sp, b = S.sp.inf ? Infinity : Math.max(S.sp.b, a * 1.05);
+    return { C: PHYS.Csphere(a, b, er), Ex: r => PHYS.Esphere(r, a, b, V0), xr: [a, isFinite(b) ? b : 6 * a], unit: 'cm', xs: 1e2, where: 'at the inner sphere, r = a', b,
+      f1: isFinite(b) ? 'C=\\dfrac{4\\pi\\varepsilon_0\\varepsilon_r}{1/a-1/b}' : 'C=4\\pi\\varepsilon_0\\varepsilon_r a\\quad(b\\to\\infty)', f2: 'E_r=\\dfrac{V_0}{r^2(1/a-1/b)},\\quad E_{\\max}=E_r(a)' };
+  }
+  let M = null;
+  function upd() {
+    M = model(); tex('#f1', M.f1); tex('#f2', M.f2);
+    let Emax = 0; for (let i = 0; i <= 200; i++) { const x = M.xr[0] + (M.xr[1] - M.xr[0]) * i / 200; Emax = Math.max(Emax, M.Ex(x - (i === 200 ? 1e-12 : 0))); }
+    M.Emax = Emax;
+    const Q = M.C * S.V0, W = 0.5 * M.C * S.V0 * S.V0;
+    $('#read').innerHTML = `C = <span class="big">${eng(M.C, 'F')}</span><br>Q = CV₀ = <b>${eng(Q, 'C')}</b> &nbsp; W = ½CV₀² = <b>${eng(W, 'J')}</b><br>E<sub>max</sub> = <b>${(Emax / 1e6).toPrecision(3)} kV/mm</b> <span class="small">— ${M.where}</span>` +
+      (Emax > 3e6 ? '<br><span style="color:#d1242f;font-weight:700">Exceeds air breakdown (~3 kV/mm)!</span>' : '');
+    C.redraw();
+  }
+
+  function draw(ctx, w, h) {
+    if (!M) return;
+    const fs = UI.fontPx(), sw = Math.min(w * 0.55, h * 1.1), V0 = S.V0;
+    const E2col = e => { const c = cmap(Math.min(1, e / M.Emax) * 0.95); return `rgb(${c[0]},${c[1]},${c[2]})`; };
+    const box = { x: 8, y: 8, w: sw - 16, h: h - 16 };
+    if (S.tab === 'pp') {
+      const { d, layer, frac, er1, er2 } = S.pp;
+      const pw = box.w * 0.82, gap = Math.min(box.h * 0.62, Math.max(fs * 3, d / 10e-3 * box.h * 0.62)), x0 = box.x + (box.w - pw) / 2, y0 = box.y + (box.h - gap) / 2;
+      const yOf = z => y0 + z / d * gap; // z from top plate
+      // fill by E magnitude
+      if (layer === 'series') { const y1 = yOf(M.d1); ctx.fillStyle = E2col(M.E1); ctx.fillRect(x0, y0, pw, y1 - y0); ctx.fillStyle = E2col(M.E2); ctx.fillRect(x0, y1, pw, y0 + gap - y1);
+        text(ctx, `ε_r1 = ${er1.toFixed(1)}`, x0 + pw + 6, (y0 + y1) / 2, { size: fs * 0.85 }); text(ctx, `ε_r2 = ${er2.toFixed(1)}`, x0 + pw + 6, (y1 + y0 + gap) / 2, { size: fs * 0.85 });
+        ctx.strokeStyle = '#1b2333'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]); ctx.beginPath(); ctx.moveTo(x0, y1); ctx.lineTo(x0 + pw, y1); ctx.stroke(); ctx.setLineDash([]);
+      } else if (layer === 'side') { const xm = x0 + pw * frac; ctx.fillStyle = E2col(V0 / d); ctx.fillRect(x0, y0, pw, gap);
+        ctx.fillStyle = 'rgba(130,80,223,' + (0.05 + 0.04 * er1) + ')'; ctx.fillRect(x0, y0, xm - x0, gap); ctx.fillStyle = 'rgba(130,80,223,' + (0.05 + 0.04 * er2) + ')'; ctx.fillRect(xm, y0, x0 + pw - xm, gap);
+        ctx.strokeStyle = '#1b2333'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]); ctx.beginPath(); ctx.moveTo(xm, y0); ctx.lineTo(xm, y0 + gap); ctx.stroke(); ctx.setLineDash([]);
+        text(ctx, `ε_r1 = ${er1.toFixed(1)}`, (x0 + xm) / 2, y0 + gap + fs * 2.2, { align: 'center', size: fs * 0.85 }); text(ctx, `ε_r2 = ${er2.toFixed(1)}`, (xm + x0 + pw) / 2, y0 + gap + fs * 2.2, { align: 'center', size: fs * 0.85 });
+      } else { ctx.fillStyle = E2col(V0 / d); ctx.fillRect(x0, y0, pw, gap); text(ctx, `ε_r = ${S.pp.er.toFixed(1)}`, x0 + pw + 6, y0 + gap / 2, { size: fs * 0.85 }); }
+      // field lines: for side-by-side spacing ∝ 1/D (D-lines); others uniform
+      // lines drawn are D-lines: uniform for single/series; density ∝ ε_r for side-by-side
+      const xsL = [];
+      if (layer === 'side') { const tot = 16, w1 = er1 * frac, w2 = er2 * (1 - frac), n1 = Math.max(1, Math.round(tot * w1 / (w1 + w2))), n2 = Math.max(1, tot - n1);
+        for (let i = 0; i < n1; i++) xsL.push(frac * (i + 0.5) / n1); for (let i = 0; i < n2; i++) xsL.push(frac + (1 - frac) * (i + 0.5) / n2); }
+      else for (let i = 0; i < 14; i++) xsL.push((i + 0.5) / 14);
+      for (const xf of xsL) {
+        const x = x0 + pw * xf; ctx.strokeStyle = 'rgba(27,35,51,.75)'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(x, y0 + 3); ctx.lineTo(x, y0 + gap - 3); ctx.stroke(); UI.midHead(ctx, x, y0 + gap / 2, Math.PI / 2, 'rgba(27,35,51,.85)', fs * 0.4);
+      }
+      // plates
+      ctx.fillStyle = '#5a6478'; ctx.fillRect(x0 - 6, y0 - fs * 0.6, pw + 12, fs * 0.6); ctx.fillRect(x0 - 6, y0 + gap, pw + 12, fs * 0.6);
+      // plate charges (density ∝ D)
+      const signs = (xa, xb, Dn, sym, y, col) => { const n = Math.max(1, Math.round((xb - xa) / (fs * 1.1) * Dn)); for (let k = 0; k < n; k++) text(ctx, sym, xa + (k + 0.5) * (xb - xa) / n, y, { align: 'center', color: col, size: fs * 0.9, weight: 800 }); };
+      if (layer === 'side') { const xm = x0 + pw * frac, mx = Math.max(er1, er2); signs(x0, xm, er1 / mx, '+', y0 - fs * 1.2, '#d1242f'); signs(xm, x0 + pw, er2 / mx, '+', y0 - fs * 1.2, '#d1242f'); signs(x0, xm, er1 / mx, '−', y0 + gap + fs * 1.1, '#1f6feb'); signs(xm, x0 + pw, er2 / mx, '−', y0 + gap + fs * 1.1, '#1f6feb'); }
+      else { signs(x0, x0 + pw, 1, '+', y0 - fs * 1.2, '#d1242f'); signs(x0, x0 + pw, 1, '−', y0 + gap + fs * 1.1, '#1f6feb'); }
+      text(ctx, 'V₀', x0 - 10, y0 - fs * 0.3, { align: 'right', weight: 700 }); text(ctx, '0 V', x0 - 10, y0 + gap + fs * 0.3, { align: 'right', weight: 700 });
+      text(ctx, `side view (gap not to scale); colour = |E|, lines = D`, box.x, box.y + fs * 0.4, { size: fs * 0.78, color: '#5a6478' });
+    } else {
+      // coax / sphere cross-section
+      const a = M.xr[0], b = M.xr[1], cx0 = box.x + box.w / 2, cy0 = box.y + box.h / 2;
+      const Rmax = Math.min(box.w, box.h) / 2 - fs * 1.2, k = Rmax / b;
+      const ra = Math.max(4, a * k);
+      // colour ring
+      const img = ctx.createImageData(1, 1);
+      for (let rr = Rmax; rr >= ra; rr -= 1) { const r = rr / k; ctx.fillStyle = E2col(M.Ex(r)); ctx.beginPath(); ctx.arc(cx0, cy0, rr, 0, 7); ctx.fill(); }
+      // conductors
+      if (S.tab === 'cx' || isFinite(M.b)) { ctx.strokeStyle = '#5a6478'; ctx.lineWidth = fs * 0.5; ctx.beginPath(); ctx.arc(cx0, cy0, Rmax + fs * 0.25, 0, 7); ctx.stroke(); }
+      const g = ctx.createRadialGradient(cx0 - ra * 0.3, cy0 - ra * 0.3, 1, cx0, cy0, ra); g.addColorStop(0, '#e9ecf2'); g.addColorStop(1, '#7d8697');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx0, cy0, ra, 0, 7); ctx.fill();
+      // radial field lines
+      const nL = 16; for (let i = 0; i < nL; i++) { const t = i / nL * 2 * Math.PI; const x1 = cx0 + ra * Math.cos(t), y1 = cy0 + ra * Math.sin(t), x2 = cx0 + Rmax * Math.cos(t), y2 = cy0 + Rmax * Math.sin(t);
+        ctx.strokeStyle = 'rgba(27,35,51,.75)'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); UI.midHead(ctx, (x1 + x2) / 2, (y1 + y2) / 2, t, 'rgba(27,35,51,.85)', fs * 0.4); }
+      // a, b dimension
+      ctx.strokeStyle = '#1b2333'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx0, cy0); ctx.lineTo(cx0 + ra * Math.cos(-2.4), cy0 + ra * Math.sin(-2.4)); ctx.stroke();
+      text(ctx, 'a', cx0 + ra * 0.5 * Math.cos(-2.4) - fs * 0.6, cy0 + ra * 0.5 * Math.sin(-2.4), { weight: 700, bg: 'rgba(255,255,255,.8)' });
+      if (S.tab === 'cx' || isFinite(M.b)) text(ctx, 'b', cx0 + (Rmax + fs * 0.5) * 0.707, cy0 + (Rmax + fs * 0.5) * 0.707 + fs * 0.5, { weight: 700 });
+      else text(ctx, 'outer conductor at ∞', cx0, box.y + box.h - fs * 0.2, { align: 'center', size: fs * 0.8, color: '#5a6478' });
+      text(ctx, S.tab === 'cx' ? 'cross-section (to scale); colour = |E|' : 'cross-section through centre; colour = |E|', box.x, box.y + fs * 0.4, { size: fs * 0.78, color: '#5a6478' });
+      // stress marker
+      ctx.strokeStyle = '#d1242f'; ctx.lineWidth = 3; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.arc(cx0, cy0, ra + 3, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+      text(ctx, 'max |E|', cx0 + ra + fs * 0.4, cy0 - ra * 0.4 - fs * 0.4, { color: '#d1242f', weight: 700, size: fs * 0.85, bg: 'rgba(255,255,255,.85)' });
+    }
+    // colour bar
+    const cbx = sw - 4, cby = 14, cbh = h * 0.35;
+    for (let i = 0; i < cbh; i++) { const c = cmap((1 - i / cbh) * 0.95); ctx.fillStyle = `rgb(${c})`; ctx.fillRect(cbx, cby + i, fs * 0.6, 1.5); }
+    text(ctx, 'E_max', cbx + fs * 0.75, cby + fs * 0.3, { size: fs * 0.72, color: '#5a6478' }); text(ctx, '0', cbx + fs * 0.75, cby + cbh, { size: fs * 0.72, color: '#5a6478' });
+    // E profile plot
+    const xs = [], ys = [], [r0, r1] = M.xr;
+    for (let i = 0; i <= 300; i++) { const x = r0 + (r1 - r0) * i / 300; xs.push(x * M.xs); ys.push(M.Ex(Math.min(r1 * (1 - 1e-9), x)) / 1e6); }
+    const lab = S.tab === 'pp' ? 'distance from top plate z (mm)' : (S.tab === 'cx' ? 'ρ (mm)' : 'r (cm)');
+    const pts = []; const im = ys.indexOf(Math.max(...ys)); pts.push({ x: xs[im], y: ys[im], color: '#d1242f', label: 'E_max', align: im > 150 ? 'right' : 'left' });
+    plot(ctx, { x: sw + fs * 2.2, y: 4, w: w - sw - fs * 2.2 - 4, h: h * 0.62 }, { xlim: [xs[0], xs[xs.length - 1]], ylim: [0, M.Emax / 1e6 * 1.18], title: '|E| across the dielectric', xlabel: lab, ylabel: 'kV/mm', series: [{ x: xs, y: ys, color: '#d1242f', width: 3 }], points: pts });
+    // V profile plot (integrate E)
+    const vs = []; let acc = 0; for (let i = 0; i <= 300; i++) { if (i) acc += 0.5 * (ys[i] + ys[i - 1]) * (xs[i] - xs[i - 1]) / M.xs * 1e6; vs.push((S.V0 - acc)); }
+    const infSph = S.tab === 'sp' && !isFinite(M.b);
+    plot(ctx, { x: sw + fs * 2.2, y: h * 0.64, w: w - sw - fs * 2.2 - 4, h: h * 0.36 - 4 }, { xlim: [xs[0], xs[xs.length - 1]], ylim: [0, S.V0 * 1.05], title: infSph ? 'Potential V (→ 0 at ∞; plot truncated at 6a)' : 'Potential V  (V₀ → 0)', xlabel: lab, ylabel: 'V', series: [{ x: xs, y: vs, color: '#1f6feb', width: 3 }] });
+  }
+  const C = canvas($('#cv'), draw);
+  layout();
+})();
+</script>
+</body></html>

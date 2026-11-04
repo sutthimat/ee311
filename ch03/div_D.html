@@ -1,0 +1,641 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Divergence of D</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@700&family=IBM+Plex+Sans:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: part tabs on top, then the field and its divergence, then two views side by side (where P sits / the small cell around P), then controls beside the face-by-face flux table. */
+:root {
+  --bg: #f4f6f7;
+  --surface: #ffffff;
+  --paper: #ffffff;
+  --ink: #15191d;
+  --muted: #5a6670;
+  --line: #dbe1e5;
+  --band: #eef3f6;
+  --accent: #0a8fd6;
+  --out: #d9480f;
+  --in: #0b86c9;
+  --lblue: #8ad4f5;
+  --axis: #b4bac0;
+  --cell: #7fa6bd;
+  --box0: #8fd0f6;
+  --box1: #ecf7fd;
+  --top0: #c4e6fa;
+  --top1: #f6fbfe;
+  --side: #38b3f0;
+  --side-op: 0.16;
+  --serif: 'STIX Two Text', 'Times New Roman', Times, serif;
+  --sans-fig: 'Arimo', Arial, Helvetica, sans-serif;
+  --ui: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a; --band: #1c2329;
+    --accent: #4cb8f0; --out: #ff8a4c; --in: #3cb6f4; --lblue: #6fc3ec; --axis: #5c6672; --cell: #4f7a94;
+    --box0: #215f84; --box1: #1a2833; --top0: #25506b; --top1: #1a252e; --side: #38b3f0; --side-op: 0.2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a; --band: #1c2329;
+  --accent: #4cb8f0; --out: #ff8a4c; --in: #3cb6f4; --lblue: #6fc3ec; --axis: #5c6672; --cell: #4f7a94;
+  --box0: #215f84; --box1: #1a2833; --top0: #25506b; --top1: #1a252e; --side: #38b3f0; --side-op: 0.2;
+  color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 28px 56px; }
+h1 { font-size: clamp(1.5rem, 3.4vw, 2rem); line-height: 1.2; margin: 0 0 6px; font-weight: 600; text-wrap: balance; }
+h2 { font-size: .8rem; font-weight: 600; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; line-height: 1.5; }
+.lede { margin: 0 0 18px; color: var(--muted); max-width: 72ch; }
+i, .m { font-family: var(--serif); font-style: italic; }
+b.v, .v { font-family: var(--serif); font-weight: 700; font-style: italic; }
+.u { font-style: normal; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.tabs button { font: inherit; font-size: .92rem; line-height: 1.4; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+:root[data-theme="dark"] .tabs button[aria-pressed="true"] { color: #07202f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tabs button[aria-pressed="true"] { color: #07202f; } }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 16px; min-width: 0; }
+.field { margin-bottom: 16px; display: grid; gap: 10px; }
+.field .eqline { font-family: var(--serif); font-size: 1.12rem; line-height: 1.8; overflow-x: auto; }
+.field .pt { font-size: .9rem; color: var(--muted); }
+.divline { background: var(--band); padding: 8px 14px; font-family: var(--serif); font-size: 1.05rem; line-height: 1.9; overflow-x: auto; }
+.terms { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 6px 18px; margin: 8px 0 0; font-size: .92rem; }
+.terms div { font-variant-numeric: tabular-nums; }
+.terms .t { display: block; font-family: var(--serif); font-size: .98rem; }
+
+.figs { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 16px; margin-bottom: 16px; }
+@media (max-width: 860px) { .figs { grid-template-columns: minmax(0, 1fr); } }
+.fig { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 12px; min-width: 0; }
+.fig svg { display: block; width: 100%; height: auto; max-width: 100%; }
+.fig figcaption { font-size: .85rem; line-height: 1.5; color: var(--muted); padding: 6px 10px 0; }
+.sw { display: inline-block; width: 14px; height: 4px; vertical-align: middle; margin-right: 4px; border-radius: 1px; }
+.sw.out { background: var(--out); } .sw.in { background: var(--in); }
+
+.bottom { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 960px) { .bottom { grid-template-columns: minmax(0, 1fr); } }
+.row { display: grid; grid-template-columns: 5.4rem minmax(0, 1fr) 4.4rem; align-items: center; gap: 10px; padding-block: 2px; line-height: 1.5; }
+.row label { font-size: .88rem; }
+.row input[type="range"] { width: 100%; min-width: 0; accent-color: var(--accent); }
+.row input[type="number"] { width: 100%; min-width: 0; font: inherit; font-size: .85rem; font-variant-numeric: tabular-nums; text-align: right; padding: 3px 6px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; }
+.sep { height: 1px; background: var(--line); margin: 10px 0; }
+.chk { display: flex; align-items: center; gap: 8px; padding-block: 2px; font-size: .88rem; line-height: 1.5; }
+.chk input { accent-color: var(--accent); width: 16px; height: 16px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.btns button { font: inherit; font-size: .85rem; line-height: 1.4; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.btns button:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.note { font-size: .8rem; color: var(--muted); margin: 8px 0 0; }
+
+.big { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 22px; margin-bottom: 8px; }
+.big .val { font-size: 1.9rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.big .sub { color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; }
+.pos { color: var(--out); } .neg { color: var(--in); }
+.tablewrap { overflow-x: auto; max-width: 100%; margin: 8px 0; }
+table.ft { border-collapse: collapse; width: 100%; min-width: 440px; font-size: .88rem; font-variant-numeric: tabular-nums; }
+table.ft th, table.ft td { padding: 5px 10px; text-align: right; border-bottom: 1px solid var(--line); }
+table.ft th:first-child, table.ft td:first-child { text-align: left; }
+table.ft th { font-weight: 600; color: var(--muted); font-size: .8rem; }
+table.ft tr.sum td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 600; }
+.meaning { margin: 10px 0 0; max-width: 70ch; }
+.check { margin: 10px 0 0; font-size: .88rem; color: var(--muted); }
+.check b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* drawing */
+.vec line { stroke: var(--c); stroke-width: var(--w); }
+.vec polygon { fill: var(--c); }
+.vec.back line { stroke-dasharray: 7 5; }
+.vec.hi line { stroke-width: 5.6; }
+.vec.dim, text.dim { opacity: .25; }
+.vlb { --c: var(--lblue); --w: 2.4; }
+.vax { --c: var(--axis); --w: 1.6; }
+.vout { --c: var(--out); --w: 3.8; }
+.vin { --c: var(--in); --w: 3.8; }
+.vink { --c: var(--ink); --w: 2.6; }
+.vloc { --c: var(--muted); --w: 1.8; }
+.guide { stroke: var(--axis); stroke-width: 1.2; stroke-dasharray: 5 4; fill: none; }
+.arc { stroke: var(--muted); stroke-width: 1.3; fill: none; }
+.dot { fill: var(--ink); }
+.ring { stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 3 3; fill: none; }
+.fc.hid { stroke: var(--cell); stroke-width: 1.2; stroke-dasharray: 4 4; fill: var(--cell); fill-opacity: .04; stroke-linejoin: round; }
+.fc.vis { stroke: var(--cell); stroke-width: 1.6; stroke-linejoin: round; }
+.fc.fhi { stroke: var(--accent); stroke-width: 2.4; fill: var(--accent); fill-opacity: .28; }
+.g0 { stop-color: var(--box0); } .g1 { stop-color: var(--box1); } .t0 { stop-color: var(--top0); } .t1 { stop-color: var(--top1); }
+.face-r { fill: var(--side); fill-opacity: var(--side-op); }
+.sec { fill: var(--side); fill-opacity: .2; stroke: var(--muted); stroke-width: 1.2; }
+.pl { fill: var(--side); fill-opacity: .12; stroke: var(--axis); stroke-width: 1.2; stroke-dasharray: 5 4; }
+svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3.5px; stroke-linejoin: round; font-family: var(--sans-fig); user-select: none; -webkit-user-select: none; }
+.fig svg { cursor: grab; }
+.fig svg.drag { cursor: grabbing; }
+.ta { font-family: var(--serif); font-style: italic; fill: var(--axis); font-size: 19px; }
+.tl { font-family: var(--serif); font-style: italic; fill: var(--ink); font-size: 19px; }
+.tp { font-family: var(--sans-fig); font-weight: 700; fill: var(--ink); font-size: 14px; }
+.tf { font-family: var(--sans-fig); font-weight: 700; font-size: 14px; fill: var(--muted); }
+.tf.out { fill: var(--out); } .tf.in { fill: var(--in); }
+.tb { font-family: var(--serif); font-weight: 700; font-style: italic; fill: var(--muted); font-size: 17px; }
+.sub { font-size: .7em; font-style: normal; }
+table.ft tbody tr[data-i] { cursor: pointer; }
+table.ft tbody tr.hl td { background: var(--band); }
+</style>
+
+<main class="wrap">
+  <h1>Divergence of D</h1>
+  <p class="lede">Drill Problem D3.7, parts a, b, c: find ∇·D at the given point. The figure shows that ∇·D is the net flux flowing out of a small cell around the point, divided by the volume of the cell. Shrink the cell and see how the value from the flux approaches the value from the formula.</p>
+
+  <div class="tabs" role="group" aria-label="Choose part">
+    <button type="button" data-part="a" aria-pressed="true">(a) Rectangular coordinates</button>
+    <button type="button" data-part="b" aria-pressed="false">(b) Cylindrical coordinates</button>
+    <button type="button" data-part="c" aria-pressed="false">(c) Spherical coordinates</button>
+  </div>
+
+  <section class="card field">
+    <div class="eqline" id="d-eq"></div>
+    <div class="pt" id="d-pt"></div>
+    <div class="divline" id="div-eq"></div>
+  </section>
+
+  <div class="figs">
+    <figure class="fig">
+      <svg id="ov" viewBox="0 0 480 460" role="img" aria-label="Position of point P in the chosen coordinate system"></svg>
+      <figcaption>Position of point <i>P</i>. The dashed circle marks the region enlarged in the right-hand figure. Drag on the figure to rotate the view.</figcaption>
+    </figure>
+    <figure class="fig">
+      <svg id="zm" viewBox="0 0 640 560" role="img" aria-label="Small cell around point P with flux arrows on each face"></svg>
+      <figcaption><span class="sw out"></span>Outward flux <span class="sw in" style="margin-left:10px"></span>Inward flux. The arrows on the faces show the component of <b class="v">D</b> normal to each face. Dashed arrows are on the back faces. The black arrow is <b class="v">D</b> at the centre of the cell. Drag on the figure to rotate it, or point at a table row to highlight that face.</figcaption>
+    </figure>
+  </div>
+
+  <div class="bottom">
+    <section class="card" id="ctl">
+      <h2>Position of point <i>P</i> and cell size</h2>
+      <div id="rows"></div>
+      <div class="sep"></div>
+      <div id="rows-s"></div>
+      <div class="sep"></div>
+      <h2>View</h2>
+      <div id="rows-cam"></div>
+      <div class="btns" style="margin-top:4px">
+        <button type="button" data-view="home">Default view</button>
+        <button type="button" data-view="front">Front</button>
+        <button type="button" data-view="top">Top</button>
+      </div>
+      <div class="sep"></div>
+      <label class="chk"><input type="checkbox" id="f-guides" checked> Surfaces and coordinate guides in the left figure</label>
+      <label class="chk"><input type="checkbox" id="f-labels" checked> Face names on the arrows</label>
+      <div class="btns"><button type="button" id="btn-reset">Reset to the given point</button><button type="button" id="btn-small">Make the cell very small</button></div>
+      <p class="note">The cell is roughly a cube with sides of s metres. In curvilinear coordinates its size is limited to a range that can be drawn, no larger than the distance to the axis or the origin.</p>
+    </section>
+
+    <section class="card" id="out">
+      <h2>Results at point <i>P</i></h2>
+      <div class="big"><span class="val" id="o-div"></span><span class="sub" id="o-num"></span></div>
+      <div class="terms" id="o-terms"></div>
+      <div class="tablewrap">
+        <table class="ft">
+          <thead><tr><th>Cell face (point to see it in the figure)</th><th><b class="v">D</b>·<b class="v">n</b> (C/m²)</th><th>Area (m²)</th><th>Flux (C)</th></tr></thead>
+          <tbody id="o-faces"></tbody>
+        </table>
+      </div>
+      <p class="meaning" id="o-mean"></p>
+      <p class="check" id="o-check"></p>
+    </section>
+  </div>
+</main>
+
+<script>
+(function () {
+  var D2R = Math.PI / 180;
+  function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function comb(B, c) { return [0, 1, 2].map(function (k) { return c[0] * B[0][k] + c[1] * B[1][k] + c[2] * B[2][k]; }); }
+  function M(n, d) { var s = Math.abs(n).toFixed(d); var neg = n < 0 && parseFloat(s) !== 0; return (neg ? '−' : '') + s; }
+  function sciFmt(n) {
+    if (n === 0) return '0';
+    var a = Math.abs(n);
+    if (a >= 0.001) return M(n, 4);
+    var e = Math.floor(Math.log10(a)), m = a / Math.pow(10, e);
+    return (n < 0 ? '−' : '') + m.toFixed(2) + '×10<sup>' + (e < 0 ? '−' : '') + Math.abs(e) + '</sup>';
+  }
+
+  var SYS = {
+    a: {
+      names: ['x', 'y', 'z'], uiNames: ['x (m)', 'y (m)', 'z (m)'], isAng: [false, false, false],
+      def: [2, 3, -1], rng: [[-3.5, 3.5], [-3.5, 3.5], [-3.5, 3.5]], step: [0.1, 0.1, 0.1],
+      book: -10.0,
+      faceNames: [['−x', '+x'], ['−y', '+y'], ['−z', '+z']],
+      basisLab: ['x', 'y', 'z'],
+      fieldHTML: '<b class="v">D</b> = (2<i>xyz</i> − <i>y</i>²) <b class="v">a</b><sub class="u"><i>x</i></sub> + (<i>x</i>²<i>z</i> − 2<i>xy</i>) <b class="v">a</b><sub class="u"><i>y</i></sub> + <i>x</i>²<i>y</i> <b class="v">a</b><sub class="u"><i>z</i></sub> &nbsp;C/m²',
+      ptHTML: 'Given point <i>P</i><sub class="u">A</sub>(2, 3, −1)',
+      divHTML: '∇·<b class="v">D</b> = ∂<i>D</i><sub class="u"><i>x</i></sub>/∂<i>x</i> + ∂<i>D</i><sub class="u"><i>y</i></sub>/∂<i>y</i> + ∂<i>D</i><sub class="u"><i>z</i></sub>/∂<i>z</i> = 2<i>yz</i> − 2<i>x</i>',
+      termLabels: ['∂<i>D</i><sub class="u"><i>x</i></sub>/∂<i>x</i> = 2<i>yz</i>', '∂<i>D</i><sub class="u"><i>y</i></sub>/∂<i>y</i> = −2<i>x</i>', '∂<i>D</i><sub class="u"><i>z</i></sub>/∂<i>z</i> = 0'],
+      toCart: function (c) { return [c[0], c[1], c[2]]; },
+      basis: function () { return [[1, 0, 0], [0, 1, 0], [0, 0, 1]]; },
+      Dc: function (c) { var x = c[0], y = c[1], z = c[2]; return [2 * x * y * z - y * y, x * x * z - 2 * x * y, x * x * y]; },
+      terms: function (c) { var x = c[0], y = c[1], z = c[2]; return [2 * y * z, -2 * x, 0]; },
+      dims: function (c, s) { return [s, s, s]; },
+      area: function (i, c, d, q) { return i === 0 ? d[1] * d[2] : i === 1 ? d[0] * d[2] : d[0] * d[1]; },
+      vol: function (c, d) { return d[0] * d[1] * d[2]; },
+      fromUI: function (v) { return v.slice(); }
+    },
+    b: {
+      names: ['ρ', 'φ', 'z'], uiNames: ['ρ (m)', 'φ (°)', 'z (m)'], isAng: [false, true, false],
+      def: [2, 110, -1], rng: [[0.5, 3.5], [0, 360], [-3.5, 3.5]], step: [0.1, 1, 0.1],
+      book: 9.06,
+      faceNames: [['ρ−', 'ρ+'], ['φ−', 'φ+'], ['z−', 'z+']],
+      basisLab: ['ρ', 'φ', 'z'],
+      fieldHTML: '<b class="v">D</b> = 2<i>ρz</i>² sin²<i>φ</i> <b class="v">a</b><sub class="u"><i>ρ</i></sub> + <i>ρz</i>² sin 2<i>φ</i> <b class="v">a</b><sub class="u"><i>φ</i></sub> + 2<i>ρ</i>²<i>z</i> sin²<i>φ</i> <b class="v">a</b><sub class="u"><i>z</i></sub> &nbsp;C/m²',
+      ptHTML: 'Given point <i>P</i><sub class="u">B</sub>(<i>ρ</i> = 2, <i>φ</i> = 110°, <i>z</i> = −1)',
+      divHTML: '∇·<b class="v">D</b> = (1/<i>ρ</i>) ∂(<i>ρD</i><sub class="u"><i>ρ</i></sub>)/∂<i>ρ</i> + (1/<i>ρ</i>) ∂<i>D</i><sub class="u"><i>φ</i></sub>/∂<i>φ</i> + ∂<i>D</i><sub class="u"><i>z</i></sub>/∂<i>z</i> = 4<i>z</i>² sin²<i>φ</i> + 2<i>z</i>² cos 2<i>φ</i> + 2<i>ρ</i>² sin²<i>φ</i>',
+      termLabels: ['(1/<i>ρ</i>) ∂(<i>ρD</i><sub class="u"><i>ρ</i></sub>)/∂<i>ρ</i> = 4<i>z</i>² sin²<i>φ</i>', '(1/<i>ρ</i>) ∂<i>D</i><sub class="u"><i>φ</i></sub>/∂<i>φ</i> = 2<i>z</i>² cos 2<i>φ</i>', '∂<i>D</i><sub class="u"><i>z</i></sub>/∂<i>z</i> = 2<i>ρ</i>² sin²<i>φ</i>'],
+      toCart: function (c) { return [c[0] * Math.cos(c[1]), c[0] * Math.sin(c[1]), c[2]]; },
+      basis: function (c) { var p = c[1]; return [[Math.cos(p), Math.sin(p), 0], [-Math.sin(p), Math.cos(p), 0], [0, 0, 1]]; },
+      Dc: function (c) {
+        var r = c[0], p = c[1], z = c[2], s2 = Math.sin(p) * Math.sin(p);
+        return comb(SYS.b.basis(c), [2 * r * z * z * s2, r * z * z * Math.sin(2 * p), 2 * r * r * z * s2]);
+      },
+      terms: function (c) { var r = c[0], p = c[1], z = c[2], s2 = Math.sin(p) * Math.sin(p); return [4 * z * z * s2, 2 * z * z * Math.cos(2 * p), 2 * r * r * s2]; },
+      dims: function (c, s) { return [Math.min(s, 1.6 * c[0]), Math.min(s / c[0], 2.5), s]; },
+      area: function (i, c, d, q) { return i === 0 ? q * d[1] * d[2] : i === 1 ? d[0] * d[2] : c[0] * d[0] * d[1]; },
+      vol: function (c, d) { return c[0] * d[0] * d[1] * d[2]; },
+      fromUI: function (v) { return [v[0], v[1] * D2R, v[2]]; }
+    },
+    c: {
+      names: ['r', 'θ', 'φ'], uiNames: ['r (m)', 'θ (°)', 'φ (°)'], isAng: [false, true, true],
+      def: [1.5, 30, 50], rng: [[0.5, 3.5], [5, 175], [0, 360]], step: [0.1, 1, 1],
+      book: 1.29,
+      faceNames: [['r−', 'r+'], ['θ−', 'θ+'], ['φ−', 'φ+']],
+      basisLab: ['r', 'θ', 'φ'],
+      fieldHTML: '<b class="v">D</b> = 2<i>r</i> sin<i>θ</i> cos<i>φ</i> <b class="v">a</b><sub class="u"><i>r</i></sub> + <i>r</i> cos<i>θ</i> cos<i>φ</i> <b class="v">a</b><sub class="u"><i>θ</i></sub> − <i>r</i> sin<i>φ</i> <b class="v">a</b><sub class="u"><i>φ</i></sub> &nbsp;C/m²',
+      ptHTML: 'Given point <i>P</i><sub class="u">C</sub>(<i>r</i> = 1.5, <i>θ</i> = 30°, <i>φ</i> = 50°)',
+      divHTML: '∇·<b class="v">D</b> = (1/<i>r</i>²) ∂(<i>r</i>²<i>D</i><sub class="u"><i>r</i></sub>)/∂<i>r</i> + (1/<i>r</i> sin<i>θ</i>) ∂(sin<i>θ</i> <i>D</i><sub class="u"><i>θ</i></sub>)/∂<i>θ</i> + (1/<i>r</i> sin<i>θ</i>) ∂<i>D</i><sub class="u"><i>φ</i></sub>/∂<i>φ</i> = 4 sin<i>θ</i> cos<i>φ</i>',
+      termLabels: ['(1/<i>r</i>²) ∂(<i>r</i>²<i>D</i><sub class="u"><i>r</i></sub>)/∂<i>r</i> = 6 sin<i>θ</i> cos<i>φ</i>', '(1/<i>r</i> sin<i>θ</i>) ∂(sin<i>θ</i> <i>D</i><sub class="u"><i>θ</i></sub>)/∂<i>θ</i> = cos<i>φ</i> cos 2<i>θ</i> / sin<i>θ</i>', '(1/<i>r</i> sin<i>θ</i>) ∂<i>D</i><sub class="u"><i>φ</i></sub>/∂<i>φ</i> = −cos<i>φ</i> / sin<i>θ</i>'],
+      toCart: function (c) { var s = Math.sin(c[1]); return [c[0] * s * Math.cos(c[2]), c[0] * s * Math.sin(c[2]), c[0] * Math.cos(c[1])]; },
+      basis: function (c) {
+        var t = c[1], p = c[2], st = Math.sin(t), ct = Math.cos(t), sp = Math.sin(p), cp = Math.cos(p);
+        return [[st * cp, st * sp, ct], [ct * cp, ct * sp, -st], [-sp, cp, 0]];
+      },
+      Dc: function (c) {
+        var r = c[0], t = c[1], p = c[2];
+        return comb(SYS.c.basis(c), [2 * r * Math.sin(t) * Math.cos(p), r * Math.cos(t) * Math.cos(p), -r * Math.sin(p)]);
+      },
+      terms: function (c) { var t = c[1], p = c[2], st = Math.sin(t); return [6 * st * Math.cos(p), Math.cos(p) * Math.cos(2 * t) / st, -Math.cos(p) / st]; },
+      dims: function (c, s) {
+        return [Math.min(s, 1.6 * c[0]), Math.min(s / c[0], 1.8 * Math.min(c[1], Math.PI - c[1])), Math.min(s / (c[0] * Math.sin(c[1])), 2.5)];
+      },
+      area: function (i, c, d, q) {
+        if (i === 0) return q * q * d[2] * (Math.cos(c[1] - d[1] / 2) - Math.cos(c[1] + d[1] / 2));
+        if (i === 1) return c[0] * d[0] * Math.sin(q) * d[2];
+        return c[0] * d[0] * d[1];
+      },
+      vol: function (c, d) {
+        var r1 = c[0] - d[0] / 2, r2 = c[0] + d[0] / 2;
+        return (Math.pow(r2, 3) - Math.pow(r1, 3)) / 3 * d[2] * (Math.cos(c[1] - d[1] / 2) - Math.cos(c[1] + d[1] / 2));
+      },
+      fromUI: function (v) { return [v[0], v[1] * D2R, v[2] * D2R]; }
+    }
+  };
+
+  var part = 'a';
+  var vals = { a: SYS.a.def.slice(), b: SYS.b.def.slice(), c: SYS.c.def.slice() };
+  var cellS = 0.5;
+  var flags = { guides: true, labels: true };
+  var inputs = [];
+
+  /* ---------- controls ---------- */
+  function buildRows() {
+    var host = document.getElementById('rows'); host.innerHTML = ''; inputs = [];
+    var sys = SYS[part];
+    for (var i = 0; i < 3; i++) (function (i) {
+      host.appendChild(makeRow('p' + i, sys.uiNames[i], sys.rng[i][0], sys.rng[i][1], sys.step[i], vals[part][i], function (v) { vals[part][i] = v; render(); }, inputs));
+    })(i);
+    var hs = document.getElementById('rows-s'); hs.innerHTML = '';
+    hs.appendChild(makeRow('ps', 'Cell size s (m)', 0.02, 1, 0.01, cellS, function (v) { cellS = v; render(); }, inputs, 's'));
+  }
+  function makeRow(id, label, min, max, step, value, onChange, reg, tag) {
+    var row = document.createElement('div'); row.className = 'row';
+    var lab = document.createElement('label'); lab.htmlFor = 'n-' + id; lab.textContent = label;
+    var rng = document.createElement('input'); rng.type = 'range'; rng.id = 'r-' + id; rng.setAttribute('aria-label', label);
+    var num = document.createElement('input'); num.type = 'number'; num.id = 'n-' + id;
+    [rng, num].forEach(function (el) { el.min = min; el.max = max; el.step = step; el.value = value; });
+    rng.addEventListener('input', function () { num.value = rng.value; onChange(parseFloat(rng.value)); });
+    num.addEventListener('input', function () { var v = parseFloat(num.value); if (isNaN(v)) return; rng.value = v; onChange(v); });
+    row.appendChild(lab); row.appendChild(rng); row.appendChild(num);
+    reg.push({ tag: tag || 'p', rng: rng, num: num });
+    return row;
+  }
+  function setCellS(v) {
+    cellS = v;
+    inputs.forEach(function (it) { if (it.tag === 's') { it.rng.value = v; it.num.value = v; } });
+  }
+
+  /* ---------- drawing helpers ---------- */
+  function f1(n) { return n.toFixed(1); }
+  function arrow(a, b, cls, hl, hw, nt) {
+    hl = hl || 12; hw = hw || 4.4; nt = nt || 3;
+    var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy);
+    if (L < 3) return '';
+    var ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+    var h = Math.min(hl, L * 0.9), w = hw * h / hl;
+    var bx = b.x - ux * h, by = b.y - uy * h, qx = b.x - ux * (h - nt), qy = b.y - uy * (h - nt);
+    return '<g class="vec ' + cls + '"><line x1="' + f1(a.x) + '" y1="' + f1(a.y) + '" x2="' + f1(qx) + '" y2="' + f1(qy) + '"/>' +
+      '<polygon points="' + f1(b.x) + ',' + f1(b.y) + ' ' + f1(bx + nx * w) + ',' + f1(by + ny * w) + ' ' + f1(qx) + ',' + f1(qy) + ' ' + f1(bx - nx * w) + ',' + f1(by - ny * w) + '"/></g>';
+  }
+  function seg(a, b, cls) {
+    if (Math.hypot(a.x - b.x, a.y - b.y) < 0.5) return '';
+    return '<line class="' + cls + '" x1="' + f1(a.x) + '" y1="' + f1(a.y) + '" x2="' + f1(b.x) + '" y2="' + f1(b.y) + '"/>';
+  }
+  function polyline(pts, cls) { return '<polyline class="' + cls + '" points="' + pts.map(function (p) { return f1(p.x) + ',' + f1(p.y); }).join(' ') + '"/>'; }
+  function T(x, y, parts, cls, anchor) {
+    var s = '<text x="' + f1(x) + '" y="' + f1(y + 5) + '" class="' + cls + '" text-anchor="' + (anchor || 'middle') + '">', down = false;
+    parts.forEach(function (p) {
+      s += '<tspan' + (down ? ' dy="-4"' : '') + '>' + p[0] + '</tspan>'; down = false;
+      if (p[1]) { s += '<tspan class="sub" dy="4">' + p[1] + '</tspan>'; down = true; }
+    });
+    return s + '</text>';
+  }
+
+  /* orthographic camera: azimuth about z, elevation above the xy-plane */
+  var cam = { az: 30, el: 25 }, camB = null;
+  function camBasis() {
+    var a = cam.az * D2R, e = cam.el * D2R;
+    return { r: [-Math.sin(a), Math.cos(a), 0], u: [-Math.sin(e) * Math.cos(a), -Math.sin(e) * Math.sin(a), Math.cos(e)], v: [Math.cos(e) * Math.cos(a), Math.cos(e) * Math.sin(a), Math.sin(e)] };
+  }
+  function proj(p) { return { x: dot(p, camB.r), y: -dot(p, camB.u) }; }
+  function fitView(pts, W, H, m, cap) {
+    var minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
+    pts.forEach(function (p) { var q = proj(p); minx = Math.min(minx, q.x); maxx = Math.max(maxx, q.x); miny = Math.min(miny, q.y); maxy = Math.max(maxy, q.y); });
+    var w = Math.max(maxx - minx, 1e-6), h = Math.max(maxy - miny, 1e-6);
+    var s = Math.min((W - 2 * m) / w, (H - 2 * m) / h, cap);
+    return { s: s, ox: W / 2 - s * (minx + maxx) / 2, oy: H / 2 - s * (miny + maxy) / 2 };
+  }
+  function gradDefs(pre) {
+    return '<defs><linearGradient id="' + pre + 'F" x1="0" y1="0" x2="1" y2="0"><stop class="g0" offset="0"/><stop class="g1" offset="1"/></linearGradient>' +
+      '<linearGradient id="' + pre + 'T" x1="0" y1="0" x2="1" y2="0"><stop class="t0" offset="0"/><stop class="t1" offset="1"/></linearGradient></defs>';
+  }
+  function fshort(n) {
+    var a = Math.abs(n);
+    if (a === 0) return '0';
+    if (a >= 0.01) return M(n, 2);
+    return (n < 0 ? '−' : '') + a.toExponential(1).replace('e-', 'e−');
+  }
+
+  /* ---------- overview ---------- */
+  var V = null;
+  function po(p) { var q = proj(p); return { x: V.ox + V.s * q.x, y: V.oy + V.s * q.y }; }
+  function polyP(pts, attrs) {
+    return '<polygon ' + attrs + ' points="' + pts.map(function (p) { var q = po(p); return f1(q.x) + ',' + f1(q.y); }).join(' ') + '"/>';
+  }
+  function drawOverview(sys, cP) {
+    var P = sys.toCart(cP), s = gradDefs('o');
+    var mx = Math.max(Math.abs(P[0]), Math.abs(P[1]), Math.abs(P[2]), 1), Lx = Math.max(2.2, mx * 1.45);
+    var ax = [[Lx, 0, 0], [0, 1.05 * Lx, 0], [0, 0, 0.97 * Lx]], neg = [[-0.8 * Lx, 0, 0], [0, -0.8 * Lx, 0], [0, 0, -0.8 * Lx]];
+    var xy = [P[0], P[1], 0], rr = Math.hypot(P[0], P[1]), t, n;
+    V = fitView([].concat(ax, neg, [P, xy, [0, 0, P[2]]]), 480, 460, 46, 110);
+    var O = po([0, 0, 0]), Ps = po(P), Pxy = po(xy), lab = ['x', 'y', 'z'];
+    for (var k = 0; k < 3; k++) {
+      s += seg(O, po(neg[k]), 'guide');
+      var e = po(ax[k]); s += arrow(O, e, 'vax', 12, 4.2, 3);
+      var dx = e.x - O.x, dy = e.y - O.y, L = Math.hypot(dx, dy) || 1;
+      s += T(e.x + dx / L * 17, e.y + dy / L * 14, [[lab[k]]], 'ta');
+    }
+    var phi = part === 'b' ? cP[1] : cP[2];
+    if (flags.guides) {
+      if (part === 'a') {
+        var xp = P[0], yp = P[1], zp = P[2];
+        var faces = [
+          { pts: [[0, yp, 0], [xp, yp, 0], [xp, yp, zp], [0, yp, zp]], n: [0, Math.sign(yp) || 1, 0], f: 'class="face-r"' },
+          { pts: [[xp, 0, 0], [xp, yp, 0], [xp, yp, zp], [xp, 0, zp]], n: [Math.sign(xp) || 1, 0, 0], f: 'fill="url(#oF)"' },
+          { pts: [[0, 0, zp], [xp, 0, zp], [xp, yp, zp], [0, yp, zp]], n: [0, 0, Math.sign(zp) || 1], f: 'fill="url(#oT)"' }
+        ];
+        faces.forEach(function (f) { s += polyP(f.pts, f.f + ' stroke="var(--cell)" stroke-width="1" stroke-opacity=".7"'); });
+      } else {
+        var sec = [[0, 0, 0]]; n = 28;
+        for (t = 0; t <= n; t++) { var a = phi * t / n; sec.push([rr * Math.cos(a), rr * Math.sin(a), 0]); }
+        s += polyP(sec, 'class="sec"');
+        s += polyP(part === 'b' ? [[0, 0, 0], xy, P, [0, 0, P[2]]] : [[0, 0, 0], xy, P], 'class="pl"');
+      }
+    }
+    if (flags.guides && rr > 0.2) {
+      var ra = 0.4 * rr, pts = [];
+      for (t = 0; t <= 24; t++) { var b = phi * t / 24; pts.push(po([ra * Math.cos(b), ra * Math.sin(b), 0])); }
+      s += polyline(pts, 'arc');
+      if (part !== 'a') { var am = po([(ra + 0.2 * rr + 0.1) * Math.cos(phi / 2), (ra + 0.2 * rr + 0.1) * Math.sin(phi / 2), 0]); s += T(am.x, am.y, [['φ']], 'tl'); }
+    }
+    if (flags.guides && part === 'c') {
+      var R = cP[0], th = cP[1], rt = 0.4 * R, pts2 = [];
+      for (t = 0; t <= 20; t++) { var c2 = th * t / 20; pts2.push(po([rt * Math.sin(c2) * Math.cos(phi), rt * Math.sin(c2) * Math.sin(phi), rt * Math.cos(c2)])); }
+      s += polyline(pts2, 'arc');
+      var rl = rt + 0.2 * R, tm = po([rl * Math.sin(th / 2) * Math.cos(phi), rl * Math.sin(th / 2) * Math.sin(phi), rl * Math.cos(th / 2)]);
+      s += T(tm.x, tm.y, [['θ']], 'tl');
+    }
+    s += arrow(O, Ps, 'vlb', 12, 4.4, 3);
+    if (flags.guides) {
+      if (part === 'b') {
+        var mid = po([P[0] / 2, P[1] / 2, 0]); s += T(mid.x - 4, mid.y + 15, [['ρ']], 'tl');
+        if (Math.abs(P[2]) > 0.3) { var zm = po([P[0], P[1], P[2] / 2]); s += T(zm.x + 16, zm.y + 6, [['z']], 'tl'); }
+      }
+      if (part === 'c') { var mm = po([P[0] / 2, P[1] / 2, P[2] / 2]); s += T(mm.x - 12, mm.y - 6, [['r']], 'tl'); }
+    }
+    s += '<circle class="ring" cx="' + f1(Ps.x) + '" cy="' + f1(Ps.y) + '" r="14"/><circle class="dot" cx="' + f1(Ps.x) + '" cy="' + f1(Ps.y) + '" r="5"/>';
+    var pl = part === 'a' ? 'P(' + M(P[0], 1) + ', ' + M(P[1], 1) + ', ' + M(P[2], 1) + ')'
+      : part === 'b' ? 'P(ρ=' + M(cP[0], 1) + ', φ=' + Math.round(cP[1] / D2R) + '°, z=' + M(cP[2], 1) + ')'
+        : 'P(r=' + M(cP[0], 1) + ', θ=' + Math.round(cP[1] / D2R) + '°, φ=' + Math.round(cP[2] / D2R) + '°)';
+    var left = Ps.x > 270;
+    s += '<text x="' + f1(left ? Ps.x - 22 : Ps.x + 22) + '" y="' + f1(Ps.y - 20) + '" class="tp" text-anchor="' + (left ? 'end' : 'start') + '">' + pl + '</text>';
+    document.getElementById('ov').innerHTML = s;
+  }
+
+  /* ---------- cell and flux ---------- */
+  function buildCell(sys, c0, sNom) {
+    var d = sys.dims(c0, sNom);
+    var faces = [];
+    for (var i = 0; i < 3; i++) {
+      for (var sg = -1; sg <= 1; sg += 2) {
+        var q = c0[i] + sg * d[i] / 2;
+        var c = c0.slice(); c[i] = q;
+        var B = sys.basis(c), n = B[i].map(function (v) { return sg * v; });
+        var Dv = sys.Dc(c), Dn = dot(Dv, n), A = sys.area(i, c0, d, q);
+        var j = (i + 1) % 3, k = (i + 2) % 3, a0 = c0[j] - d[j] / 2, a1 = c0[j] + d[j] / 2, b0 = c0[k] - d[k] / 2, b1 = c0[k] + d[k] / 2;
+        var N = 6, poly = [];
+        function pt(a, b) { var cc = c0.slice(); cc[i] = q; cc[j] = a; cc[k] = b; return sys.toCart(cc); }
+        var t;
+        for (t = 0; t < N; t++) poly.push(pt(a0 + (a1 - a0) * t / N, b0));
+        for (t = 0; t < N; t++) poly.push(pt(a1, b0 + (b1 - b0) * t / N));
+        for (t = 0; t < N; t++) poly.push(pt(a1 - (a1 - a0) * t / N, b1));
+        for (t = 0; t < N; t++) poly.push(pt(a0, b1 - (b1 - b0) * t / N));
+        faces.push({ name: sys.faceNames[i][sg > 0 ? 1 : 0], center: sys.toCart(c), n: n, Dn: Dn, area: A, flux: Dn * A, poly: poly });
+      }
+    }
+    return { d: d, faces: faces, vol: sys.vol(c0, d), D0: sys.Dc(c0), center: sys.toCart(c0) };
+  }
+
+  /* ---------- zoom view ---------- */
+  var hi = -1, lastSys = null, lastCell = null;
+  function drawZoom(sys, cell) {
+    var C = cell.center, dv = camB.v;
+    var maxDn = 1e-12; cell.faces.forEach(function (f) { maxDn = Math.max(maxDn, Math.abs(f.Dn)); });
+    var charDim = Math.cbrt(Math.abs(cell.vol));
+    var kArrow = 0.55 * charDim / maxDn;
+    var items = [C];
+    cell.faces.forEach(function (f) {
+      f.poly.forEach(function (p) { items.push(p); });
+      f.tip = [f.center[0] + f.n[0] * f.Dn * kArrow, f.center[1] + f.n[1] * f.Dn * kArrow, f.center[2] + f.n[2] * f.Dn * kArrow];
+      items.push(f.tip);
+    });
+    var D0 = cell.D0, mag = Math.hypot(D0[0], D0[1], D0[2]), Dtip = null;
+    if (mag > 1e-12) { var cap = Math.min(kArrow, 0.9 * charDim / mag); Dtip = [C[0] + D0[0] * cap, C[1] + D0[1] * cap, C[2] + D0[2] * cap]; items.push(Dtip); }
+    var W = fitView(items, 640, 560, 64, 700);
+    function pz(p) { var q = proj(p); return { x: W.ox + W.s * q.x, y: W.oy + W.s * q.y }; }
+    var s = gradDefs('z');
+
+    function pts(f) { return f.poly.map(function (p) { var q = pz(p); return f1(q.x) + ',' + f1(q.y); }).join(' '); }
+    var vis = [], hid = [];
+    cell.faces.forEach(function (f, i) { f.i = i; (dot(f.n, dv) > 0 ? vis : hid).push(f); });
+    hid.forEach(function (f) { s += '<polygon class="fc ' + (f.i === hi ? 'fhi' : 'hid') + '" points="' + pts(f) + '"/>'; });
+    vis.forEach(function (f) {
+      if (f.i === hi) { s += '<polygon class="fc fhi" points="' + pts(f) + '"/>'; return; }
+      var ax = [Math.abs(f.n[0]), Math.abs(f.n[1]), Math.abs(f.n[2])];
+      var k = ax[2] >= ax[0] && ax[2] >= ax[1] ? 2 : ax[1] >= ax[0] ? 1 : 0;
+      var fill = k === 2 ? 'fill="url(#zT)" fill-opacity=".72"' : k === 0 ? 'fill="url(#zF)" fill-opacity=".72"' : 'fill="var(--side)" fill-opacity=".22"';
+      s += '<polygon class="fc vis" ' + fill + ' points="' + pts(f) + '"/>';
+    });
+
+    var labels = '';
+    function arrowFor(f, isVis) {
+      if (Math.abs(f.Dn) < 1e-9 * maxDn || Math.abs(f.Dn) < 1e-12) return '';
+      var a = pz(f.center), b = pz(f.tip), bl = Math.hypot(b.x - a.x, b.y - a.y);
+      if (bl < 1e-6) return '';
+      if (bl < 22) { var kk = 22 / bl; b = { x: a.x + (b.x - a.x) * kk, y: a.y + (b.y - a.y) * kk }; }
+      var c = (f.Dn > 0 ? 'vout' : 'vin') + (isVis ? '' : ' back') + (hi >= 0 ? (f.i === hi ? ' hi' : ' dim') : '');
+      var g = arrow(a, b, c, 15, 5.8, 4);
+      if (flags.labels) {
+        var ux = b.x - a.x, uy = b.y - a.y, L = Math.hypot(ux, uy) || 1;
+        var txt = f.name + '  ' + fshort(f.flux), tcls = 'tf ' + (f.Dn > 0 ? 'out' : 'in') + (hi >= 0 && f.i !== hi ? ' dim' : '');
+        labels += f.Dn > 0 ? T(b.x + ux / L * 30, b.y + uy / L * 14, [[txt]], tcls) : T(a.x - ux / L * 30, a.y - uy / L * 14, [[txt]], tcls);
+      }
+      return g;
+    }
+    hid.forEach(function (f) { s += arrowFor(f, false); });
+    vis.forEach(function (f) { s += arrowFor(f, true); });
+    if (Dtip) {
+      s += arrow(pz(C), pz(Dtip), 'vink' + (hi >= 0 ? ' dim' : ''), 14, 5.4, 3.6);
+      var tp = pz(Dtip); labels += T(tp.x + 15, tp.y - 8, [['D']], 'tb');
+    }
+    var cc = pz(C); s += '<circle class="dot" cx="' + f1(cc.x) + '" cy="' + f1(cc.y) + '" r="4"/>';
+    labels += T(cc.x - 13, cc.y - 13, [['P']], 'tl');
+    s += labels;
+
+    var B0 = sys.basis(sys.fromUI(vals[part])), lx = 70, ly = 100, scl = 36, lab = sys.basisLab, placed = [];
+    for (var i = 0; i < 3; i++) {
+      var q = proj(B0[i]), e = { x: lx + scl * q.x, y: ly + scl * q.y };
+      s += arrow({ x: lx, y: ly }, e, 'vloc', 10, 3.6, 2.6);
+      var dx = e.x - lx, dy = e.y - ly, L = Math.hypot(dx, dy) || 1;
+      var tx = e.x + dx / L * 14, ty = e.y + dy / L * 12;
+      for (var m = 0; m < placed.length; m++) { if (Math.hypot(placed[m].x - tx, placed[m].y - ty) < 30) { tx += 30; } }
+      placed.push({ x: tx, y: ty });
+      s += T(tx, ty, [['a', lab[i]]], 'tb');
+    }
+    s += '<text x="' + lx + '" y="' + (ly - 56) + '" class="tf" text-anchor="middle">Unit vectors at P</text>';
+    document.getElementById('zm').innerHTML = s;
+  }
+
+  /* ---------- readouts ---------- */
+  function cls(n) { return n > 1e-12 ? 'pos' : n < -1e-12 ? 'neg' : ''; }
+  function render() {
+    camB = camBasis();
+    var sys = SYS[part], c0 = sys.fromUI(vals[part]);
+    var cell = buildCell(sys, c0, cellS);
+    lastSys = sys; lastCell = cell;
+    drawOverview(sys, c0);
+    drawZoom(sys, cell);
+
+    var tm = sys.terms(c0), div = tm[0] + tm[1] + tm[2];
+    var sum = 0; cell.faces.forEach(function (f) { sum += f.flux; });
+    var est = sum / cell.vol;
+    var el = function (id) { return document.getElementById(id); };
+    el('o-div').innerHTML = '∇·<b class="v">D</b> = <span class="' + cls(div) + '">' + M(div, 2) + '</span> <span style="font-size:1rem;font-weight:400">C/m³</span>';
+    var rel = Math.abs(div) > 1e-9 ? ' (differs from the formula by ' + (Math.abs(est - div) / Math.abs(div) * 100).toFixed(2) + '%)' : '';
+    el('o-num').innerHTML = 'From the flux: ' + M(est, 3) + ' C/m³' + rel;
+    el('o-terms').innerHTML = [0, 1, 2].map(function (i) { return '<div><span class="t">' + sys.termLabels[i] + '</span>' + M(tm[i], 3) + '</div>'; }).join('');
+    el('o-faces').innerHTML = cell.faces.map(function (f, i) {
+      return '<tr data-i="' + i + '"' + (i === hi ? ' class="hl"' : '') + '><td>' + f.name + '</td><td>' + M(f.Dn, 3) + '</td><td>' + sciFmt(f.area) + '</td><td class="' + cls(f.flux) + '">' + sciFmt(f.flux) + '</td></tr>';
+    }).join('') +
+      '<tr class="sum"><td>Total Σ</td><td></td><td></td><td class="' + cls(sum) + '">' + sciFmt(sum) + '</td></tr>' +
+      '<tr><td>Cell volume Δ<i>V</i></td><td></td><td></td><td>' + sciFmt(cell.vol) + ' m³</td></tr>';
+    var meaning;
+    if (Math.abs(div) < 1e-9) meaning = 'At this point the flux into and out of the cell cancels exactly. ∇·<b class="v">D</b> = 0, so there is no free charge at this point.';
+    else if (div > 0) meaning = 'More flux flows out of the cell than in, so this point is a source of flux. By Maxwell’s first equation, ∇·<b class="v">D</b> = <i>ρ</i><sub class="u"><i>v</i></sub>, the volume charge density at this point is positive, about ' + M(div, 2) + ' C/m³';
+    else meaning = 'More flux flows into the cell than out, so this point is a sink of flux. By Maxwell’s first equation, ∇·<b class="v">D</b> = <i>ρ</i><sub class="u"><i>v</i></sub>, the volume charge density at this point is negative, about ' + M(div, 2) + ' C/m³';
+    el('o-mean').innerHTML = meaning;
+    var atDef = vals[part].every(function (v, i) { return Math.abs(v - sys.def[i]) < 1e-9; });
+    el('o-check').innerHTML = 'Textbook answer at the given point: <b>' + M(sys.book, 2) + '</b> C/m³' + (atDef ? ', which matches the value computed above.' : '. You have moved away from the given point. Press “Reset to the given point” to compare.');
+    el('d-eq').innerHTML = sys.fieldHTML;
+    el('d-pt').innerHTML = sys.ptHTML;
+    el('div-eq').innerHTML = sys.divHTML;
+  }
+
+  function setHi(i) {
+    if (i === hi) return;
+    hi = i;
+    Array.prototype.forEach.call(document.querySelectorAll('#o-faces tr[data-i]'), function (r) { r.classList.toggle('hl', parseInt(r.getAttribute('data-i'), 10) === hi); });
+    if (lastSys) drawZoom(lastSys, lastCell);
+  }
+
+  /* ---------- wiring ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (b) {
+    b.addEventListener('click', function () {
+      part = b.getAttribute('data-part');
+      Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      buildRows(); render();
+    });
+  });
+  document.getElementById('f-guides').addEventListener('change', function (e) { flags.guides = e.target.checked; render(); });
+  document.getElementById('f-labels').addEventListener('change', function (e) { flags.labels = e.target.checked; render(); });
+  document.getElementById('btn-reset').addEventListener('click', function () { vals[part] = SYS[part].def.slice(); buildRows(); render(); });
+  document.getElementById('btn-small').addEventListener('click', function () { setCellS(0.02); render(); });
+  /* camera controls */
+  var camInputs = [];
+  (function () {
+    var host = document.getElementById('rows-cam');
+    host.appendChild(makeRow('az', 'Azimuth (°)', -180, 180, 1, cam.az, function (v) { cam.az = v; render(); }, camInputs, 'az'));
+    host.appendChild(makeRow('el', 'Elevation (°)', -85, 85, 1, cam.el, function (v) { cam.el = v; render(); }, camInputs, 'el'));
+  })();
+  function setCam(az, el) {
+    cam.az = az; cam.el = el;
+    camInputs.forEach(function (it) { var v = it.tag === 'az' ? az : el; it.rng.value = v; it.num.value = v; });
+    render();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-view]'), function (b) {
+    b.addEventListener('click', function () {
+      var v = b.getAttribute('data-view');
+      if (v === 'home') setCam(30, 25); else if (v === 'front') setCam(0, 8); else setCam(0, 80);
+    });
+  });
+  ['ov', 'zm'].forEach(function (id) {
+    var svgEl = document.getElementById(id), drag = null;
+    svgEl.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'touch') return;
+      drag = { x: e.clientX, y: e.clientY }; svgEl.classList.add('drag');
+      try { svgEl.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    svgEl.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag = { x: e.clientX, y: e.clientY };
+      var az = cam.az - dx * 0.5; az = ((az + 180) % 360 + 360) % 360 - 180;
+      var el = Math.max(-85, Math.min(85, cam.el + dy * 0.5));
+      setCam(Math.round(az), Math.round(el));
+    });
+    function end() { drag = null; svgEl.classList.remove('drag'); }
+    svgEl.addEventListener('pointerup', end); svgEl.addEventListener('pointercancel', end);
+  });
+  var tb = document.getElementById('o-faces');
+  tb.addEventListener('mouseover', function (e) { var r = e.target.closest('tr[data-i]'); setHi(r ? parseInt(r.getAttribute('data-i'), 10) : -1); });
+  tb.addEventListener('mouseleave', function () { setHi(-1); });
+  tb.addEventListener('click', function (e) { var r = e.target.closest('tr[data-i]'); if (r) { var i = parseInt(r.getAttribute('data-i'), 10); setHi(i === hi ? -1 : i); } });
+  buildRows(); render();
+  
+})();
+</script>
+
+</body></html>

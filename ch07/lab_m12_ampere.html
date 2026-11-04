@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ampère's Circuital Law</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+:root{--bg:#f4f6f9;--panel:#fff;--ink:#16202a;--mut:#56616e;--line:#d5dbe3;--acc:#1c64d6;--pos:#2b8a3e;--neg:#c92a2a;--fs:clamp(11px,min(1.6vw,2.8vh),26px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:var(--fs)}
+#app{height:100%;display:grid;grid-template-rows:auto 1fr}
+header{padding:.3em .8em;display:flex;align-items:baseline;gap:1em;border-bottom:1px solid var(--line);background:var(--panel)}
+h1{font-size:1.2em;margin:0;white-space:nowrap}
+.cap{color:var(--mut);font-size:.9em;flex:1;min-width:0}.cap b{color:var(--ink)}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,32%);min-height:0}
+#stage{position:relative;min-width:0;min-height:0;overflow:hidden}
+#stage canvas{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none}
+#chart{left:auto!important;top:auto!important;right:.4em;bottom:.4em;width:38%!important;height:36%!important;pointer-events:none}
+aside{background:var(--panel);border-left:1px solid var(--line);padding:.4em .7em;overflow:auto;display:flex;flex-direction:column;gap:.38em}
+.row{display:grid;grid-template-columns:minmax(0,7.6em) minmax(0,1fr);align-items:center;gap:.5em}
+.row label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+input[type=range]{width:100%;accent-color:var(--acc);margin:0}
+.seg{display:flex;gap:3px}
+button{font:inherit;font-size:.9em;padding:.15em .45em;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:.35em;cursor:pointer;flex:1}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.read{font-variant-numeric:tabular-nums;font-size:.92em;line-height:1.4;background:#f6f7f9;border-radius:.4em;padding:.25em .5em}
+.big{font-size:1.15em}
+.ok{color:var(--pos);font-weight:600}
+.fx{background:#eef3fb;border-radius:.4em;padding:.25em .5em;font-size:.95em;line-height:1.6}
+.hint{color:var(--mut);font-size:.88em}
+</style>
+</head>
+<body>
+<div id="app">
+<header><h1>Ampère's circuital law</h1>
+<div class="cap" id="cap"></div></header>
+<main>
+<section id="stage"><canvas id="cv"></canvas><canvas id="chart"></canvas></section>
+<aside>
+<div class="seg" id="modeSeg"><button data-m="wires" class="on">Wires</button><button data-m="coax">Coax cable</button></div>
+<div class="seg" id="shapeSeg"><button data-s="circle" class="on">Circle loop</button><button data-s="square">Square loop</button></div>
+<div id="wireCtl" class="seg"><button id="addP">+ wire (+I)</button><button id="addN">+ wire (−I)</button><button id="clr">Clear</button></div>
+<div class="row" id="rowIw"><label>|I| new = <b id="vIw"></b></label><input type="range" id="Iw" min="1" max="10" step="1" value="4"></div>
+<div id="coaxCtl" style="display:none;flex-direction:column;gap:.38em">
+<div class="row"><label>I = <b id="vIc"></b></label><input type="range" id="Ic" min="1" max="20" step="1" value="10"></div>
+<div class="row"><label>a = <b id="vca"></b></label><input type="range" id="ca" min="0.5" max="3" step="0.1" value="1.5"></div>
+<div class="row"><label>b = <b id="vcb"></b></label><input type="range" id="cb" min="2" max="7" step="0.1" value="5"></div>
+<div class="row"><label>c = <b id="vcc"></b></label><input type="range" id="cc" min="2.5" max="8.5" step="0.1" value="6.5"></div>
+</div>
+<div class="read" id="read"></div>
+<div class="fx" id="fx"></div>
+<div class="hint" id="hint"></div>
+</aside>
+</main>
+</div>
+
+<script id="physics">
+/* ===== Physics core (portable, no DOM). SI units: metres, amperes. ===== */
+const AMP = (function () {
+  // field of infinitely long straight wires along z at (x_k, y_k), current I_k (+ = out of page, +z)
+  function wiresH(wires, x, y) {
+    let hx = 0, hy = 0;
+    for (const w of wires) {
+      const dx = x - w.x, dy = y - w.y, r2 = dx * dx + dy * dy;
+      if (r2 < 1e-14) continue;
+      const k = w.I / (2 * Math.PI * r2);       // H = I/(2πρ) a_φ ;  a_φ = (−dy, dx)/ρ
+      hx += -k * dy; hy += k * dx;
+    }
+    return [hx, hy];
+  }
+  // coax: inner conductor radius a carries +I (uniform), outer conductor b..c carries −I (uniform)
+  function coaxHphi(I, a, b, c, rho) {
+    if (rho <= a) return (I * rho) / (2 * Math.PI * a * a);
+    if (rho <= b) return I / (2 * Math.PI * rho);
+    if (rho <= c) return (I / (2 * Math.PI * rho)) * (c * c - rho * rho) / (c * c - b * b);
+    return 0;
+  }
+  function coaxIenc(I, a, b, c, rho) { return 2 * Math.PI * rho * coaxHphi(I, a, b, c, rho); }
+  function coaxJ(I, a, b, c, rho) {
+    if (rho <= a) return I / (Math.PI * a * a);
+    if (rho > b && rho <= c) return -I / (Math.PI * (c * c - b * b));
+    return 0;
+  }
+  function coaxH(co, x, y) {
+    const r = Math.hypot(x - co.x, y - co.y); if (r < 1e-12) return [0, 0];
+    const h = coaxHphi(co.I, co.a, co.b, co.c, r);
+    return [-h * (y - co.y) / r, h * (x - co.x) / r];
+  }
+  // closed path, counter-clockwise (right-hand rule with +z out of page)
+  function loopPath(shape, M = 2000) {
+    const pts = [];
+    if (shape.type === 'circle') {
+      for (let i = 0; i < M; i++) { const t = (2 * Math.PI * i) / M; pts.push([shape.cx + shape.r * Math.cos(t), shape.cy + shape.r * Math.sin(t)]); }
+    } else {
+      const h = shape.r, c = [[h, -h], [h, h], [-h, h], [-h, -h]], q = Math.max(1, Math.round(M / 4));
+      for (let s = 0; s < 4; s++) { const A = c[s], B = c[(s + 1) % 4]; for (let i = 0; i < q; i++) { const f = i / q; pts.push([shape.cx + A[0] + (B[0] - A[0]) * f, shape.cy + A[1] + (B[1] - A[1]) * f]); } }
+    }
+    return pts;
+  }
+  // numeric ∮H·dL with midpoint rule; also returns running sum
+  function circulation(Hfn, pts) {
+    let sum = 0; const run = new Float64Array(pts.length);
+    for (let i = 0; i < pts.length; i++) {
+      const p = pts[i], q = pts[(i + 1) % pts.length];
+      const h = Hfn(0.5 * (p[0] + q[0]), 0.5 * (p[1] + q[1]));
+      sum += h[0] * (q[0] - p[0]) + h[1] * (q[1] - p[1]); run[i] = sum;
+    }
+    return { total: sum, run };
+  }
+  function inside(shape, x, y) {
+    return shape.type === 'circle' ? Math.hypot(x - shape.cx, y - shape.cy) < shape.r : Math.abs(x - shape.cx) < shape.r && Math.abs(y - shape.cy) < shape.r;
+  }
+  function wiresIenc(wires, shape) { return wires.reduce((s, w) => s + (inside(shape, w.x, w.y) ? w.I : 0), 0); }
+  // enclosed coax current by area integral of J over the loop (n × n midpoint grid)
+  function coaxIencShape(co, shape, n = 300) {
+    const x0 = shape.cx - shape.r, y0 = shape.cy - shape.r, d = (2 * shape.r) / n; let s = 0;
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+      const x = x0 + (i + 0.5) * d, y = y0 + (j + 0.5) * d;
+      if (inside(shape, x, y)) s += coaxJ(co.I, co.a, co.b, co.c, Math.hypot(x - co.x, y - co.y));
+    }
+    return s * d * d;
+  }
+  return { wiresH, coaxHphi, coaxIenc, coaxJ, coaxH, loopPath, circulation, inside, wiresIenc, coaxIencShape };
+})();
+if (typeof module !== 'undefined') module.exports = AMP;
+</script>
+
+<script>
+/* ===== UI ===== */
+const $ = id => document.getElementById(id);
+const tex = (el, s) => { if (window.katex) { try { katex.render(s, el, { throwOnError: false }); return; } catch (e) {} } el.textContent = s; };
+const fmt = (v, d = 3) => (Math.abs(v) < 5e-4 ? 0 : v).toFixed(d);
+const CM = 0.01;
+const S = {
+  mode: 'wires', shape: { type: 'circle', cx: 0, cy: 0, r: 4 * CM },
+  wires: [{ x: -1.5 * CM, y: 0.8 * CM, I: 4 }, { x: 1.6 * CM, y: -1 * CM, I: -2 }, { x: 6.5 * CM, y: 2.5 * CM, I: 5 }],
+  Iw: 4, co: { x: 0, y: 0, I: 10, a: 1.5 * CM, b: 5 * CM, c: 6.5 * CM }
+};
+const cv = $('cv'), ctx = cv.getContext('2d'), ch = $('chart'), cc = ch.getContext('2d');
+let scale = 1, ox = 0, oy = 0; // px per metre, origin px
+const fsPx = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
+const P = (x, y) => [ox + x * scale, oy - y * scale];
+const Wd = (px, py) => [(px - ox) / scale, (oy - py) / scale];
+
+function Hfn() { return S.mode === 'wires' ? (x, y) => AMP.wiresH(S.wires, x, y) : (x, y) => AMP.coaxH(S.co, x, y); }
+
+function bind(id, fn, show) { const el = $(id), o = $('v' + id); const u = () => { fn(parseFloat(el.value)); o.textContent = show(parseFloat(el.value)); }; el.oninput = () => { u(); fixCoax(); draw(); }; u(); }
+bind('Iw', v => S.Iw = v, v => v + ' A');
+bind('Ic', v => S.co.I = v, v => v + ' A');
+bind('ca', v => S.co.a = v * CM, v => v.toFixed(1) + ' cm');
+bind('cb', v => S.co.b = v * CM, v => v.toFixed(1) + ' cm');
+bind('cc', v => S.co.c = v * CM, v => v.toFixed(1) + ' cm');
+function fixCoax() { // keep a < b < c
+  const co = S.co;
+  if (co.b < co.a + 0.3 * CM) { co.b = co.a + 0.3 * CM; $('cb').value = co.b / CM; $('vcb').textContent = (co.b / CM).toFixed(1) + ' cm'; }
+  if (co.c < co.b + 0.3 * CM) { co.c = co.b + 0.3 * CM; $('cc').value = co.c / CM; $('vcc').textContent = (co.c / CM).toFixed(1) + ' cm'; }
+}
+document.querySelectorAll('#modeSeg button').forEach(b => b.onclick = () => {
+  S.mode = b.dataset.m; document.querySelectorAll('#modeSeg button').forEach(x => x.classList.toggle('on', x === b));
+  $('wireCtl').style.display = $('rowIw').style.display = S.mode === 'wires' ? '' : 'none';
+  $('coaxCtl').style.display = S.mode === 'coax' ? 'flex' : 'none';
+  S.shape.cx = 0; S.shape.cy = 0; S.shape.r = S.mode === 'coax' ? 3.2 * CM : 4 * CM;
+  texts(); draw();
+});
+document.querySelectorAll('#shapeSeg button').forEach(b => b.onclick = () => { S.shape.type = b.dataset.s; document.querySelectorAll('#shapeSeg button').forEach(x => x.classList.toggle('on', x === b)); draw(); });
+function addWire(sgn) {
+  const ang = Math.random() * 6.28, r = (1 + Math.random() * 6) * CM;
+  S.wires.push({ x: r * Math.cos(ang), y: r * Math.sin(ang), I: sgn * S.Iw }); draw();
+}
+$('addP').onclick = () => addWire(1); $('addN').onclick = () => addWire(-1); $('clr').onclick = () => { S.wires = []; draw(); };
+
+function texts() {
+  if (S.mode === 'wires') {
+    $('cap').innerHTML = '<b>Notice:</b> wires outside the loop change H along the path but add exactly zero to ∮H·dL — only enclosed current counts.';
+    $('hint').innerHTML = 'Drag the loop body to move it, drag the ◆ handle to resize. Drag wires; tap a wire to flip its sign. ⊙ = current out of page.';
+  } else {
+    $('cap').innerHTML = '<b>Notice:</b> H(ρ) rises linearly in the inner conductor, falls as 1/ρ in the dielectric, drops to zero outside the outer conductor.';
+    $('hint').innerHTML = 'Drag the ◆ handle to change the loop radius; drag the loop off-centre — the integral still equals the enclosed current.';
+  }
+  const fx = $('fx');
+  fx.innerHTML = S.mode === 'wires'
+    ? '<span data-t="\\oint \\mathbf H\\cdot d\\mathbf L = I_{\\text{enc}}"></span><br><span data-t="H_\\phi=\\dfrac{I}{2\\pi\\rho}\\;\\text{(each wire)}"></span>'
+    : '<span data-t="H_\\phi=\\begin{cases}\\dfrac{I\\rho}{2\\pi a^2} & \\rho<a\\\\[4pt] \\dfrac{I}{2\\pi\\rho} & a<\\rho<b\\\\[4pt] \\dfrac{I}{2\\pi\\rho}\\dfrac{c^2-\\rho^2}{c^2-b^2} & b<\\rho<c\\\\[4pt] 0 & \\rho>c\\end{cases}"></span>';
+  fx.querySelectorAll('[data-t]').forEach(e => tex(e, e.dataset.t));
+}
+
+function arrow(c, x, y, ux, uy, len, col, w) {
+  const hl = Math.max(4, len * 0.35), tx = x + ux * len / 2, ty = y + uy * len / 2;
+  c.strokeStyle = c.fillStyle = col; c.lineWidth = w;
+  c.beginPath(); c.moveTo(x - ux * len / 2, y - uy * len / 2); c.lineTo(tx, ty); c.stroke();
+  c.beginPath(); c.moveTo(tx, ty); c.lineTo(tx - ux * hl - uy * hl * .5, ty - uy * hl + ux * hl * .5); c.lineTo(tx - ux * hl + uy * hl * .5, ty - uy * hl - ux * hl * .5); c.closePath(); c.fill();
+}
+function sym(c, x, y, r, out, col, lw) {
+  c.fillStyle = '#fff'; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
+  c.strokeStyle = c.fillStyle = col; c.lineWidth = lw; c.beginPath(); c.arc(x, y, r, 0, 7); c.stroke();
+  if (out) { c.beginPath(); c.arc(x, y, r * .3, 0, 7); c.fill(); }
+  else { const d = r * .6; c.beginPath(); c.moveTo(x - d, y - d); c.lineTo(x + d, y + d); c.moveTo(x + d, y - d); c.lineTo(x - d, y + d); c.stroke(); }
+}
+
+let last = null;
+function draw() {
+  const W = cv.width, Hh = cv.height, dpr = window.devicePixelRatio || 1, fs = fsPx() * dpr;
+  const half = 9 * CM; scale = Math.min(W, Hh) / (2 * half); ox = S.mode === 'coax' ? Math.min(W / 2, Hh / 2 + 0.02 * W) : W * 0.45; oy = Hh / 2;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, Hh);
+  const H = Hfn();
+  // coax regions
+  if (S.mode === 'coax') {
+    const co = S.co, [cx, cy] = P(co.x, co.y);
+    ctx.fillStyle = '#f2d8c9'; ctx.beginPath(); ctx.arc(cx, cy, co.c * scale, 0, 2 * Math.PI); ctx.moveTo(cx + co.b * scale, cy); ctx.arc(cx, cy, co.b * scale, 0, 2 * Math.PI); ctx.fill('evenodd');
+    ctx.fillStyle = '#eef5e6'; ctx.beginPath(); ctx.arc(cx, cy, co.b * scale, 0, 7); ctx.fill();
+    ctx.fillStyle = '#f0c4a8'; ctx.beginPath(); ctx.arc(cx, cy, co.a * scale, 0, 7); ctx.fill();
+    ctx.fillStyle = '#56616e'; ctx.font = `${0.8 * fs}px system-ui`;
+    ctx.textAlign = 'center';
+    ctx.fillText('inner ⊙ +I', cx, cy - co.a * scale - 0.3 * fs);
+    ctx.fillText('dielectric', cx, cy + (co.a + 0.5 * (co.b - co.a)) * scale + 0.3 * fs);
+    ctx.fillText('outer ⊗ −I', cx, cy - co.c * scale - 0.4 * fs); ctx.textAlign = 'left';
+  }
+  // field arrows
+  const step = Math.max(2.1 * fs, 26 * dpr);
+  let mags = [];
+  for (let py = step / 2; py < Hh; py += step) for (let px = step / 2; px < W; px += step) { const [x, y] = Wd(px, py), h = H(x, y); mags.push([px, py, h]); }
+  const ms = mags.map(m => Math.hypot(...m[2])).filter(v => v > 0).sort((a, b) => a - b), ref = ms[Math.floor(ms.length * 0.9)] || 1;
+  for (const [px, py, h] of mags) {
+    const m = Math.hypot(h[0], h[1]); if (m < ref * 1e-3) continue;
+    const t = Math.min(1, m / ref); arrow(ctx, px, py, h[0] / m, -h[1] / m, step * (0.3 + 0.45 * t), `rgba(60,30,130,${0.2 + 0.6 * t})`, 1.4 * dpr);
+  }
+  // loop with H·dL colouring
+  const pts = AMP.loopPath(S.shape, 720), circ = AMP.circulation(H, pts);
+  const big = AMP.loopPath(S.shape, 2000), res = AMP.circulation(H, big);
+  let mx = 1e-12; const contrib = pts.map((p, i) => { const q = pts[(i + 1) % pts.length], h = H((p[0] + q[0]) / 2, (p[1] + q[1]) / 2); const L = Math.hypot(q[0] - p[0], q[1] - p[1]); const v = (h[0] * (q[0] - p[0]) + h[1] * (q[1] - p[1])) / L; mx = Math.max(mx, Math.abs(v)); return v; });
+  ctx.lineWidth = 5 * dpr; ctx.lineCap = 'round';
+  for (let i = 0; i < pts.length; i++) {
+    const v = contrib[i] / mx, a = P(...pts[i]), b = P(...pts[(i + 1) % pts.length]);
+    ctx.strokeStyle = v >= 0 ? `rgba(43,138,62,${0.25 + 0.75 * v})` : `rgba(201,42,42,${0.25 - 0.75 * v})`;
+    ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+  }
+  // direction arrows on loop (CCW)
+  for (const f of [0.125, 0.375, 0.625, 0.875]) { const i = Math.floor(pts.length * f), a = P(...pts[i]), b = P(...pts[(i + 3) % pts.length]), m = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; arrow(ctx, a[0], a[1], (b[0] - a[0]) / m, (b[1] - a[1]) / m, 1.1 * fs, '#16202a', 2.5 * dpr); }
+  // handle
+  const hp = S.shape.type === 'circle' ? P(S.shape.cx + S.shape.r * Math.SQRT1_2, S.shape.cy - S.shape.r * Math.SQRT1_2) : P(S.shape.cx + S.shape.r, S.shape.cy - S.shape.r);
+  ctx.fillStyle = '#1c64d6'; ctx.beginPath(); const hs = 0.55 * fs; ctx.moveTo(hp[0], hp[1] - hs); ctx.lineTo(hp[0] + hs, hp[1]); ctx.lineTo(hp[0], hp[1] + hs); ctx.lineTo(hp[0] - hs, hp[1]); ctx.closePath(); ctx.fill();
+  // wires
+  if (S.mode === 'wires') for (const w of S.wires) {
+    const [x, y] = P(w.x, w.y), r = (0.55 + 0.05 * Math.abs(w.I)) * fs; sym(ctx, x, y, r, w.I > 0, w.I > 0 ? '#d9480f' : '#1864ab', 2.5 * dpr);
+    ctx.fillStyle = '#16202a'; ctx.font = `bold ${0.85 * fs}px system-ui`; ctx.fillText((w.I > 0 ? '+' : '−') + Math.abs(w.I) + ' A', x + r + 0.2 * fs, y - r * 0.5);
+  }
+  // scale bar
+  ctx.fillStyle = '#56616e'; ctx.fillRect(fs, Hh - fs, 2 * CM * scale, 3 * dpr); ctx.font = `${0.85 * fs}px system-ui`; ctx.fillText('2 cm', fs, Hh - 1.4 * fs);
+  // readout
+  let Ienc, Ienc2 = null;
+  if (S.mode === 'wires') Ienc = AMP.wiresIenc(S.wires, S.shape);
+  else {
+    Ienc = AMP.coaxIencShape(S.co, S.shape, 360);
+    const concentric = S.shape.type === 'circle' && Math.hypot(S.shape.cx - S.co.x, S.shape.cy - S.co.y) < 1e-6;
+    if (concentric) Ienc2 = AMP.coaxIenc(S.co.I, S.co.a, S.co.b, S.co.c, S.shape.r);
+  }
+  const nearWire = S.mode === 'wires' && S.wires.some(w => { const s = { ...S.shape }; const inR = AMP.inside({ ...s, r: s.r * 1.02 }, w.x, w.y), inr = AMP.inside({ ...s, r: s.r * 0.98 }, w.x, w.y); return inR !== inr; });
+  let s = `<div class="big">∮<b>H</b>·d<b>L</b> = <b>${fmt(res.total)} A</b></div><div class="big">I<sub>enc</sub> = <b>${fmt(Ienc)} A</b> ${Math.abs(res.total - Ienc) < 0.01 * Math.max(1, Math.abs(Ienc)) ? '<span class="ok">✓ equal</span>' : ''}</div>`;
+  if (S.mode === 'wires') s += `<span style="color:#56616e">${S.wires.filter(w => AMP.inside(S.shape, w.x, w.y)).length} of ${S.wires.length} wires enclosed</span>`;
+  else {
+    const rho = Math.hypot(S.shape.cx - S.co.x, S.shape.cy - S.co.y);
+    s += Ienc2 !== null ? `ρ = ${(S.shape.r / CM).toFixed(2)} cm → H<sub>φ</sub> = ${fmt(AMP.coaxHphi(S.co.I, S.co.a, S.co.b, S.co.c, S.shape.r), 2)} A/m<br>closed-form I<sub>enc</sub> = ${fmt(Ienc2)} A` : `<span style="color:#56616e">Loop off-centre by ${(rho / CM).toFixed(1)} cm — H·dL varies, the sum does not.</span>`;
+  }
+  if (nearWire) s += '<br><span style="color:#c92a2a">Wire on the path — integral is singular.</span>';
+  s += '<br><span style="color:#2b8a3e">■</span> H·dL &gt; 0 &nbsp; <span style="color:#c92a2a">■</span> H·dL &lt; 0';
+  $('read').innerHTML = s;
+  last = res; drawChart(res, Ienc);
+}
+
+function drawChart(res, Ienc) {
+  const dpr = window.devicePixelRatio || 1, r = ch.getBoundingClientRect(); ch.width = r.width * dpr; ch.height = r.height * dpr;
+  const W = ch.width, Hh = ch.height, fs = fsPx() * dpr * 0.82, c = cc;
+  c.fillStyle = 'rgba(255,255,255,.94)'; c.strokeStyle = '#c8d0da'; c.lineWidth = dpr; c.fillRect(0, 0, W, Hh); c.strokeRect(0, 0, W, Hh);
+  const L = 3 * fs, R = W - 0.8 * fs, T = 2.2 * fs, B = Hh - 1.7 * fs;
+  c.font = `${fs}px system-ui`;
+  if (S.mode === 'coax') {
+    const co = S.co, xmax = 9 * CM, f = rho => AMP.coaxHphi(co.I, co.a, co.b, co.c, rho), ymax = co.I / (2 * Math.PI * co.a) * 1.15;
+    const X = x => L + x / xmax * (R - L), Y = y => B - y / ymax * (B - T);
+    [[0, co.a, '#f0c4a8'], [co.a, co.b, '#eef5e6'], [co.b, co.c, '#f2d8c9']].forEach(([a, b, col]) => { c.fillStyle = col; c.fillRect(X(a), T, X(b) - X(a), B - T); });
+    c.strokeStyle = '#8994a1'; c.beginPath(); c.moveTo(L, T); c.lineTo(L, B); c.lineTo(R, B); c.stroke();
+    c.strokeStyle = '#3d1a8a'; c.lineWidth = 2.6 * dpr; c.beginPath(); for (let i = 0; i <= 300; i++) { const x = xmax * i / 300; i ? c.lineTo(X(x), Y(f(x))) : c.moveTo(X(x), Y(f(x))); } c.stroke();
+    const rr = S.shape.r; if (rr < xmax) { c.fillStyle = '#1c64d6'; c.beginPath(); c.arc(X(rr), Y(f(rr)), 0.35 * fs, 0, 7); c.fill(); }
+    c.fillStyle = '#16202a'; c.fillText('H_φ(ρ)  (A/m)', 0.4 * fs, 1.2 * fs); c.fillStyle = '#56616e'; c.fillText('ρ →', R - 2 * fs, T - 0.4 * fs);
+    c.fillText(ymax.toFixed(0), 0.3 * fs, T + 0.8 * fs); c.fillText('a', X(co.a) - 0.25 * fs, B + 1.1 * fs); c.fillText('b', X(co.b) - 0.25 * fs, B + 1.1 * fs); c.fillText('c', X(co.c) - 0.2 * fs, B + 1.1 * fs);
+  } else {
+    const run = res.run, n = run.length; let ymin = Math.min(0, Ienc), ymax = Math.max(0, Ienc); for (const v of run) { ymin = Math.min(ymin, v); ymax = Math.max(ymax, v); }
+    const pad = (ymax - ymin) * 0.12 || 1; ymin -= pad; ymax += pad;
+    const X = i => L + i / n * (R - L), Y = y => B - (y - ymin) / (ymax - ymin) * (B - T);
+    c.strokeStyle = '#8994a1'; c.beginPath(); c.moveTo(L, T); c.lineTo(L, B); c.moveTo(L, Y(0)); c.lineTo(R, Y(0)); c.stroke();
+    c.setLineDash([6 * dpr, 4 * dpr]); c.strokeStyle = '#2b8a3e'; c.beginPath(); c.moveTo(L, Y(Ienc)); c.lineTo(R, Y(Ienc)); c.stroke(); c.setLineDash([]);
+    c.strokeStyle = '#3d1a8a'; c.lineWidth = 2.6 * dpr; c.beginPath(); for (let i = 0; i < n; i += 4) i ? c.lineTo(X(i), Y(run[i])) : c.moveTo(X(i), Y(run[i])); c.lineTo(X(n), Y(run[n - 1])); c.stroke();
+    c.fillStyle = '#16202a'; c.fillText('running ∫H·dL  (A)', 0.4 * fs, 1.2 * fs); c.fillStyle = '#56616e'; c.fillText('position along loop →', L + 0.3 * fs, Hh - 0.35 * fs);
+    c.fillStyle = '#2b8a3e'; c.fillText('I_enc', R - 2.6 * fs, Y(Ienc) - 0.3 * fs);
+  }
+}
+
+// pointer interaction
+let drag = null, moved = false;
+cv.addEventListener('pointerdown', e => {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, px = (e.clientX - r.left) * dpr, py = (e.clientY - r.top) * dpr, fs = fsPx() * dpr;
+  const [x, y] = Wd(px, py); moved = false;
+  const hp = S.shape.type === 'circle' ? P(S.shape.cx + S.shape.r * Math.SQRT1_2, S.shape.cy - S.shape.r * Math.SQRT1_2) : P(S.shape.cx + S.shape.r, S.shape.cy - S.shape.r);
+  if (Math.hypot(px - hp[0], py - hp[1]) < 1.2 * fs) drag = { k: 'resize' };
+  else if (S.mode === 'wires') {
+    const w = S.wires.find(w => { const q = P(w.x, w.y); return Math.hypot(q[0] - px, q[1] - py) < 1.1 * fs; });
+    if (w) drag = { k: 'wire', w, dx: w.x - x, dy: w.y - y };
+  }
+  if (!drag) drag = { k: 'move', dx: S.shape.cx - x, dy: S.shape.cy - y };
+  cv.setPointerCapture(e.pointerId);
+});
+cv.addEventListener('pointermove', e => {
+  if (!drag) return; moved = true;
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, [x, y] = Wd((e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr);
+  if (drag.k === 'resize') { const d = S.shape.type === 'circle' ? Math.hypot(x - S.shape.cx, y - S.shape.cy) : Math.max(Math.abs(x - S.shape.cx), Math.abs(y - S.shape.cy)); S.shape.r = Math.max(0.3 * CM, Math.min(12 * CM, d)); }
+  else if (drag.k === 'wire') { drag.w.x = x + drag.dx; drag.w.y = y + drag.dy; }
+  else { S.shape.cx = x + drag.dx; S.shape.cy = y + drag.dy; if (S.mode === 'coax' && Math.hypot(S.shape.cx, S.shape.cy) < 0.4 * CM) { S.shape.cx = 0; S.shape.cy = 0; } }
+  draw();
+});
+cv.addEventListener('pointerup', () => { if (drag && drag.k === 'wire' && !moved) { drag.w.I = -drag.w.I; draw(); } drag = null; });
+
+new ResizeObserver(() => { const dpr = window.devicePixelRatio || 1; cv.width = Math.max(1, Math.round(cv.clientWidth * dpr)); cv.height = Math.max(1, Math.round(cv.clientHeight * dpr)); draw(); }).observe($('stage'));
+texts();
+window.addEventListener('load', texts);
+</script>
+</body>
+</html>

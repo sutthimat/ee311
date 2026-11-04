@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" crossorigin="anonymous"></script>
+<title>Continuity &amp; Charge Relaxation</title>
+<style>/* ===== common UI kit (shared by all sims) ===== */
+:root{
+  --bg:#f7f8fb; --panel:#ffffff; --ink:#1b2333; --muted:#5a6478; --line:#d5dae5;
+  --accent:#1f6feb; --pos:#d1242f; --neg:#1f6feb; --ok:#1a7f37; --warn:#b35900;
+  --c1:#1f6feb; --c2:#d1242f; --c3:#1a7f37; --c4:#8250df; --c5:#b35900;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink)}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:clamp(12px,min(2.6vh,1.46vw),26px);line-height:1.25}
+.app{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100vh;width:100vw;padding:.45em .7em;gap:.4em}
+header{display:flex;align-items:baseline;gap:.8em;min-width:0}
+header h1{font-size:1.3em;margin:0;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .tag{font-size:.8em;color:#fff;background:var(--accent);border-radius:.3em;padding:.1em .45em;white-space:nowrap}
+header .modes{margin-left:auto}
+main{display:grid;grid-template-columns:minmax(0,1fr) 21em;gap:.6em;min-height:0}
+.stage{position:relative;min-height:0;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:.5em;overflow:hidden}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.panel{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:.5em;padding:.5em .7em;overflow-y:auto;overflow-x:hidden;min-height:0;display:flex;flex-direction:column;gap:.45em}
+.ctl{display:flex;flex-direction:column;gap:.05em}
+.ctl-row{display:flex;justify-content:space-between;align-items:baseline;gap:.5em}
+.ctl-row label{font-weight:600}
+.ctl-row output{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:600;white-space:nowrap}
+input[type=range]{width:100%;height:1.3em;margin:0;accent-color:var(--accent);cursor:pointer}
+.seg{display:inline-flex;border:1px solid var(--accent);border-radius:.4em;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.92em;border:0;background:#fff;color:var(--accent);padding:.18em .6em;cursor:pointer}
+.seg button+button{border-left:1px solid var(--accent)}
+.seg button.on{background:var(--accent);color:#fff}
+button.btn{font:inherit;font-size:.92em;border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:.4em;padding:.15em .6em;cursor:pointer}
+button.btn:hover,.seg button:hover:not(.on){background:#eaf1fe}
+.row{display:flex;gap:.4em;flex-wrap:wrap;align-items:center}
+.formula{border-top:1px solid var(--line);padding-top:.35em;font-size:.95em}
+.formula .katex{font-size:1.02em}
+.formula .eq{margin:.15em 0;overflow-x:auto;overflow-y:hidden}
+.readout{font-variant-numeric:tabular-nums;font-size:.95em}
+.readout b{color:var(--accent)}
+.big{font-size:1.25em;font-weight:700;color:var(--accent)}
+footer.notice{font-size:1em;background:#fff8e1;border:1px solid #f0d78c;border-radius:.4em;padding:.25em .6em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+footer.notice::before{content:"What to notice: ";font-weight:700;color:var(--warn)}
+.chk{display:flex;gap:.4em;align-items:center;cursor:pointer}
+.chk input{width:1em;height:1em;accent-color:var(--accent)}
+select{font:inherit;font-size:.92em;padding:.05em .2em}
+.hide{display:none!important}
+.small{font-size:.85em;color:var(--muted)}
+@media (max-width:760px),(max-aspect-ratio:1/1){
+  body{font-size:clamp(12px,2.2vw,20px)}
+  main{grid-template-columns:1fr;grid-template-rows:minmax(0,1.4fr) minmax(0,1fr)}
+  footer.notice{white-space:normal}
+}
+</style>
+</head><body>
+<div class="app">
+  <header><span class="tag">Session 12</span><h1>Continuity of Current &amp; Charge Relaxation</h1><div class="modes" id="modes"></div></header>
+  <main>
+    <div class="stage"><canvas id="cv"></canvas></div>
+    <aside class="panel" id="panel">
+      <div id="ctlA"></div>
+      <div id="ctlB"></div>
+      <div class="row"><button class="btn" id="play">❚❚ Pause</button><button class="btn" id="reset">↺ Reset t = 0</button></div>
+      <div class="readout" id="read"></div>
+      <div class="formula" id="fA">
+        <div class="eq" data-tex="\nabla\cdot\mathbf J=-\dfrac{\partial\rho_v}{\partial t}"></div>
+        <div class="eq" data-tex="I=\oint_S\mathbf J\cdot d\mathbf S=-\dfrac{dQ_{\rm enc}}{dt}"></div>
+        <div class="eq" id="fAprof"></div>
+      </div>
+      <div class="formula hide" id="fB">
+        <div class="eq" data-tex="\mathbf J=\sigma\mathbf E,\quad \nabla\cdot\mathbf D=\rho_v"></div>
+        <div class="eq" data-tex="\dfrac{\partial\rho_v}{\partial t}=-\dfrac{\sigma}{\varepsilon}\rho_v"></div>
+        <div class="eq" data-tex="\rho_v=\rho_{v0}\,e^{-t/\tau},\quad \tau=\dfrac{\varepsilon}{\sigma}"></div>
+      </div>
+    </aside>
+  </main>
+  <footer class="notice" id="notice"></footer>
+</div>
+
+<!-- ===================== PHYSICS (pure, testable; no DOM) ===================== -->
+<script id="physics">
+const PHYS = (() => {
+  const EPS0 = 8.854e-12;
+  // Spherically symmetric, exponentially decaying charge cloud.
+  // profile 'uniform':  rho = rho0 e^{-t/tau},              J_r = rho0 r/(3 tau) e^{-t/tau}
+  // profile 'inv2'   :  rho = rho0 (a/r)^2 e^{-t/tau},      J_r = rho0 a^2/(r tau) e^{-t/tau}   (Hayt-style J ∝ e^{-t}/r)
+  // Both satisfy div J = -d(rho)/dt exactly (checked numerically in tests).
+  function rho(r, t, p) { const d = Math.exp(-t / p.tau); return p.profile === 'uniform' ? p.rho0 * d : p.rho0 * (p.a / r) ** 2 * d; }
+  function Jr(r, t, p) { const d = Math.exp(-t / p.tau); return p.profile === 'uniform' ? p.rho0 * r / (3 * p.tau) * d : p.rho0 * p.a * p.a / (r * p.tau) * d; }
+  function Qenc(R, t, p) { const d = Math.exp(-t / p.tau); return p.profile === 'uniform' ? 4 / 3 * Math.PI * R ** 3 * p.rho0 * d : 4 * Math.PI * p.rho0 * p.a * p.a * R * d; }
+  function Iout(R, t, p) { return 4 * Math.PI * R * R * Jr(R, t, p); }           // closed-surface integral of J·dS (sphere)
+  // drift velocity of the charge v = J/rho (radial); trajectory r(t) = r0 exp(k t)
+  function driftRate(p) { return p.profile === 'uniform' ? 1 / (3 * p.tau) : 1 / p.tau; }
+  // numerical versions (used by tests to cross-check)
+  function QencNum(R, t, p, n = 4000) { let s = 0; const h = R / n; for (let i = 0; i < n; i++) { const r = (i + 0.5) * h; s += 4 * Math.PI * r * r * rho(r, t, p) * h; } return s; }
+  function IoutNum(R, t, p, n = 400) { // integrate J·dS over sphere surface in (theta,phi) – independent of symmetry assumption
+    let s = 0; const dth = Math.PI / n, dph = 2 * Math.PI / n;
+    for (let i = 0; i < n; i++) { const th = (i + 0.5) * dth; s += Jr(R, t, p) * R * R * Math.sin(th) * dth * dph * n; }
+    return s;
+  }
+  function divJ(r, t, p, h = 1e-5) { const f = x => x * x * Jr(x, t, p); return (f(r + h) - f(r - h)) / (2 * h) / (r * r); }
+
+  // Charge relaxation in a homogeneous conductor
+  const tau = (sigma, epsr) => epsr * EPS0 / sigma;
+  const MATERIALS = [ // sigma [S/m], eps_r (typical room-temperature values)
+    { name: 'Copper', sigma: 5.8e7, epsr: 1 },
+    { name: 'Seawater', sigma: 4, epsr: 81 },
+    { name: 'Intrinsic Si', sigma: 4.4e-4, epsr: 11.7 },
+    { name: 'Distilled water', sigma: 1e-4, epsr: 80 },
+    { name: 'Glass', sigma: 1e-12, epsr: 6 },
+    { name: 'Fused quartz', sigma: 1e-17, epsr: 3.8 },
+  ];
+  return { EPS0, rho, Jr, Qenc, Iout, QencNum, IoutNum, divJ, driftRate, tau, MATERIALS };
+})();
+if (typeof module !== 'undefined') module.exports = PHYS;
+</script>
+
+<script>/* ===== common UI kit (shared by all sims; no physics here) ===== */
+const UI = (() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '+': '' };
+  // scientific notation with unicode superscripts: 1.53×10⁻¹⁹
+  function sci(x, d = 3) {
+    if (!isFinite(x)) return String(x);
+    if (x === 0) return '0';
+    const e = Math.floor(Math.log10(Math.abs(x)));
+    if (e >= -2 && e <= 3) return (+x.toPrecision(d)).toString();
+    let m = x / Math.pow(10, e);
+    let ms = (+m.toPrecision(d)).toString();
+    if (Math.abs(+ms) >= 10) { ms = (+(m / 10).toPrecision(d)).toString(); return ms + '×10' + String(e + 1).split('').map(c => SUP[c]).join(''); }
+    return ms + '×10' + String(e).split('').map(c => SUP[c]).join('');
+  }
+  // engineering format with SI prefix: eng(1.5e-9,'F') -> "1.50 nF"
+  const PRE = { '-24': 'y', '-21': 'z', '-18': 'a', '-15': 'f', '-12': 'p', '-9': 'n', '-6': 'µ', '-3': 'm', '0': '', '3': 'k', '6': 'M', '9': 'G', '12': 'T' };
+  function eng(x, unit = '', d = 3) {
+    if (!isFinite(x)) return String(x);
+    if (x === 0) return '0 ' + unit;
+    let e3 = Math.floor(Math.log10(Math.abs(x)) / 3) * 3;
+    e3 = Math.max(-24, Math.min(12, e3));
+    let m = x / Math.pow(10, e3);
+    let s = m.toPrecision(d);
+    if (Math.abs(+s) >= 1000 && e3 < 12) { e3 += 3; s = (x / Math.pow(10, e3)).toPrecision(d); }
+    return s + ' ' + PRE[e3] + unit;
+  }
+  // KaTeX is loaded with `defer`; anything rendered before it arrives is queued and re-rendered on load.
+  const texQueue = [];
+  function tex(el, src, display = false) {
+    if (typeof el === 'string') el = $(el);
+    if (!el) return;
+    if (window.katex) { try { katex.render(src, el, { displayMode: display, throwOnError: false }); return; } catch (e) { } }
+    el.textContent = src; // plain-TeX fallback when KaTeX is unavailable (offline)
+    texQueue.push([el, src, display]);
+  }
+  window.addEventListener('load', () => { if (window.katex) texQueue.splice(0).forEach(a => tex(...a)); });
+  // render every element carrying data-tex="..." (static formula panels)
+  function texAll(root = document) { root.querySelectorAll('[data-tex]').forEach(e => tex(e, e.dataset.tex, e.hasAttribute('data-display'))); }
+  function fontPx() { return parseFloat(getComputedStyle(document.body).fontSize) || 18; }
+
+  // canvas with DPR + resize handling; draw(ctx, w, h) in CSS px
+  function canvas(cv, draw) {
+    const ctx = cv.getContext('2d');
+    const obj = { cv, ctx, w: 0, h: 0, draw, redraw() { const dpr = window.devicePixelRatio || 1; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, obj.w, obj.h); obj.draw(ctx, obj.w, obj.h); } };
+    function resize() {
+      const r = cv.getBoundingClientRect(); const dpr = window.devicePixelRatio || 1;
+      obj.w = Math.max(10, r.width); obj.h = Math.max(10, r.height);
+      cv.width = Math.round(obj.w * dpr); cv.height = Math.round(obj.h * dpr); obj.redraw();
+    }
+    new ResizeObserver(resize).observe(cv); resize();
+    return obj;
+  }
+  function pointer(cv, { down, move, up, hover }) {
+    const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    let dragging = false;
+    cv.addEventListener('pointerdown', e => { const p = pos(e); if (down && down(p, e) !== false) { dragging = true; cv.setPointerCapture(e.pointerId); } });
+    cv.addEventListener('pointermove', e => { const p = pos(e); if (dragging) move && move(p, e); else hover && hover(p, e); });
+    const end = e => { if (dragging) { dragging = false; up && up(pos(e), e); } };
+    cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  }
+
+  // slider: {label(html), min,max,step,value, log:bool, fmt:fn, onInput:fn}
+  function slider(parent, o) {
+    const d = document.createElement('div'); d.className = 'ctl';
+    d.innerHTML = `<div class="ctl-row"><label>${o.label}</label><output></output></div><input type="range">`;
+    const inp = d.querySelector('input'), out = d.querySelector('output');
+    const N = 1000;
+    const toS = v => o.log ? Math.round((Math.log10(v) - Math.log10(o.min)) / (Math.log10(o.max) - Math.log10(o.min)) * N) : v;
+    const fromS = s => o.log ? Math.pow(10, Math.log10(o.min) + (Math.log10(o.max) - Math.log10(o.min)) * s / N) : +s;
+    if (o.log) { inp.min = 0; inp.max = N; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step || 'any'; }
+    const api = {
+      el: d, get value() { return api._v; },
+      set(v, fire = true) { api._v = v; inp.value = toS(v); out.innerHTML = o.fmt ? o.fmt(v) : (+v).toPrecision(3); if (fire && o.onInput) o.onInput(v); },
+    };
+    inp.addEventListener('input', () => api.set(fromS(inp.value)));
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(d);
+    api.set(o.value, false);
+    return api;
+  }
+  // segmented toggle: options [[value,label],...]
+  function seg(parent, options, value, onChange) {
+    const d = document.createElement('div'); d.className = 'seg';
+    const api = { el: d, value, set(v, fire = true) { api.value = v; [...d.children].forEach(b => b.classList.toggle('on', b.dataset.v === String(v))); if (fire && onChange) onChange(v); } };
+    options.forEach(([v, l]) => { const b = document.createElement('button'); b.dataset.v = v; b.innerHTML = l; b.onclick = () => api.set(v); d.appendChild(b); });
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(d);
+    api.set(value, false); return api;
+  }
+  function check(parent, label, value, onChange) {
+    const l = document.createElement('label'); l.className = 'chk';
+    l.innerHTML = `<input type="checkbox"> <span>${label}</span>`;
+    const i = l.querySelector('input'); i.checked = value; i.onchange = () => onChange(i.checked);
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(l); return i;
+  }
+
+  // ---------- plotting ----------
+  function niceStep(range, n) {
+    const raw = range / Math.max(1, n); const p = Math.pow(10, Math.floor(Math.log10(raw))); const f = raw / p;
+    return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p;
+  }
+  function ticks(a, b, n) { const s = niceStep(b - a, n); const t = []; for (let v = Math.ceil(a / s - 1e-9) * s; v <= b + s * 1e-9; v += s) t.push(Math.abs(v) < s * 1e-9 ? 0 : v); return { t, s }; }
+  function tickLabel(v, s) {
+    if (v === 0) return '0';
+    const a = Math.abs(v);
+    if (a >= 1e5 || a < 1e-3) return sci(v, 2);
+    const dec = Math.max(0, -Math.floor(Math.log10(s) + 1e-9));
+    return v.toFixed(Math.min(dec, 4));
+  }
+  // o: {xlim:[a,b], ylim:[a,b], logx, logy, xlabel, ylabel, title, series:[{x,y,color,width,dash,label}],
+  //     points:[{x,y,color,r,label}], vlines:[{x,color,dash,label}], hlines:[...], fs, legend:true, zero:true}
+  function plot(ctx, R, o) {
+    const fs = o.fs || fontPx() * 0.85;
+    ctx.save();
+    ctx.font = `${fs}px system-ui, sans-serif`;
+    const padL = fs * (o.padL || 3.8), padB = fs * (o.xlabel ? 2.5 : 1.5), padT = fs * (o.title ? 1.5 : 0.6), padR = fs * (o.padR || 0.8);
+    const I = { x: R.x + padL, y: R.y + padT, w: Math.max(10, R.w - padL - padR), h: Math.max(10, R.h - padT - padB) };
+    const lx = v => o.logx ? Math.log10(v) : v, ly = v => o.logy ? Math.log10(v) : v;
+    const [x0, x1] = o.xlim.map(lx), [y0, y1] = o.ylim.map(ly);
+    const X = v => I.x + (lx(v) - x0) / (x1 - x0) * I.w;
+    const Y = v => I.y + I.h - (ly(v) - y0) / (y1 - y0) * I.h;
+    // background + grid
+    ctx.fillStyle = '#fff'; ctx.fillRect(I.x, I.y, I.w, I.h);
+    ctx.strokeStyle = '#e6e9f0'; ctx.lineWidth = 1; ctx.fillStyle = '#4a5468';
+    const nx = Math.max(2, Math.floor(I.w / (fs * 5))), ny = Math.max(2, Math.floor(I.h / (fs * 2.4)));
+    const logT = (a, b) => { const t = []; const st = Math.max(1, Math.ceil((b - a) / 8)); for (let e = Math.ceil(a); e <= Math.floor(b); e += st) t.push(e); return t; };
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    if (o.logx) logT(x0, x1).forEach(e => { const px = I.x + (e - x0) / (x1 - x0) * I.w; ctx.beginPath(); ctx.moveTo(px, I.y); ctx.lineTo(px, I.y + I.h); ctx.stroke(); ctx.fillText(sci(Math.pow(10, e), 1).replace(/^1×/, ''), px, I.y + I.h + fs * 0.25); });
+    else { const { t, s } = ticks(x0, x1, nx); t.forEach(v => { const px = X(v); ctx.beginPath(); ctx.moveTo(px, I.y); ctx.lineTo(px, I.y + I.h); ctx.stroke(); ctx.fillText(tickLabel(v, s), px, I.y + I.h + fs * 0.25); }); }
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    if (o.logy) logT(y0, y1).forEach(e => { const py = I.y + I.h - (e - y0) / (y1 - y0) * I.h; ctx.beginPath(); ctx.moveTo(I.x, py); ctx.lineTo(I.x + I.w, py); ctx.stroke(); ctx.fillText(sci(Math.pow(10, e), 1).replace(/^1×/, ''), I.x - fs * 0.3, py); });
+    else { const { t, s } = ticks(y0, y1, ny); t.forEach(v => { const py = Y(v); ctx.beginPath(); ctx.moveTo(I.x, py); ctx.lineTo(I.x + I.w, py); ctx.stroke(); ctx.fillText(tickLabel(v, s), I.x - fs * 0.3, py); }); }
+    // zero axis
+    ctx.strokeStyle = '#8a93a6'; ctx.lineWidth = 1.2;
+    if (!o.logy && y0 < 0 && y1 > 0) { ctx.beginPath(); ctx.moveTo(I.x, Y(0)); ctx.lineTo(I.x + I.w, Y(0)); ctx.stroke(); }
+    if (!o.logx && x0 < 0 && x1 > 0) { ctx.beginPath(); ctx.moveTo(X(0), I.y); ctx.lineTo(X(0), I.y + I.h); ctx.stroke(); }
+    ctx.strokeStyle = '#4a5468'; ctx.strokeRect(I.x, I.y, I.w, I.h);
+    // labels
+    ctx.fillStyle = '#1b2333';
+    if (o.xlabel) { ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText(o.xlabel, I.x + I.w / 2, R.y + R.h); }
+    if (o.ylabel) { ctx.save(); ctx.translate(R.x + fs * 0.1, I.y + I.h / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(o.ylabel, 0, 0); ctx.restore(); }
+    if (o.title) { ctx.font = `600 ${fs}px system-ui, sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(o.title, I.x, R.y + fs * 0.1); ctx.font = `${fs}px system-ui, sans-serif`; }
+    // data
+    ctx.save(); ctx.beginPath(); ctx.rect(I.x, I.y, I.w, I.h); ctx.clip();
+    (o.hlines || []).forEach(l => { ctx.strokeStyle = l.color || '#888'; ctx.setLineDash(l.dash || [6, 4]); ctx.lineWidth = l.width || 1.5; ctx.beginPath(); ctx.moveTo(I.x, Y(l.y)); ctx.lineTo(I.x + I.w, Y(l.y)); ctx.stroke(); });
+    (o.vlines || []).forEach(l => { ctx.strokeStyle = l.color || '#888'; ctx.setLineDash(l.dash || [6, 4]); ctx.lineWidth = l.width || 1.5; ctx.beginPath(); ctx.moveTo(X(l.x), I.y); ctx.lineTo(X(l.x), I.y + I.h); ctx.stroke(); });
+    ctx.setLineDash([]);
+    (o.series || []).forEach(s => {
+      if (s.fill) { ctx.fillStyle = s.fill; ctx.beginPath(); const yb = Y(o.logy ? o.ylim[0] : Math.max(o.ylim[0], Math.min(o.ylim[1], 0))); ctx.moveTo(X(s.x[0]), yb); for (let i = 0; i < s.x.length; i++) ctx.lineTo(X(s.x[i]), Y(s.y[i])); ctx.lineTo(X(s.x[s.x.length - 1]), yb); ctx.closePath(); ctx.fill(); }
+      ctx.strokeStyle = s.color || '#1f6feb'; ctx.lineWidth = s.width || 2.5; ctx.setLineDash(s.dash || []);
+      ctx.beginPath(); let pen = false;
+      for (let i = 0; i < s.x.length; i++) { const yv = s.y[i]; if (!isFinite(yv) || (o.logy && yv <= 0)) { pen = false; continue; } const px = X(s.x[i]), py = Y(yv); if (!pen) { ctx.moveTo(px, py); pen = true; } else ctx.lineTo(px, py); }
+      ctx.stroke(); ctx.setLineDash([]);
+    });
+    (o.points || []).forEach(p => { ctx.fillStyle = p.color || '#d1242f'; ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), p.r || fs * 0.35, 0, 7); ctx.fill(); });
+    ctx.restore();
+    (o.points || []).forEach(p => { if (p.label) { ctx.fillStyle = p.color || '#d1242f'; ctx.textAlign = p.align || 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(p.label, X(p.x) + (p.align === 'right' ? -fs * 0.5 : fs * 0.5), Y(p.y) - fs * 0.2); } });
+    // legend
+    const leg = (o.series || []).filter(s => s.label);
+    if (leg.length && o.legend !== false) {
+      let ly2 = I.y + fs * 0.4; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      const lw = Math.max(...leg.map(s => ctx.measureText(s.label).width)) + fs * 2.6;
+      const lx2 = o.legendLeft ? I.x + fs * 0.4 : I.x + I.w - lw - fs * 0.3;
+      ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(lx2 - fs * 0.2, ly2 - fs * 0.3, lw, leg.length * fs * 1.2 + fs * 0.2);
+      leg.forEach(s => { ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 2.5; ctx.setLineDash(s.dash || []); ctx.beginPath(); ctx.moveTo(lx2, ly2 + fs * .3); ctx.lineTo(lx2 + fs * 1.6, ly2 + fs * .3); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#1b2333'; ctx.fillText(s.label, lx2 + fs * 2.0, ly2 + fs * .3); ly2 += fs * 1.2; });
+    }
+    ctx.restore();
+    return { X, Y, I, fs };
+  }
+  function arrow(ctx, x0, y0, x1, y1, color, w = 2, head = 10) {
+    const a = Math.atan2(y1 - y0, x1 - x0), L = Math.hypot(x1 - x0, y1 - y0); head = Math.min(head, L * 0.6);
+    ctx.strokeStyle = ctx.fillStyle = color; ctx.lineWidth = w;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - head * 0.7 * Math.cos(a), y1 - head * 0.7 * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - head * Math.cos(a - 0.4), y1 - head * Math.sin(a - 0.4)); ctx.lineTo(x1 - head * Math.cos(a + 0.4), y1 - head * Math.sin(a + 0.4)); ctx.closePath(); ctx.fill();
+  }
+  // arrowhead in the middle of a polyline segment
+  function midHead(ctx, x, y, ang, color, s = 9) {
+    ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(x + s * Math.cos(ang), y + s * Math.sin(ang));
+    ctx.lineTo(x + s * Math.cos(ang + 2.5), y + s * Math.sin(ang + 2.5)); ctx.lineTo(x + s * Math.cos(ang - 2.5), y + s * Math.sin(ang - 2.5)); ctx.closePath(); ctx.fill();
+  }
+  // perceptual-ish colour map (blue -> cyan -> yellow -> red), t in [0,1]
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    const S = [[0, [49, 54, 149]], [0.25, [69, 117, 180]], [0.45, [171, 217, 233]], [0.6, [254, 224, 144]], [0.8, [244, 109, 67]], [1, [165, 0, 38]]];
+    for (let i = 1; i < S.length; i++) if (t <= S[i][0]) { const [a, ca] = S[i - 1], [b, cb] = S[i]; const u = (t - a) / (b - a); return ca.map((c, k) => Math.round(c + (cb[k] - c) * u)); }
+    return S[S.length - 1][1];
+  }
+  // marching-squares contour of node field f (nx*ny, row-major f[j*nx+i]); toPx(i,j)->[x,y]; mask(i,j) true = skip cell
+  function contour(ctx, f, nx, ny, level, toPx, mask) {
+    ctx.beginPath();
+    const lerp = (a, b) => (level - a) / (b - a);
+    for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+      if (mask && mask(i, j)) continue;
+      const v0 = f[j * nx + i], v1 = f[j * nx + i + 1], v2 = f[(j + 1) * nx + i + 1], v3 = f[(j + 1) * nx + i];
+      const c = (v0 > level) | ((v1 > level) << 1) | ((v2 > level) << 2) | ((v3 > level) << 3);
+      if (c === 0 || c === 15) continue;
+      const e = [];
+      if ((v0 > level) !== (v1 > level)) e.push([i + lerp(v0, v1), j]);
+      if ((v1 > level) !== (v2 > level)) e.push([i + 1, j + lerp(v1, v2)]);
+      if ((v3 > level) !== (v2 > level)) e.push([i + lerp(v3, v2), j + 1]);
+      if ((v0 > level) !== (v3 > level)) e.push([i, j + lerp(v0, v3)]);
+      for (let k = 0; k + 1 < e.length; k += 2) { const a = toPx(...e[k]), b = toPx(...e[k + 1]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    }
+    ctx.stroke();
+  }
+  function text(ctx, s, x, y, { color = '#1b2333', size, align = 'left', base = 'middle', weight = '', bg = null } = {}) {
+    const fz = size || fontPx();
+    ctx.font = `${weight} ${fz}px system-ui, sans-serif`; ctx.textAlign = align; ctx.textBaseline = base;
+    if (bg) { const wd = ctx.measureText(s).width, x0 = align === 'center' ? x - wd / 2 : align === 'right' ? x - wd : x, y0 = base === 'middle' ? y - fz * 0.6 : base === 'top' ? y - fz * 0.1 : y - fz * 1.1; ctx.fillStyle = bg; ctx.fillRect(x0 - fz * 0.2, y0, wd + fz * 0.4, fz * 1.2); }
+    ctx.fillStyle = color; ctx.fillText(s, x, y);
+  }
+  return { $, sci, eng, tex, texAll, contour, fontPx, canvas, pointer, slider, seg, check, plot, arrow, midHead, cmap, text, ticks };
+})();
+</script>
+
+<!-- ===================== UI / RENDERING ===================== -->
+<script id="app">
+(() => {
+  const { $, sci, eng, tex, texAll, canvas, slider, seg, plot, arrow, text, pointer } = UI;
+  const S = { mode: 'cloud', profile: 'uniform', tau: 1, R: 1.5, t: 0, playing: true, sigma: 5.8e7, epsr: 1, tn: 0 };
+  const P = () => ({ profile: S.profile, tau: S.tau, rho0: 1e-9, a: 1 });
+
+  // ----- particles for visualisation (3D positions, thin slab |z|<slab shown) -----
+  const rnd = (() => { let s = 12345; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+  const parts = [];
+  for (let k = 0; k < 2600; k++) { const u = rnd(), ct = 2 * rnd() - 1, ph = 2 * Math.PI * rnd(); parts.push({ u, ct, ph }); }
+  const RMAX0 = 4.5;
+  function partPos(q) { // initial radius from the profile's radial CDF
+    const r0 = S.profile === 'uniform' ? RMAX0 * Math.cbrt(q.u) : RMAX0 * q.u;
+    const r = r0 * Math.exp(PHYS.driftRate(P()) * S.t);
+    const st = Math.sqrt(1 - q.ct * q.ct);
+    return { x: r * st * Math.cos(q.ph), y: r * st * Math.sin(q.ph), z: r * q.ct, r };
+  }
+
+  // ----- controls -----
+  seg('#modes', [['cloud', 'Decaying charge cloud'], ['relax', 'Relaxation in a conductor']], S.mode, v => { S.mode = v; S.t = 0; S.tn = 0; layout(); });
+  const cA = $('#ctlA'), cB = $('#ctlB');
+  const profBox = document.createElement('div'); profBox.className = 'ctl';
+  profBox.innerHTML = '<div class="ctl-row"><label>Charge profile</label></div>'; cA.appendChild(profBox);
+  seg(profBox, [['uniform', 'uniform ρ<sub>v</sub>'], ['inv2', 'ρ<sub>v</sub> ∝ 1/r²']], S.profile, v => { S.profile = v; S.t = 0; setProfTex(); });
+  slider(cA, { label: 'Decay time τ', min: 0.3, max: 4, step: 0.1, value: S.tau, fmt: v => v.toFixed(1) + ' s', onInput: v => { S.tau = v; S.t = 0; } });
+  const sR = slider(cA, { label: 'Gaussian sphere radius R', min: 0.4, max: 3, step: 0.05, value: S.R, fmt: v => v.toFixed(2) + ' m', onInput: v => { S.R = v; } });
+  const sSig = slider(cB, { label: 'Conductivity σ', min: 1e-18, max: 1e8, log: true, value: S.sigma, fmt: v => sci(v, 2) + ' S/m', onInput: v => { S.sigma = v; } });
+  const sEps = slider(cB, { label: 'Relative permittivity ε<sub>r</sub>', min: 1, max: 81, step: 0.1, value: S.epsr, fmt: v => v.toFixed(1), onInput: v => { S.epsr = v; } });
+  const mats = document.createElement('div'); mats.className = 'row'; cB.appendChild(mats);
+  PHYS.MATERIALS.forEach(m => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = m.name; b.onclick = () => { sSig.set(m.sigma); sEps.set(m.epsr); S.tn = 0; }; mats.appendChild(b); });
+  $('#play').onclick = () => { S.playing = !S.playing; $('#play').textContent = S.playing ? '❚❚ Pause' : '▶ Play'; };
+  $('#reset').onclick = () => { S.t = 0; S.tn = 0; };
+  function setProfTex() {
+    tex('#fAprof', S.profile === 'uniform'
+      ? '\\rho_v=\\rho_0e^{-t/\\tau},\\ \\ J_r=\\dfrac{\\rho_0 r}{3\\tau}e^{-t/\\tau}'
+      : '\\rho_v=\\dfrac{\\rho_0a^2}{r^2}e^{-t/\\tau},\\ \\ J_r=\\dfrac{\\rho_0a^2}{r\\,\\tau}e^{-t/\\tau}');
+  }
+  function layout() {
+    const a = S.mode === 'cloud';
+    cA.classList.toggle('hide', !a); cB.classList.toggle('hide', a);
+    $('#fA').classList.toggle('hide', !a); $('#fB').classList.toggle('hide', a);
+    $('#notice').textContent = a
+      ? 'The current leaving the closed surface equals exactly the rate at which the enclosed charge decreases: I(t) = −dQ/dt.'
+      : 'Any charge placed inside a conductor moves to its surface with τ = ε/σ — about 10⁻¹⁹ s for copper, but days for quartz.';
+  }
+
+  // ----- drawing -----
+  let geo = null; // scene geometry for hit testing
+  function drawCloud(ctx, w, h) {
+    const fs = UI.fontPx(), p = P();
+    const sq = Math.min(h, w * 0.5), cx = sq / 2 + 4, cy = h / 2, L = 3.2, sc = (sq / 2 - 6) / L; // metres -> px
+    geo = { cx, cy, sc };
+    // background density shading
+    ctx.save(); ctx.beginPath(); ctx.rect(4, cy - sq / 2, sq, sq); ctx.clip();
+    ctx.fillStyle = '#fbfcfe'; ctx.fillRect(4, cy - sq / 2, sq, sq);
+    // charges (slab |z|<0.25 m)
+    ctx.fillStyle = '#d1242f';
+    for (const q of parts) { const s = partPos(q); if (Math.abs(s.z) > 0.25 || s.r < 0.02) continue; const X = cx + s.x * sc, Y = cy - s.y * sc; ctx.beginPath(); ctx.arc(X, Y, Math.max(2, fs * 0.13), 0, 7); ctx.fill(); }
+    // J field arrows on a polar grid
+    const Jref = PHYS.Jr(S.profile === 'uniform' ? 3 : 0.5, 0, p);
+    for (let rr = 0.5; rr <= 3.01; rr += 0.5) for (let k = 0; k < 12; k++) {
+      const ang = (k + (rr * 2 % 2) * 0.5) * Math.PI / 6, J = PHYS.Jr(rr, S.t, p);
+      const len = Math.min(1, J / Jref) * 0.45 * sc; if (len < 2) continue;
+      const x0 = cx + rr * Math.cos(ang) * sc, y0 = cy - rr * Math.sin(ang) * sc;
+      arrow(ctx, x0, y0, x0 + len * Math.cos(ang), y0 - len * Math.sin(ang), 'rgba(31,111,235,.55)', 2, fs * 0.5);
+    }
+    ctx.restore();
+    // Gaussian surface
+    ctx.strokeStyle = '#1a7f37'; ctx.lineWidth = 3; ctx.setLineDash([10, 6]); ctx.beginPath(); ctx.arc(cx, cy, S.R * sc, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+    // J arrows on the surface (bold)
+    const Js = PHYS.Jr(S.R, S.t, p), lenS = Math.min(1.2, Js / Jref) * 0.45 * sc;
+    for (let k = 0; k < 16; k++) { const a = k * Math.PI / 8, x0 = cx + S.R * Math.cos(a) * sc, y0 = cy - S.R * Math.sin(a) * sc; if (lenS > 2) arrow(ctx, x0, y0, x0 + lenS * Math.cos(a), y0 - lenS * Math.sin(a), '#1a7f37', 3, fs * 0.6); }
+    // handle
+    ctx.fillStyle = '#1a7f37'; ctx.beginPath(); ctx.arc(cx + S.R * sc * Math.SQRT1_2, cy - S.R * sc * Math.SQRT1_2, fs * 0.45, 0, 7); ctx.fill();
+    text(ctx, 'S (drag)', cx + S.R * sc * Math.SQRT1_2 + fs * 0.6, cy - S.R * sc * Math.SQRT1_2 - fs * 0.6, { color: '#1a7f37', size: fs * 0.85, weight: 600 });
+    ctx.strokeStyle = '#4a5468'; ctx.lineWidth = 1; ctx.strokeRect(4, cy - sq / 2, sq, sq);
+    text(ctx, 'cross-section (z ≈ 0):  red dots = charge,  blue arrows = J', 12, cy - sq / 2 + fs * 0.7, { size: fs * 0.8, color: '#5a6478', bg: 'rgba(255,255,255,.9)' });
+    // scale bar 1 m
+    ctx.fillStyle = '#1b2333'; ctx.fillRect(14, cy + sq / 2 - fs * 0.9, sc, 3); text(ctx, '1 m', 14 + sc / 2, cy + sq / 2 - fs * 1.5, { align: 'center', size: fs * 0.8 });
+
+    // plots
+    const T = 5 * S.tau, n = 200, ts = [], Q = [], I = [], mdQ = [];
+    for (let i = 0; i <= n; i++) { const t = T * i / n; ts.push(t); Q.push(PHYS.Qenc(S.R, t, p) * 1e9); I.push(PHYS.Iout(S.R, t, p) * 1e9); }
+    for (let i = 0; i <= n; i++) { const a = Math.max(0, i - 1), b = Math.min(n, i + 1); mdQ.push(-(Q[b] - Q[a]) / (ts[b] - ts[a])); }
+    const px = sq + 16, pw = w - px - 6, ph = h / 2 - 4;
+    const Qmax = Q[0] * 1.08, Imax = I[0] * 1.08;
+    const Qn = PHYS.Qenc(S.R, S.t, p) * 1e9, In = PHYS.Iout(S.R, S.t, p) * 1e9;
+    plot(ctx, { x: px, y: 2, w: pw, h: ph }, { xlim: [0, T], ylim: [0, Qmax], title: 'Enclosed charge  Q_enc(t)', ylabel: 'nC', series: [{ x: ts, y: Q, color: '#d1242f' }], vlines: [{ x: S.t, color: '#5a6478' }], points: [{ x: S.t, y: Qn, color: '#d1242f', label: Qn.toPrecision(3) + ' nC' }] });
+    plot(ctx, { x: px, y: h / 2 + 2, w: pw, h: ph }, { xlim: [0, T], ylim: [0, Imax], title: 'Outward current  I(t) = ∮ J·dS', xlabel: 't  (s)', ylabel: 'nA',
+      series: [{ x: ts, y: I, color: '#1a7f37', label: '∮ J·dS' }, { x: ts, y: mdQ, color: '#1b2333', dash: [5, 6], width: 2, label: '−dQ/dt (numeric)' }],
+      vlines: [{ x: S.t, color: '#5a6478' }], points: [{ x: S.t, y: In, color: '#1a7f37', label: In.toPrecision(3) + ' nA' }] });
+    $('#read').innerHTML = `t = <b>${S.t.toFixed(2)} s</b> &nbsp; Q<sub>enc</sub> = <b>${Qn.toPrecision(3)} nC</b><br>I = <b>${In.toPrecision(3)} nA</b> &nbsp; −dQ/dt = <b>${(Qn / S.tau).toPrecision(3)} nA</b><br><span class="small">ρ<sub>0</sub> = 1 nC/m³${S.profile === 'inv2' ? ', a = 1 m' : ''}; charges drift with v = J/ρ<sub>v</sub></span>`;
+  }
+
+  function drawRelax(ctx, w, h) {
+    const fs = UI.fontPx(); const tau = PHYS.tau(S.sigma, S.epsr); const tn = S.tn; // t/tau
+    const frac = Math.exp(-tn);
+    const sq = Math.min(h * 0.62, w * 0.36), cx = sq / 2 + 10, cy = sq / 2 + 6, Rp = sq / 2 - 10;
+    // conductor sphere
+    const g = ctx.createRadialGradient(cx - Rp * 0.3, cy - Rp * 0.3, Rp * 0.1, cx, cy, Rp);
+    g.addColorStop(0, '#f2f4f8'); g.addColorStop(1, '#c9ced9'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, Rp, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#4a5468'; ctx.lineWidth = 2; ctx.stroke();
+    // interior charges: first N*frac particles shown inside, rest on the surface
+    const N = 160; let k = 0;
+    for (let i = 0; i < N; i++) {
+      const q = parts[i]; const inside = i < N * frac;
+      let x, y;
+      if (inside) { const r = 0.85 * Math.sqrt(q.u); x = cx + r * Rp * Math.cos(q.ph); y = cy + r * Rp * Math.sin(q.ph); }
+      else { const a = (k++) * 2.39996; x = cx + (Rp - fs * 0.25) * Math.cos(a); y = cy + (Rp - fs * 0.25) * Math.sin(a); }
+      ctx.fillStyle = '#d1242f'; ctx.beginPath(); ctx.arc(x, y, fs * 0.18, 0, 7); ctx.fill();
+    }
+    text(ctx, `t = ${tn.toFixed(2)} τ = ${UI.eng(tn * tau, 's')}`, cx, cy + Rp + fs * 0.9, { align: 'center', size: fs * 0.9, weight: 600 });
+    text(ctx, `inside: ${(100 * frac).toFixed(1)} %   on surface: ${(100 * (1 - frac)).toFixed(1)} %`, cx, cy + Rp + fs * 2.1, { align: 'center', size: fs * 0.85, color: '#5a6478' });
+    // decay plot
+    const px = sq + 30, pw = w - px - 8;
+    const ts = [], ys = []; for (let i = 0; i <= 200; i++) { const x = 5 * i / 200; ts.push(x * tau); ys.push(Math.exp(-x)); }
+    const pr = plot(ctx, { x: px, y: 4, w: pw, h: h * 0.6 }, { xlim: [0, 5 * tau], ylim: [0, 1.05], title: 'Interior charge density  ρ_v(t) / ρ_v0', xlabel: 't  (s)', series: [{ x: ts, y: ys, color: '#d1242f' }],
+      vlines: [{ x: tau, color: '#8250df', label: 'τ' }, { x: tn * tau, color: '#5a6478', dash: [] }], hlines: [{ y: Math.exp(-1), color: '#8250df' }], points: [{ x: tn * tau, y: frac, color: '#d1242f' }] });
+    // log ruler of relaxation times
+    const ry = h * 0.62 + (h * 0.38) * 0.5, rx0 = 30, rx1 = w - 30;
+    const lo = -20, hi = 8, X = e => rx0 + (e - lo) / (hi - lo) * (rx1 - rx0);
+    text(ctx, 'Relaxation time τ = ε/σ  (log scale, seconds)', rx0, ry - fs * 3.4, { size: fs * 0.9, weight: 600 });
+    ctx.strokeStyle = '#4a5468'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(rx0, ry); ctx.lineTo(rx1, ry); ctx.stroke();
+    for (let e = lo; e <= hi; e += 4) { ctx.beginPath(); ctx.moveTo(X(e), ry - 5); ctx.lineTo(X(e), ry + 5); ctx.stroke(); text(ctx, '10' + String(e).split('').map(c => ({ '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' })[c]).join(''), X(e), ry + fs * 0.9, { align: 'center', size: fs * 0.8, color: '#5a6478' }); }
+    const marks = [[Math.log10(1e-12), 'ps'], [Math.log10(1), '1 s'], [Math.log10(86400), '1 day']];
+    marks.forEach(([e, l]) => text(ctx, l, X(e), ry + fs * 1.9, { align: 'center', size: fs * 0.72, color: '#8a93a6' }));
+    PHYS.MATERIALS.forEach((m, i) => {
+      const e = Math.log10(PHYS.tau(m.sigma, m.epsr)), x = X(e), up = i % 2 === 0;
+      ctx.fillStyle = '#5a6478'; ctx.beginPath(); ctx.arc(x, ry, 4, 0, 7); ctx.fill();
+      text(ctx, m.name, x, ry + (up ? -fs * 0.9 : fs * 3.0), { align: 'center', size: fs * 0.75, color: '#5a6478' });
+    });
+    const ec = Math.max(lo, Math.min(hi, Math.log10(tau)));
+    ctx.fillStyle = '#8250df'; ctx.beginPath(); ctx.moveTo(X(ec), ry + 4); ctx.lineTo(X(ec) - 10, ry + 22); ctx.lineTo(X(ec) + 10, ry + 22); ctx.closePath(); ctx.fill();
+    text(ctx, 'this material', X(ec), ry - fs * 2.0, { align: 'center', size: fs * 0.8, color: '#8250df', weight: 600 });
+    { text(ctx, 't = τ, ρ = ρ₀/e', pr.X(tau) + fs * 0.4, pr.Y(Math.exp(-1)) - fs * 0.7, { size: fs * 0.8, color: '#8250df' }); }
+    $('#read').innerHTML = `ε = ${S.epsr.toFixed(1)} ε<sub>0</sub>, σ = ${sci(S.sigma, 2)} S/m<br>τ = ε/σ = <span class="big">${sci(tau, 3)} s</span><br><span class="small">${tau < 1e-14 ? 'Shorter than the electron collision time (~10⁻¹⁴ s): the simple σ-model breaks down, but charge still reaches the surface almost instantly.' : tau > 3600 ? 'A good insulator: charge stays put for a long time.' : ''}</span>`;
+  }
+
+  const C = canvas($('#cv'), (ctx, w, h) => S.mode === 'cloud' ? drawCloud(ctx, w, h) : drawRelax(ctx, w, h));
+  pointer($('#cv'), {
+    down: p => { if (S.mode !== 'cloud' || !geo) return false; const r = Math.hypot(p.x - geo.cx, p.y - geo.cy) / geo.sc; if (Math.abs(r - S.R) > 0.35) return false; },
+    move: p => { const r = Math.hypot(p.x - geo.cx, p.y - geo.cy) / geo.sc; sR.set(Math.max(0.4, Math.min(3, r))); },
+  });
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (S.playing) {
+      if (S.mode === 'cloud') { S.t += dt; if (S.t > 5 * S.tau) S.t = 0; }
+      else { S.tn += dt * 0.8; if (S.tn > 5) S.tn = 0; }
+    }
+    C.redraw(); requestAnimationFrame(frame);
+  }
+  setProfTex(); texAll(); layout(); requestAnimationFrame(frame);
+})();
+</script>
+</body></html>

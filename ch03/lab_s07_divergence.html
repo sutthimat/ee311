@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Divergence as Flux per Volume</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f6f5f1; --panel:#ffffff; --ink:#16181d; --muted:#4d535e; --line:#d6d2c8;
+  --pos:#c8322c; --neg:#1f5fbf; --acc:#d97000; --grn:#12804a; --vio:#7a3fb3;
+  /* ~18.5px at 1280x720; scales with the iframe/container */
+  font-size: clamp(12px, min(1.45vw, 2.6vh), 30px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.3}
+#app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
+header{padding:.35rem 1rem .3rem;border-bottom:2px solid var(--line);display:flex;align-items:baseline;column-gap:1.2rem;flex-wrap:wrap}
+header h1{font-size:1.3rem;margin:0;font-weight:700;white-space:nowrap}
+.notice{margin:0;font-size:1rem;color:var(--muted)}
+.notice b{color:var(--acc)}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(15rem,23rem);min-height:0}
+#stage{position:relative;min-width:0;min-height:0;overflow:hidden}
+#stage canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+aside{position:relative;border-left:2px solid var(--line);background:var(--panel);padding:.4rem .7rem;overflow-y:auto;overflow-x:hidden;
+  display:flex;flex-direction:column;gap:.35rem;min-height:0}
+aside>*{flex-shrink:0}
+aside h3{font-size:1rem;margin:.1rem 0 0;color:var(--muted);font-weight:700}
+.row{display:grid;grid-template-columns:5.6rem minmax(0,1fr) 5.2rem;align-items:center;gap:.35rem;font-size:1rem}
+.row label{white-space:nowrap}
+.row .val{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--acc);margin:0;height:1.3rem}
+.btns{display:flex;flex-wrap:wrap;gap:.3rem}
+button,select{font:inherit;font-size:1rem;padding:.1rem .55rem;border:1.5px solid #9a968c;border-radius:.4rem;background:#fff;color:var(--ink);cursor:pointer;line-height:1.35}
+button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+button:disabled{opacity:.4;cursor:default}
+.chk{display:inline-flex;align-items:center;gap:.3rem;margin-right:.6rem;white-space:nowrap;cursor:pointer}
+.chk input{width:1.05rem;height:1.05rem;accent-color:var(--acc);margin:0}
+table.ro{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:1rem}
+table.ro td{padding:.03rem .2rem;white-space:nowrap}
+table.ro td:last-child{text-align:right;font-weight:600}
+.formula{background:#f1eee6;border-radius:.4rem;padding:.25rem .5rem;font-size:1rem;overflow-x:auto;overflow-y:hidden}
+.formula .katex-display{margin:.15rem 0}
+.small{font-size:1rem;color:var(--muted)}
+.warn{color:var(--pos);font-weight:600}
+.tex.d{display:block}
+</style>
+
+<style>
+select{width:100%}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <h1>Divergence = outward flux per unit volume</h1>
+  <p class="notice"><b>Notice:</b> as the box shrinks, ∮D·dS / Δv → <b>∇·D</b> at its centre. Flowing ≠ diverging: y a<sub>x</sub> and 1/r² (away from the source) have ∇·D = 0.</p>
+</header>
+<main>
+  <div id="stage"><canvas id="cv"></canvas></div>
+  <aside>
+    <label class="small">Vector field D</label>
+    <select id="fld"></select>
+    <div class="row"><label>box Δx</label><input type="range" id="bx" min="-2" max="-0.3" step="0.01" value="-0.5"><span class="val" id="bx-v"></span></div>
+    <div class="btns"><button id="bShrink">▶ Shrink box</button><button id="bCtr">Box → origin</button></div>
+    <table class="ro" id="tbl"></table>
+    <div class="formula">
+      <span class="tex d">\nabla\cdot\mathbf D=\lim_{\Delta v\to0}\frac{\oint_S\mathbf D\cdot d\mathbf S}{\Delta v}</span>
+      <span class="tex d" id="divTex"></span>
+      <span class="small">Point sources (dots) make ∮ = ±4π if inside, so the ratio blows up. Box: cube of side Δx (2-D view of the z = 0 slice). Flux computed by 2-D Gauss–Legendre quadrature over all six faces. Drag the box.</span>
+    </div>
+  </aside>
+</main>
+</div>
+
+<!-- ===================== PHYSICS (pure, no DOM) ===================== -->
+<script id="physics">
+var PHYS = (function () {
+  // Fields in arbitrary units (D in C/m², lengths in m). Each has D(x,y,z) -> [Dx,Dy,Dz], analytic div(x,y,z), and a TeX label.
+  const r3 = (x, y, z) => Math.pow(x * x + y * y + z * z, 1.5);
+  const SQ = [0.5, 0, 0], SK = [-0.5, 0, 0];   // source and sink positions for the pair
+  const pc = (p, x, y, z) => { const dx = x - p[0], dy = y - p[1], dz = z - p[2], r = r3(dx, dy, dz); return [dx / r, dy / r, dz / r]; };
+  const FIELDS = {
+    xax: { name: 'D = x aₓ', tex: String.raw`\mathbf D=x\,\mathbf a_x\ \Rightarrow\ \nabla\cdot\mathbf D=1`, D: (x, y, z) => [x, 0, 0], div: () => 1 },
+    yax: { name: 'D = y aₓ (shear)', tex: String.raw`\mathbf D=y\,\mathbf a_x\ \Rightarrow\ \nabla\cdot\mathbf D=0`, D: (x, y, z) => [y, 0, 0], div: () => 0 },
+    xyz: { name: 'D = x³ aₓ + y² a_y', tex: String.raw`\mathbf D=x^3\mathbf a_x+y^2\mathbf a_y\Rightarrow\nabla\cdot\mathbf D=3x^2+2y`, D: (x, y, z) => [x * x * x, y * y, 0], div: (x, y) => 3 * x * x + 2 * y },
+    sin: { name: 'D = sin(4x) aₓ', tex: String.raw`\mathbf D=\sin(4x)\,\mathbf a_x\Rightarrow\nabla\cdot\mathbf D=4\cos(4x)`, D: (x, y, z) => [Math.sin(4 * x), 0, 0], div: (x) => 4 * Math.cos(4 * x) },
+    rad: { name: 'D = a_r / r²  (point source)', tex: String.raw`\mathbf D=\frac{\mathbf a_r}{r^2}\Rightarrow\nabla\cdot\mathbf D=0\ (r\neq0)`, D: (x, y, z) => pc([0, 0, 0], x, y, z), div: () => 0, singular: [[0, 0, 0, 4 * Math.PI]] },
+    lin: { name: 'D = r a_r (uniform charge)', tex: String.raw`\mathbf D=r\,\mathbf a_r\ \Rightarrow\ \nabla\cdot\mathbf D=3`, D: (x, y, z) => [x, y, z], div: () => 3 },
+    pair: { name: 'source + sink (1/r²)', tex: String.raw`\mathbf D=\frac{\mathbf a_{R_1}}{R_1^2}-\frac{\mathbf a_{R_2}}{R_2^2}\Rightarrow\nabla\cdot\mathbf D=0`,
+      D: (x, y, z) => { const a = pc(SQ, x, y, z), b = pc(SK, x, y, z); return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }, div: () => 0, singular: [[...SQ, 4 * Math.PI], [...SK, -4 * Math.PI]] }
+  };
+  // Outward flux through an axis-aligned cube centred at c with side s; Gauss–Legendre (n x n per panel, panels^2 per face)
+  function boxFlux(F, c, s, n, panels) {
+    n = n || 8; panels = panels || 6;
+    const h = s / 2; let tot = 0;
+    // a point singularity close to a face makes the integrand sharply peaked: refine the panels so the
+    // quadrature does not report spurious flux for a source that is still just outside (or inside) the box
+    for (const p of F.singular || []) {
+      const d = Math.abs(h - Math.max(Math.abs(p[0] - c[0]), Math.abs(p[1] - c[1]), Math.abs(p[2] - c[2])));
+      panels = Math.max(panels, Math.min(16, Math.ceil(0.6 * s / Math.max(d, 1e-9))));
+    }
+    for (let axis = 0; axis < 3; axis++) for (const sg of [-1, 1]) {
+      const i1 = (axis + 1) % 3, i2 = (axis + 2) % 3;
+      tot += NUM.gl2((u, v) => { const p = [0, 0, 0]; p[axis] = c[axis] + sg * h; p[i1] = c[i1] + u; p[i2] = c[i2] + v; return sg * F.D(p[0], p[1], p[2])[axis]; }, -h, h, -h, h, n, panels);
+    }
+    return tot;
+  }
+  // charge-like point singularities strictly inside the box (for the "∮ = 4π" readout)
+  function enclosedSingular(F, c, s) {
+    let q = 0; for (const p of F.singular || []) if (Math.max(Math.abs(p[0] - c[0]), Math.abs(p[1] - c[1]), Math.abs(p[2] - c[2])) < s / 2) q += p[3];
+    return q;
+  }
+  // numerical divergence by central differences (used by tests)
+  function numDiv(F, x, y, z, h) {
+    h = h || 1e-5;
+    return (F.D(x + h, y, z)[0] - F.D(x - h, y, z)[0] + F.D(x, y + h, z)[1] - F.D(x, y - h, z)[1] + F.D(x, y, z + h)[2] - F.D(x, y, z - h)[2]) / (2 * h);
+  }
+  return { FIELDS, boxFlux, enclosedSingular, numDiv };
+})();
+</script>
+<script id="numerics">
+/* ===== Generic numerics (pure functions, no DOM) ===== */
+var NUM = (function () {
+  // Adaptive Simpson quadrature. tol = absolute tolerance.
+  function adaptSimpson(f, a, b, tol, minDepth, maxDepth) {
+    minDepth = minDepth == null ? 4 : minDepth;
+    maxDepth = maxDepth == null ? 22 : maxDepth;
+    function rec(a, b, fa, fm, fb, whole, tol, depth) {
+      const m = 0.5 * (a + b), lm = 0.5 * (a + m), rm = 0.5 * (m + b);
+      const flm = f(lm), frm = f(rm);
+      const left = (m - a) / 6 * (fa + 4 * flm + fm);
+      const right = (b - m) / 6 * (fm + 4 * frm + fb);
+      const diff = left + right - whole;
+      if (depth >= maxDepth || (depth >= minDepth && Math.abs(diff) <= 15 * tol)) return left + right + diff / 15;
+      const t2 = Math.max(tol / 2, 1e-13 * Math.abs(whole));
+      return rec(a, m, fa, flm, fm, left, t2, depth + 1) + rec(m, b, fm, frm, fb, right, t2, depth + 1);
+    }
+    const fa = f(a), fb = f(b), fm = f(0.5 * (a + b));
+    return rec(a, b, fa, fm, fb, (b - a) / 6 * (fa + 4 * fm + fb), tol, 0);
+  }
+
+  // Gauss-Legendre nodes/weights on [-1,1]
+  const glCache = {};
+  function gaussLegendre(n) {
+    if (glCache[n]) return glCache[n];
+    const x = [], w = [];
+    for (let i = 1; i <= n; i++) {
+      let z = Math.cos(Math.PI * (i - 0.25) / (n + 0.5)), pp = 1;
+      for (let it = 0; it < 100; it++) {
+        let p1 = 1, p2 = 0;
+        for (let j = 1; j <= n; j++) { const p3 = p2; p2 = p1; p1 = ((2 * j - 1) * z * p2 - (j - 1) * p3) / j; }
+        pp = n * (z * p1 - p2) / (z * z - 1);
+        const z1 = z; z = z1 - p1 / pp;
+        if (Math.abs(z - z1) < 1e-15) break;
+      }
+      x.push(z); w.push(2 / ((1 - z * z) * pp * pp));
+    }
+    return (glCache[n] = { x, w });
+  }
+  // composite Gauss-Legendre in 2D over [a,b]x[c,d]
+  function gl2(f, a, b, c, d, n, panels) {
+    const g = gaussLegendre(n); let s = 0;
+    const hu = (b - a) / panels, hv = (d - c) / panels;
+    for (let pu = 0; pu < panels; pu++) for (let pv = 0; pv < panels; pv++) {
+      const u0 = a + (pu + 0.5) * hu, v0 = c + (pv + 0.5) * hv;
+      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++)
+        s += g.w[i] * g.w[j] * f(u0 + 0.5 * hu * g.x[i], v0 + 0.5 * hv * g.x[j]);
+    }
+    return s * 0.25 * hu * hv;
+  }
+
+  // Trace a 2D field line with RK4 along the unit field direction.
+  // opts: h(x,y) -> step length, stop(x,y) -> bool, maxSteps
+  function traceLine(Ef, x, y, sign, opts) {
+    const pts = [[x, y]];
+    function dir(x, y) {
+      const e = Ef(x, y), m = Math.hypot(e[0], e[1]);
+      return (m > 0 && isFinite(m)) ? [sign * e[0] / m, sign * e[1] / m] : null;
+    }
+    for (let i = 0; i < opts.maxSteps; i++) {
+      const h = opts.h(x, y);
+      const k1 = dir(x, y); if (!k1) break;
+      const k2 = dir(x + 0.5 * h * k1[0], y + 0.5 * h * k1[1]); if (!k2) break;
+      const k3 = dir(x + 0.5 * h * k2[0], y + 0.5 * h * k2[1]); if (!k3) break;
+      const k4 = dir(x + h * k3[0], y + h * k3[1]); if (!k4) break;
+      x += h / 6 * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0]);
+      y += h / 6 * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1]);
+      pts.push([x, y]);
+      if (opts.stop(x, y)) break;
+    }
+    return pts;
+  }
+
+  // Marching squares on a grid V[j*nx+i]; returns segments [x1,y1,x2,y2] in grid-index coords.
+  function contour(V, nx, ny, level) {
+    const segs = [];
+    for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+      const v0 = V[j * nx + i], v1 = V[j * nx + i + 1], v2 = V[(j + 1) * nx + i + 1], v3 = V[(j + 1) * nx + i];
+      if (!(isFinite(v0) && isFinite(v1) && isFinite(v2) && isFinite(v3))) continue;
+      const b0 = v0 > level, b1 = v1 > level, b2 = v2 > level, b3 = v3 > level;
+      const c = (b0 ? 1 : 0) | (b1 ? 2 : 0) | (b2 ? 4 : 0) | (b3 ? 8 : 0);
+      if (c === 0 || c === 15) continue;
+      const E = [
+        () => [i + (level - v0) / (v1 - v0), j],       // bottom 0-1
+        () => [i + 1, j + (level - v1) / (v2 - v1)],   // right 1-2
+        () => [i + (level - v3) / (v2 - v3), j + 1],   // top 3-2
+        () => [i, j + (level - v0) / (v3 - v0)]        // left 0-3
+      ];
+      let pairs;
+      if (c === 5 || c === 10) {
+        const centreHigh = (v0 + v1 + v2 + v3) / 4 > level;
+        if (c === 5) pairs = centreHigh ? [[0, 1], [2, 3]] : [[3, 0], [1, 2]];
+        else pairs = centreHigh ? [[3, 0], [1, 2]] : [[0, 1], [2, 3]];
+      } else {
+        const ed = [];
+        if (b0 !== b1) ed.push(0); if (b1 !== b2) ed.push(1); if (b3 !== b2) ed.push(2); if (b0 !== b3) ed.push(3);
+        pairs = [ed];
+      }
+      for (const p of pairs) { const a = E[p[0]](), b = E[p[1]](); segs.push([a[0], a[1], b[0], b[1]]); }
+    }
+    return segs;
+  }
+
+  function logspace(a, b, n) { const out = []; const la = Math.log10(a), lb = Math.log10(b); for (let i = 0; i < n; i++) out.push(Math.pow(10, la + (lb - la) * i / (n - 1))); return out; }
+
+  return { adaptSimpson, gaussLegendre, gl2, traceLine, contour, logspace };
+})();
+</script>
+<script id="ui">
+/* ===== Shared UI helpers (DOM / canvas only, no physics) ===== */
+var UI = (function () {
+  const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
+  const $ = (s) => document.querySelector(s);
+
+  // ---------- KaTeX ----------
+  function renderTex(root) {
+    (root || document).querySelectorAll('.tex').forEach((el) => {
+      if (el.dataset.src == null) el.dataset.src = el.textContent.trim();
+      if (window.katex) {
+        try { katex.render(el.dataset.src, el, { displayMode: el.classList.contains('d'), throwOnError: false }); } catch (e) { el.textContent = el.dataset.src; }
+      }
+    });
+  }
+  function setTex(el, src) {
+    if (typeof el === 'string') el = $(el);
+    if (!el) return;
+    if (el.dataset.src === src && el.dataset.done) return;
+    el.dataset.src = src;
+    if (window.katex) { try { katex.render(src, el, { displayMode: el.classList.contains('d'), throwOnError: false }); el.dataset.done = 1; } catch (e) { el.textContent = src; } }
+    else el.textContent = src;
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => renderTex());
+  else renderTex();
+  window.addEventListener('load', () => renderTex());
+
+  // ---------- number formatting ----------
+  const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+  const sup = (n) => String(n).split('').map((c) => SUP[c] || c).join('');
+  function sci(x, d) {
+    d = d == null ? 3 : d;
+    if (!isFinite(x)) return x > 0 ? '∞' : (x < 0 ? '−∞' : '—');
+    if (x === 0) return '0';
+    const e = Math.floor(Math.log10(Math.abs(x)));
+    if (e >= -2 && e <= 3) return minus(x.toPrecision(d));
+    const m = x / Math.pow(10, e);
+    return minus(m.toFixed(d - 1)) + '×10' + sup(e);
+  }
+  function minus(s) { return String(s).replace(/^-/, '−'); }
+  const PFX = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+  function si(x, unit, d) {
+    d = d == null ? 3 : d;
+    if (!isFinite(x)) return '—';
+    if (Math.abs(x) < 1e-18) return '0 ' + unit;
+    const a = Math.abs(x);
+    for (const [f, p] of PFX) if (a >= f * 0.9995) { const v = x / f; return minus(Math.abs(v) >= Math.pow(10, d) ? v.toFixed(0) : v.toPrecision(d)) + ' ' + p + unit; }
+    return sci(x, d) + ' ' + unit;
+  }
+  function fix(x, n) { return minus((Math.abs(x) < 0.5 * Math.pow(10, -n) ? 0 : x).toFixed(n)); }
+
+  // ---------- canvas ----------
+  function canvas2d(canvas, draw) {
+    const ctx = canvas.getContext('2d');
+    const obj = { ctx, W: 1, H: 1, dpr: 1, redraw };
+    let pending = false;
+    function resize() {
+      const r = canvas.getBoundingClientRect();
+      obj.dpr = window.devicePixelRatio || 1;
+      obj.W = Math.max(1, r.width); obj.H = Math.max(1, r.height);
+      canvas.width = Math.round(obj.W * obj.dpr); canvas.height = Math.round(obj.H * obj.dpr);
+      ctx.setTransform(obj.dpr, 0, 0, obj.dpr, 0, 0);
+      draw(obj);
+    }
+    function redraw() {
+      if (pending) return; pending = true;
+      requestAnimationFrame(() => { pending = false; ctx.setTransform(obj.dpr, 0, 0, obj.dpr, 0, 0); draw(obj); });
+    }
+    new ResizeObserver(resize).observe(canvas);
+    return obj;
+  }
+
+  // world <-> screen mapping that keeps aspect ratio 1:1
+  function View(xmin, xmax, ymin, ymax) { this.box = [xmin, xmax, ymin, ymax]; this.fit(0, 0, 100, 100); }
+  View.prototype.fit = function (px, py, W, H) {
+    const [x0, x1, y0, y1] = this.box;
+    this.s = Math.min(W / (x1 - x0), H / (y1 - y0));
+    this.cx = (x0 + x1) / 2; this.cy = (y0 + y1) / 2;
+    this.ox = px + W / 2; this.oy = py + H / 2;
+    this.rect = [px, py, W, H];
+    this.xmin = this.cx - W / 2 / this.s; this.xmax = this.cx + W / 2 / this.s;
+    this.ymin = this.cy - H / 2 / this.s; this.ymax = this.cy + H / 2 / this.s;
+    return this;
+  };
+  View.prototype.X = function (x) { return this.ox + (x - this.cx) * this.s; };
+  View.prototype.Y = function (y) { return this.oy - (y - this.cy) * this.s; };
+  View.prototype.toW = function (px, py) { return [this.cx + (px - this.ox) / this.s, this.cy - (py - this.oy) / this.s]; };
+
+  function arrow(ctx, x1, y1, x2, y2, color, width, head) {
+    const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy);
+    if (L < 0.5) return;
+    head = Math.min(head == null ? 10 : head, L * 0.6);
+    const ux = dx / L, uy = dy / L;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width || 2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - ux * head * 0.7, y2 - uy * head * 0.7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - ux * head - uy * head * 0.45, y2 - uy * head + ux * head * 0.45);
+    ctx.lineTo(x2 - ux * head + uy * head * 0.45, y2 - uy * head - ux * head * 0.45);
+    ctx.closePath(); ctx.fill();
+  }
+
+  function label(ctx, text, x, y, opt) {
+    opt = opt || {};
+    const fs = (opt.size || 1) * rem();
+    ctx.font = (opt.bold ? '600 ' : '') + fs + 'px ' + (opt.font || 'system-ui, sans-serif');
+    ctx.textAlign = opt.align || 'left'; ctx.textBaseline = opt.base || 'middle';
+    if (opt.bg) {
+      const w = ctx.measureText(text).width, pad = 0.2 * fs;
+      let bx = x - (ctx.textAlign === 'center' ? w / 2 : ctx.textAlign === 'right' ? w : 0);
+      let by = y - (ctx.textBaseline === 'middle' ? fs * 0.6 : ctx.textBaseline === 'bottom' ? fs * 1.15 : 0);
+      ctx.fillStyle = opt.bg; ctx.fillRect(bx - pad, by - pad * 0.3, w + 2 * pad, fs * 1.2 + pad * 0.6);
+    }
+    ctx.fillStyle = opt.color || '#16181d';
+    ctx.fillText(text, x, y);
+  }
+
+  // pointer helper: handlers receive canvas-local px coords
+  function pointer(canvas, h) {
+    let dragging = false;
+    const loc = (e) => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    canvas.addEventListener('pointerdown', (e) => {
+      const [x, y] = loc(e);
+      if (h.down && h.down(x, y, e)) { dragging = true; canvas.setPointerCapture(e.pointerId); e.preventDefault(); }
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      const [x, y] = loc(e);
+      if (dragging) { h.move && h.move(x, y, e); e.preventDefault(); }
+      else if (h.hover) canvas.style.cursor = h.hover(x, y) ? 'grab' : 'default';
+    });
+    const end = (e) => { if (dragging) { dragging = false; h.up && h.up(e); } };
+    canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+  }
+
+  // slider binding: <input type=range id=...> and <span id=...-v>
+  function range(id, fmt, cb, toVal) {
+    const el = document.getElementById(id), out = document.getElementById(id + '-v');
+    toVal = toVal || ((v) => v);
+    const upd = (fire) => { const v = toVal(parseFloat(el.value)); if (out) out.textContent = fmt(v); if (fire) cb(v); return v; };
+    el.addEventListener('input', () => upd(true));
+    upd(false);
+    return { get: () => toVal(parseFloat(el.value)), set: (raw) => { el.value = raw; upd(false); }, el };
+  }
+
+  // ---------- log/linear plot ----------
+  function niceTicks(a, b, n) {
+    const span = b - a, step0 = span / Math.max(1, n), mag = Math.pow(10, Math.floor(Math.log10(step0)));
+    const r = step0 / mag, step = (r < 1.5 ? 1 : r < 3.5 ? 2 : r < 7.5 ? 5 : 10) * mag;
+    const out = []; for (let t = Math.ceil(a / step - 1e-9) * step; t <= b + 1e-9 * span; t += step) out.push(Math.abs(t) < step * 1e-9 ? 0 : t);
+    return out;
+  }
+  function plot(ctx, rect, o) {
+    const R = rem();
+    const [px, py, W, H] = rect;
+    const ml = o.ml != null ? o.ml : 4.2 * R, mb = 2.6 * R, mt = o.mt != null ? o.mt : 0.6 * R, mr = 0.8 * R;
+    const x0 = px + ml, x1 = px + W - mr, y0 = py + mt, y1 = py + H - mb;
+    const lx = !!o.logx, ly = !!o.logy;
+    const tx = (v) => lx ? Math.log10(v) : v, ty = (v) => ly ? Math.log10(v) : v;
+    const [xa, xb] = o.xr.map(tx), [ya, yb] = o.yr.map(ty);
+    const X = (v) => x0 + (tx(v) - xa) / (xb - xa) * (x1 - x0);
+    const Y = (v) => y1 - (ty(v) - ya) / (yb - ya) * (y1 - y0);
+    const invX = (p) => { const t = xa + (p - x0) / (x1 - x0) * (xb - xa); return lx ? Math.pow(10, t) : t; };
+    ctx.save();
+    ctx.fillStyle = '#fff'; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+    if (o.shade) for (const s of o.shade) {
+      const a = Math.max(x0, X(s[0])), b = Math.min(x1, X(s[1]));
+      if (b > a) { ctx.fillStyle = s[2] || 'rgba(18,128,74,0.12)'; ctx.fillRect(a, y0, b - a, y1 - y0); }
+    }
+    // grid + ticks
+    ctx.lineWidth = 1; ctx.font = R + 'px system-ui, sans-serif'; ctx.fillStyle = '#4d535e';
+    const xt = lx ? (() => { const t = []; for (let e = Math.ceil(xa - 1e-9); e <= xb + 1e-9; e++) t.push(e); return t; })() : niceTicks(xa, xb, Math.max(2, Math.floor((x1 - x0) / (5 * R))));
+    const yt = ly ? (() => { const t = []; for (let e = Math.ceil(ya - 1e-9); e <= yb + 1e-9; e++) t.push(e); return t; })() : niceTicks(ya, yb, Math.max(2, Math.floor((y1 - y0) / (2.5 * R))));
+    const xstep = Math.max(1, Math.ceil(xt.length / Math.max(2, (x1 - x0) / (3.6 * R))));
+    const ystep = Math.max(1, Math.ceil(yt.length / Math.max(2, (y1 - y0) / (1.6 * R))));
+    if (lx) { ctx.strokeStyle = '#eeebe4'; for (let e = Math.floor(xa); e < xb; e++) for (let k = 2; k < 10; k++) { const v = e + Math.log10(k); if (v > xa && v < xb) { const p = x0 + (v - xa) / (xb - xa) * (x1 - x0); ctx.beginPath(); ctx.moveTo(p, y0); ctx.lineTo(p, y1); ctx.stroke(); } } }
+    if (ly) { ctx.strokeStyle = '#eeebe4'; for (let e = Math.floor(ya); e < yb; e++) for (let k = 2; k < 10; k++) { const v = e + Math.log10(k); if (v > ya && v < yb) { const p = y1 - (v - ya) / (yb - ya) * (y1 - y0); ctx.beginPath(); ctx.moveTo(x0, p); ctx.lineTo(x1, p); ctx.stroke(); } } }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    xt.forEach((t, i) => {
+      const p = x0 + (t - xa) / (xb - xa) * (x1 - x0);
+      ctx.strokeStyle = '#d9d5cc'; ctx.beginPath(); ctx.moveTo(p, y0); ctx.lineTo(p, y1); ctx.stroke();
+      if (i % xstep === 0) ctx.fillText(lx ? '10' + sup(t) : (o.fmtx ? o.fmtx(t) : minus(+t.toPrecision(6) + '')), p, y1 + 0.25 * R);
+    });
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    yt.forEach((t, i) => {
+      const p = y1 - (t - ya) / (yb - ya) * (y1 - y0);
+      ctx.strokeStyle = '#d9d5cc'; ctx.beginPath(); ctx.moveTo(x0, p); ctx.lineTo(x1, p); ctx.stroke();
+      if (i % ystep === 0) ctx.fillText(ly ? '10' + sup(t) : (o.fmty ? o.fmty(t) : minus(+t.toPrecision(6) + '')), x0 - 0.3 * R, p);
+    });
+    ctx.strokeStyle = '#16181d'; ctx.lineWidth = 1.5; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+    ctx.fillStyle = '#16181d'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    if (o.xlabel) ctx.fillText(o.xlabel, (x0 + x1) / 2, py + H - 0.05 * R);
+    if (o.ylabel) { ctx.save(); ctx.translate(px + 0.1 * R, (y0 + y1) / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'top'; ctx.fillText(o.ylabel, 0, 0); ctx.restore(); }
+    // series
+    ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
+    for (const s of o.series) {
+      ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 3; ctx.setLineDash(s.dash || []);
+      ctx.beginPath(); let pen = false;
+      for (const [x, y] of s.pts) {
+        if (!(isFinite(x) && isFinite(y)) || (lx && x <= 0) || (ly && y <= 0)) { pen = false; continue; }
+        const X_ = X(x), Y_ = Math.max(-1e4, Math.min(1e4, Y(y)));
+        if (pen) ctx.lineTo(X_, Y_); else { ctx.moveTo(X_, Y_); pen = true; }
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    if (o.extra) o.extra({ X, Y, x0, x1, y0, y1 });
+    ctx.restore();
+    // legend
+    if (o.legend !== false) {
+      const items = o.series.filter((s) => s.label);
+      ctx.font = R + 'px system-ui, sans-serif';
+      const lw = Math.max(...items.map((s) => ctx.measureText(s.label).width), 0) + 3.2 * R;
+      const pos = o.legendPos || 'tr';
+      let lxp = pos[1] === 'r' ? x1 - lw - 0.4 * R : x0 + 0.4 * R;
+      let lyp = pos[0] === 't' ? y0 + 0.4 * R : y1 - 0.4 * R - items.length * 1.35 * R - 0.3 * R;
+      if (items.length) {
+        ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.strokeStyle = '#c9c4b9'; ctx.lineWidth = 1;
+        ctx.fillRect(lxp, lyp, lw, items.length * 1.35 * R + 0.3 * R); ctx.strokeRect(lxp, lyp, lw, items.length * 1.35 * R + 0.3 * R);
+        items.forEach((s, i) => {
+          const yy = lyp + 0.15 * R + (i + 0.5) * 1.35 * R;
+          ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 3; ctx.setLineDash(s.dash || []);
+          ctx.beginPath(); ctx.moveTo(lxp + 0.4 * R, yy); ctx.lineTo(lxp + 2.4 * R, yy); ctx.stroke(); ctx.setLineDash([]);
+          ctx.fillStyle = '#16181d'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s.label, lxp + 2.8 * R, yy);
+        });
+      }
+    }
+    return { X, Y, invX, x0, x1, y0, y1 };
+  }
+
+  // log-scaled arrow length: maps |E| in [mlo, mhi] (log) to [Lmin, Lmax]
+  function logLen(m, mlo, mhi, Lmin, Lmax) {
+    if (!(m > 0)) return 0;
+    const t = Math.max(0, Math.min(1, (Math.log10(m) - Math.log10(mlo)) / (Math.log10(mhi) - Math.log10(mlo))));
+    return Lmin + t * (Lmax - Lmin);
+  }
+
+  return { rem, $, renderTex, setTex, sci, si, fix, sup, minus, canvas2d, View, arrow, label, pointer, range, plot, logLen, niceTicks };
+})();
+</script>
+
+<script id="app-js">
+(function () {
+  const P = PHYS, $ = UI.$;
+  const view = new UI.View(-1.1, 1.1, -0.85, 0.85);
+  const sel = $('#fld');
+  Object.entries(P.FIELDS).forEach(([k, f]) => { const o = document.createElement('option'); o.value = k; o.textContent = f.name; sel.appendChild(o); });
+  let F = P.FIELDS.xyz, box = { x: 0.4, y: 0.2 };
+  sel.onchange = () => { F = P.FIELDS[sel.value]; if (sel.value === 'pair') { box.x = 0.5; box.y = 0.1; } upd(); };
+  const rB = UI.range('bx', (v) => UI.si(v, 'm'), () => upd(), (v) => Math.pow(10, v));
+  $('#bCtr').onclick = () => { box.x = 0; box.y = 0; upd(); };
+  let anim = null;
+  $('#bShrink').onclick = () => {
+    if (anim) { cancelAnimationFrame(anim); anim = null; $('#bShrink').textContent = '▶ Shrink box'; return; }
+    rB.set(-0.3); $('#bShrink').textContent = '■ Stop';
+    const t0 = performance.now();
+    const step = (t) => { const v = -0.3 - 1.7 * Math.min(1, (t - t0) / 5000); rB.set(v); upd(); if (v > -2) anim = requestAnimationFrame(step); else { anim = null; $('#bShrink').textContent = '▶ Shrink box'; } };
+    anim = requestAnimationFrame(step);
+  };
+  function upd() { UI.setTex('#divTex', F.tex); cv.redraw(); }
+
+  const cv = UI.canvas2d($('#cv'), draw);
+  function draw(o) {
+    const { ctx, W, H } = o, R = UI.rem();
+    const plotH = Math.min(H * 0.34, 13 * R);
+    view.fit(0, 0, W, H - plotH);
+    ctx.fillStyle = '#f6f5f1'; ctx.fillRect(0, 0, W, H);
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H - plotH); ctx.clip();
+    ctx.strokeStyle = '#16181d33'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(view.X(view.xmin), view.Y(0)); ctx.lineTo(view.X(view.xmax), view.Y(0)); ctx.moveTo(view.X(0), view.Y(view.ymin)); ctx.lineTo(view.X(0), view.Y(view.ymax)); ctx.stroke();
+    // arrow grid (log length) with colour = div sign
+    const step = Math.max(2.2 * R, Math.min(W, H - plotH) / 15), samples = [];
+    for (let py = step / 2; py < H - plotH; py += step) for (let px = step / 2; px < W; px += step) {
+      const [x, y] = view.toW(px, py), d = F.D(x, y, 0), m = Math.hypot(d[0], d[1]);
+      samples.push([px, py, d, m]);
+    }
+    const ms = samples.map((s) => s[3]).filter((m) => m > 0 && isFinite(m)).sort((a, b) => a - b);
+    const lo = ms[Math.floor(ms.length * 0.05)] || 1e-3, hi = ms[Math.floor(ms.length * 0.95)] || 1;
+    for (const [px, py, d, m] of samples) {
+      if (!(m > hi * 1e-3) || !isFinite(m)) continue;
+      const L = UI.logLen(m, lo, hi, 0.25 * step, 0.85 * step), ux = d[0] / m, uy = -d[1] / m;
+      UI.arrow(ctx, px - ux * L / 2, py - uy * L / 2, px + ux * L / 2, py + uy * L / 2, '#5a5f69', 1.6, 0.32 * R);
+    }
+    for (const p of F.singular || []) { ctx.fillStyle = p[3] > 0 ? '#c8322c' : '#1f5fbf'; ctx.beginPath(); ctx.arc(view.X(p[0]), view.Y(p[1]), 0.45 * R, 0, 7); ctx.fill(); }
+    // box & per-face flux indication
+    const s = rB.get(), c = [box.x, box.y, 0];
+    const flux = P.boxFlux(F, c, s), vol = s * s * s, ratio = flux / vol, div = F.div(...c), sing = P.enclosedSingular(F, c, s);
+    const bx = view.X(box.x - s / 2), by = view.Y(box.y + s / 2), bw = s * view.s;
+    const vis = Math.max(bw, 0.9 * R);
+    ctx.fillStyle = ratio > 1e-9 ? 'rgba(200,50,44,0.18)' : ratio < -1e-9 ? 'rgba(31,95,191,0.18)' : 'rgba(18,128,74,0.15)';
+    ctx.strokeStyle = '#d97000'; ctx.lineWidth = 3;
+    ctx.fillRect(view.X(box.x) - vis / 2, view.Y(box.y) - vis / 2, vis, vis); ctx.strokeRect(view.X(box.x) - vis / 2, view.Y(box.y) - vis / 2, vis, vis);
+    if (bw < 0.9 * R) UI.label(ctx, '(box enlarged for visibility)', view.X(box.x) + vis, view.Y(box.y) + vis, { size: 0.85, color: '#b55d00' });
+    // face normal-flux arrows on the 4 visible faces
+    if (bw > 2.5 * R) {
+      const faces = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+      for (const [nx, ny] of faces) {
+        for (const t of [-0.25, 0.25]) {
+          const fx = box.x + nx * s / 2 + (ny ? t * s : 0), fy = box.y + ny * s / 2 + (nx ? t * s : 0);
+          const d = F.D(fx, fy, 0), dn = d[0] * nx + d[1] * ny, L = Math.min(2 * R, UI.logLen(Math.abs(dn), lo, hi, 0.4 * R, 2 * R));
+          if (Math.abs(dn) < hi * 1e-3) continue; const sg = Math.sign(dn);
+          UI.arrow(ctx, view.X(fx), view.Y(fy), view.X(fx) + sg * nx * L, view.Y(fy) - sg * ny * L, sg > 0 ? '#c8322c' : '#1f5fbf', 2.5, 0.5 * R);
+        }
+      }
+    }
+    ctx.restore();
+    // convergence curve for the current centre: flux/Δv over a range of box sizes
+    const curve = [], okY = [];
+    for (const sz of NUM.logspace(0.01, 0.5, 36)) {
+      const r_ = P.boxFlux(F, c, sz, 6, 3) / (sz * sz * sz), sg_ = P.enclosedSingular(F, c, sz);
+      curve.push([sz, r_]); if (!sg_) okY.push(r_);
+    }
+    const yv = okY.concat([div]);
+    let ya = Math.min(...yv), yb = Math.max(...yv); const pad = Math.max(0.15 * (yb - ya), 0.25 * Math.max(Math.abs(ya), Math.abs(yb)), 0.2); ya -= pad; yb += pad;
+    UI.plot(ctx, [0, H - plotH, W, plotH], {
+      logx: true, xr: [0.01, 0.5], yr: [ya, yb], xlabel: 'box side Δx (m)   ← smaller box', ylabel: 'flux / Δv', ml: 4.4 * R, mt: 0.8 * R,
+      series: [
+        { pts: [[0.01, div], [0.5, div]], color: '#12804a', width: 3, dash: [9, 6], label: '∇·D at centre (analytic)' },
+        { pts: curve, color: '#d97000', width: 3, label: 'flux / Δv (numerical)' }
+      ],
+      legendPos: 'tr',
+      extra: ({ X, Y, y0, y1 }) => { ctx.strokeStyle = '#16181d'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(X(s), y0); ctx.lineTo(X(s), y1); ctx.stroke(); ctx.fillStyle = '#d97000'; if (isFinite(ratio) && ratio <= yb && ratio >= ya) { ctx.beginPath(); ctx.arc(X(s), Y(ratio), 0.45 * R, 0, 7); ctx.fill(); } }
+    });
+    const rows = [['box centre', '(' + UI.fix(box.x, 3) + ', ' + UI.fix(box.y, 3) + ', 0)'], ['∮ D·dS', UI.sci(flux, 4)], ['Δv', UI.sci(vol, 3) + ' m³'],
+      ['∮ D·dS / Δv', UI.sci(ratio, 4)], ['∇·D (analytic)', UI.sci(div, 4)]];
+    if (sing) rows.push(['<span class="warn">point source inside:</span>', '<span class="warn">∮ → ' + UI.fix(sing / Math.PI, 0) + 'π, ratio ∝ 1/Δx³</span>']);
+    $('#tbl').innerHTML = rows.map((r) => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('');
+  }
+  let off = null;
+  const inBox = (px, py) => { const s = rB.get(), vis = Math.max(s * view.s, 0.9 * UI.rem()) / 2 + 6; return Math.abs(px - view.X(box.x)) < vis && Math.abs(py - view.Y(box.y)) < vis; };
+  UI.pointer($('#cv'), {
+    hover: inBox,
+    down: (px, py) => { if (!inBox(px, py)) return false; const [x, y] = view.toW(px, py); off = [box.x - x, box.y - y]; return true; },
+    move: (px, py) => { const [x, y] = view.toW(px, py); box.x = Math.round((x + off[0]) * 200) / 200; box.y = Math.round((y + off[1]) * 200) / 200; box.x = Math.max(-1, Math.min(1, box.x)); box.y = Math.max(-0.8, Math.min(0.8, box.y)); upd(); }
+  });
+  sel.value = 'xyz';
+  upd();
+  window.__ready = true;
+})();
+</script>
+</body>
+</html>

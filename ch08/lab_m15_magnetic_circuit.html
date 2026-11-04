@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Magnetic Circuit with Air Gap</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+:root{--bg:#f4f6f9;--panel:#fff;--ink:#16202a;--mut:#56616e;--line:#d5dbe3;--acc:#1c64d6;--pos:#2b8a3e;--fs:clamp(11px,min(1.6vw,2.8vh),26px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:var(--fs)}
+#app{height:100%;display:grid;grid-template-rows:auto 1fr}
+header{padding:.3em .8em;display:flex;align-items:baseline;gap:1em;border-bottom:1px solid var(--line);background:var(--panel)}
+h1{font-size:1.2em;margin:0;white-space:nowrap}
+.cap{color:var(--mut);font-size:.9em;flex:1;min-width:0}.cap b{color:var(--ink)}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,31%);min-height:0}
+#stage{position:relative;min-width:0;min-height:0;overflow:hidden}
+#stage canvas{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none}
+aside{background:var(--panel);border-left:1px solid var(--line);padding:.35em .7em;overflow:auto;display:flex;flex-direction:column;gap:.3em}
+.row{display:grid;grid-template-columns:minmax(0,7.4em) minmax(0,1fr);align-items:center;gap:.5em}
+.row label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+input[type=range]{width:100%;accent-color:var(--acc);margin:0}
+.seg{display:flex;gap:3px}
+button{font:inherit;font-size:.88em;padding:.12em .45em;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:.35em;cursor:pointer;flex:1}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.read{font-variant-numeric:tabular-nums;font-size:.86em;line-height:1.33;background:#f6f7f9;border-radius:.4em;padding:.2em .5em}
+.fx{background:#eef3fb;border-radius:.4em;padding:.15em .5em;font-size:.9em;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="app">
+<header><h1>Magnetic circuit: C-core with air gap</h1>
+<div class="cap"><b>Notice:</b> a gap only a fraction of a percent of the path length can dominate the reluctance — and that is where most of the magnetic energy is stored.</div></header>
+<main>
+<section id="stage"><canvas id="cv"></canvas></section>
+<aside>
+<div class="row"><label>N = <b id="vN"></b></label><input type="range" id="N" min="10" max="1000" step="10" value="200"></div>
+<div class="row"><label>I = <b id="vI"></b></label><input type="range" id="I" min="0" max="20" step="0.1" value="2"></div>
+<div class="row"><label>μ<sub>r</sub> core = <b id="vMu"></b></label><input type="range" id="Mu" min="1" max="4" step="0.01" value="3.3"></div>
+<div class="row"><label>ℓ<sub>core</sub> = <b id="vLc"></b></label><input type="range" id="Lc" min="10" max="100" step="1" value="40"></div>
+<div class="row"><label>ℓ<sub>gap</sub> = <b id="vLg"></b></label><input type="range" id="Lg" min="0" max="5" step="0.05" value="1"></div>
+<div class="row"><label>S = <b id="vS"></b></label><input type="range" id="S" min="1" max="25" step="0.5" value="4"></div>
+<div class="seg"><button id="sat">Saturating core: OFF</button></div>
+<div class="read" id="read"></div>
+<div class="fx" id="fx"></div>
+</aside>
+</main>
+</div>
+
+<script id="physics">
+/* ===== Physics core (portable, no DOM). SI units. Fringing and leakage neglected. ===== */
+const MAG = (function () {
+  const MU0 = 4 * Math.PI * 1e-7;
+  const BSAT = 1.6; // T, knee of the saturating model
+  // B–H curves. Linear: B = μ0 μr H. Saturating: B = μ0 H + Bsat·tanh(μ0(μr−1)H/Bsat)  (same initial slope μ0 μr)
+  function Bcore(H, mur, sat) {
+    if (!sat) return MU0 * mur * H;
+    return MU0 * H + BSAT * Math.tanh((MU0 * (mur - 1) * H) / BSAT);
+  }
+  const reluctance = (l, mu, S) => l / (mu * S);
+  // Solve N I = H_c ℓ_c + (B/μ0) ℓ_g with B continuous (same S): bisection on H_c
+  function solve(p) {
+    const { N, I, mur, lc, lg, S, sat } = p, F = N * I;
+    let lo = 0, hi = F / lc, Hc = 0;
+    for (let k = 0; k < 200; k++) {
+      Hc = 0.5 * (lo + hi);
+      const r = Hc * lc + (Bcore(Hc, mur, sat) * lg) / MU0 - F;
+      if (r > 0) hi = Hc; else lo = Hc;
+    }
+    const B = Bcore(Hc, mur, sat), Hg = B / MU0, Phi = B * S;
+    const Rc = reluctance(lc, MU0 * mur, S), Rg = reluctance(lg, MU0, S);
+    // stored energy: core ∫H dB (numerical), gap B²/(2μ0)
+    const n = 400; let wc = 0, Hprev = 0, Bprev = 0;
+    for (let i = 1; i <= n; i++) { const H = (Hc * i) / n, Bb = Bcore(H, mur, sat); wc += 0.5 * (H + Hprev) * (Bb - Bprev); Hprev = H; Bprev = Bb; }
+    const Wcore = wc * S * lc, Wgap = ((B * B) / (2 * MU0)) * S * lg;
+    return {
+      F, Hc, Hg, B, Phi, Rc, Rg, Rt: Rc + Rg,
+      Llin: (N * N) / (Rc + Rg),          // N²/ℜ_total (unsaturated)
+      L: I > 0 ? (N * Phi) / I : (N * N) / (Rc + Rg), // secant inductance NΦ/I
+      Wcore, Wgap, W: Wcore + Wgap, fracGap: Wgap / (Wcore + Wgap || 1),
+      mmfCore: Hc * lc, mmfGap: Hg * lg
+    };
+  }
+  // boundary refraction (no surface current): tanθ1/tanθ2 = μ1/μ2, B_n continuous, H_t continuous
+  function refract(theta1, mu1, mu2) { return Math.atan((Math.tan(theta1) * mu2) / mu1); }
+  return { MU0, BSAT, Bcore, reluctance, solve, refract };
+})();
+if (typeof module !== 'undefined') module.exports = MAG;
+</script>
+
+<script>
+/* ===== UI ===== */
+const $ = id => document.getElementById(id);
+const tex = (el, s) => { if (window.katex) { try { katex.render(s, el, { throwOnError: false }); return; } catch (e) {} } el.textContent = s; };
+function eng(v, u = '', p = 3) { if (!isFinite(v)) return '—'; if (v === 0) return '0 ' + u; const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n']]; const a = Math.abs(v); for (const [s, n] of P) if (a >= s * 0.9995) return parseFloat((v / s).toPrecision(p)) + ' ' + n + u; return v.toExponential(2) + ' ' + u; }
+const cv = $('cv'), ctx = cv.getContext('2d');
+const fsPx = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
+const S = { N: 200, I: 2, mur: 2000, lc: 0.4, lg: 1e-3, S: 4e-4, sat: false, th1: 1.2, phase: 0 };
+function bind(id, fn, show) { const el = $(id), o = $('v' + id); const u = () => { fn(+el.value); o.innerHTML = show(+el.value); }; el.addEventListener('input', u); u(); }
+bind('N', v => S.N = v, v => v);
+bind('I', v => S.I = v, v => v.toFixed(1) + ' A');
+const mu2 = v => { const x = Math.pow(10, v); return x < 10 ? Math.round(x * 10) / 10 : +x.toPrecision(2); };
+bind('Mu', v => S.mur = mu2(v), v => mu2(v));
+bind('Lc', v => S.lc = v / 100, v => v + ' cm');
+bind('Lg', v => S.lg = v / 1000, v => v.toFixed(2) + ' mm');
+bind('S', v => S.S = v * 1e-4, v => v + ' cm²');
+$('sat').onclick = () => { S.sat = !S.sat; $('sat').classList.toggle('on', S.sat); $('sat').textContent = 'Saturating core: ' + (S.sat ? 'ON' : 'OFF'); };
+$('fx').innerHTML = '<span data-t="\\mathcal R=\\dfrac{\\ell}{\\mu S},\\quad NI=\\Phi(\\mathcal R_c+\\mathcal R_g)"></span><br><span data-t="L=\\dfrac{N^2}{\\mathcal R_c+\\mathcal R_g},\\quad \\dfrac{W_g}{W}=\\dfrac{\\mathcal R_g}{\\mathcal R_c+\\mathcal R_g}"></span>';
+function renderTex() { $('fx').querySelectorAll('[data-t]').forEach(e => tex(e, e.dataset.t)); }
+renderTex(); window.addEventListener('load', renderTex);
+
+function arrow(c, x1, y1, x2, y2, col, w, hl) { const dx = x2 - x1, dy = y2 - y1, m = Math.hypot(dx, dy) || 1, ux = dx / m, uy = dy / m; hl = hl || Math.max(6, w * 3.5); c.strokeStyle = c.fillStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - ux * hl * .6, y2 - uy * hl * .6); c.stroke(); c.beginPath(); c.moveTo(x2, y2); c.lineTo(x2 - ux * hl - uy * hl * .45, y2 - uy * hl + ux * hl * .45); c.lineTo(x2 - ux * hl + uy * hl * .45, y2 - uy * hl - ux * hl * .45); c.closePath(); c.fill(); }
+
+let regions = {};
+function draw(dt) {
+  const W = cv.width, Hh = cv.height, dpr = window.devicePixelRatio || 1, fs = fsPx() * dpr;
+  const r = MAG.solve({ N: S.N, I: S.I, mur: S.mur, lc: S.lc, lg: S.lg, S: S.S, sat: S.sat });
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, Hh);
+  const topH = Math.round(Hh * 0.5);
+  /* --- C-core drawing --- */
+  const cw = Math.min(W * 0.45, topH * 1.25), chh = topH - 2.2 * fs, x0 = 1.2 * fs, y0 = 1.2 * fs, t = Math.max(1.6 * fs, Math.min(chh * 0.32, (0.8 + Math.sqrt(S.S / 25e-4) * 2.4) * fs));
+  const gapPx = Math.max(2 * dpr, Math.min(chh * 0.3, S.lg / 5e-3 * chh * 0.3));
+  const bFrac = Math.min(1, Math.abs(r.B) / 2);
+  const core = `rgb(${200 - 90 * bFrac},${205 - 120 * bFrac},${215 - 60 * bFrac})`;
+  ctx.fillStyle = core;
+  // C shape: left leg, top, bottom, right leg with a gap in the middle
+  const midY = y0 + chh / 2;
+  ctx.fillRect(x0, y0, cw, t); ctx.fillRect(x0, y0 + chh - t, cw, t); ctx.fillRect(x0, y0, t, chh);
+  ctx.fillRect(x0 + cw - t, y0, t, chh / 2 - gapPx / 2); ctx.fillRect(x0 + cw - t, midY + gapPx / 2, t, chh / 2 - gapPx / 2);
+  ctx.strokeStyle = '#495057'; ctx.lineWidth = 1.2 * dpr; ctx.strokeRect(x0, y0, cw, chh); ctx.strokeRect(x0 + t, y0 + t, cw - 2 * t, chh - 2 * t);
+  if (S.lg > 0) { ctx.fillStyle = '#fff3bf'; ctx.fillRect(x0 + cw - t - 2, midY - gapPx / 2, t + 4, gapPx); ctx.fillStyle = '#b08900'; ctx.font = `bold ${.85 * fs}px system-ui`; ctx.fillText('gap', x0 + cw + .4 * fs, midY + .3 * fs); }
+  // winding on left leg
+  const nTurns = Math.min(14, Math.max(3, Math.round(Math.sqrt(S.N)))), wy0 = y0 + t + .4 * fs, wy1 = y0 + chh - t - .4 * fs;
+  ctx.strokeStyle = '#d9480f'; ctx.lineWidth = 2.5 * dpr;
+  for (let k = 0; k < nTurns; k++) { const yy = wy0 + (wy1 - wy0) * (k + .5) / nTurns; ctx.beginPath(); ctx.moveTo(x0 - .4 * fs, yy + .25 * fs); ctx.lineTo(x0 + t + .4 * fs, yy - .25 * fs); ctx.stroke(); }
+  ctx.fillStyle = '#d9480f'; ctx.font = `bold ${.85 * fs}px system-ui`; ctx.fillText('N, I', x0 + t + .6 * fs, wy0 + .6 * fs);
+  // flux arrows travelling round the core (speed ∝ Φ)
+  const Bref = Math.min(1, Math.abs(r.B) / 1.6); S.phase += dt * (0.15 + 0.6 * Bref) * (S.I > 0 ? 1 : 0);
+  const path = [[x0 + t / 2, y0 + chh - t / 2], [x0 + t / 2, y0 + t / 2], [x0 + cw - t / 2, y0 + t / 2], [x0 + cw - t / 2, y0 + chh - t / 2]], segL = [], all = [];
+  let tot = 0; for (let i = 0; i < 4; i++) { const a = path[i], b = path[(i + 1) % 4], l = Math.hypot(b[0] - a[0], b[1] - a[1]); segL.push(l); tot += l; }
+  const nA = 10; if (S.I > 0) for (let k = 0; k < nA; k++) {
+    let d = ((k / nA + S.phase) % 1) * tot, i = 0; while (d > segL[i]) { d -= segL[i]; i++; }
+    const a = path[i], b = path[(i + 1) % 4], u = [(b[0] - a[0]) / segL[i], (b[1] - a[1]) / segL[i]], px = a[0] + u[0] * d, py = a[1] + u[1] * d;
+    arrow(ctx, px - u[0] * .6 * fs, py - u[1] * .6 * fs, px + u[0] * .6 * fs, py + u[1] * .6 * fs, `rgba(28,100,214,${0.4 + 0.6 * Bref})`, 2.5 * dpr);
+  }
+  ctx.fillStyle = '#1c64d6'; ctx.font = `bold ${.9 * fs}px system-ui`; ctx.fillText('Φ', x0 + cw / 2, y0 + t + 1.1 * fs);
+  ctx.fillStyle = '#56616e'; ctx.font = `${.75 * fs}px system-ui`; ctx.fillText('gap not to scale', x0, y0 + chh + 1.0 * fs);
+  /* --- equivalent circuit + energy bars --- */
+  const ex = x0 + cw + 3.4 * fs, ew = W - ex - 1 * fs;
+  ctx.fillStyle = '#16202a'; ctx.font = `bold ${.85 * fs}px system-ui`; ctx.fillText('Where the MMF NI is spent', ex, y0 + .6 * fs);
+  const bar = (yy, label, a, b, la, lb, ca, cb) => {
+    const tt = a + b || 1, wa = ew * a / tt; ctx.fillStyle = ca; ctx.fillRect(ex, yy, wa, 1.3 * fs); ctx.fillStyle = cb; ctx.fillRect(ex + wa, yy, ew - wa, 1.3 * fs);
+    ctx.strokeStyle = '#adb5bd'; ctx.lineWidth = dpr; ctx.strokeRect(ex, yy, ew, 1.3 * fs);
+    ctx.font = `${.78 * fs}px system-ui`; ctx.fillStyle = '#16202a'; ctx.fillText(`${la} ${(100 * a / tt).toFixed(1)}%`, ex, yy + 2.2 * fs); ctx.textAlign = 'right'; ctx.fillText(`${lb} ${(100 * b / tt).toFixed(1)}%`, ex + ew, yy + 2.2 * fs); ctx.textAlign = 'left';
+  };
+  bar(y0 + 1.1 * fs, '', r.mmfCore, r.mmfGap, 'core', 'gap', '#9aa9c9', '#f2c94c');
+  ctx.fillStyle = '#16202a'; ctx.font = `bold ${.85 * fs}px system-ui`; ctx.fillText(S.sat ? 'Where the stored energy W = ∫H dB dv is' : 'Where the energy W = ½LI² is stored', ex, y0 + 4.6 * fs);
+  bar(y0 + 5.1 * fs, '', r.Wcore, r.Wgap, 'core', 'gap', '#9aa9c9', '#f2c94c');
+  // series circuit sketch
+  const sy = y0 + 8.6 * fs, sx = ex, sw = Math.min(ew, 16 * fs);
+  if (sy + 3.4 * fs < topH) {
+    ctx.strokeStyle = '#495057'; ctx.lineWidth = 2 * dpr; ctx.strokeRect(sx + .5 * fs, sy, sw - fs, 2.6 * fs);
+    ctx.fillStyle = '#fff'; ctx.fillRect(sx, sy + .6 * fs, fs, 1.4 * fs); ctx.strokeRect(sx, sy + .6 * fs, fs, 1.4 * fs);
+    ctx.fillRect(sx + sw * .3, sy - .45 * fs, sw * .22, .9 * fs); ctx.strokeRect(sx + sw * .3, sy - .45 * fs, sw * .22, .9 * fs);
+    ctx.fillStyle = '#fff3bf'; ctx.fillRect(sx + sw * .62, sy - .45 * fs, sw * .22, .9 * fs); ctx.strokeRect(sx + sw * .62, sy - .45 * fs, sw * .22, .9 * fs);
+    ctx.fillStyle = '#16202a'; ctx.font = `${.75 * fs}px system-ui`;
+    ctx.fillText('NI', sx + 1.2 * fs, sy + 1.6 * fs); ctx.fillText('ℜc', sx + sw * .36, sy - .7 * fs); ctx.fillText('ℜg', sx + sw * .68, sy - .7 * fs);
+    ctx.fillText('Φ →', sx + sw * .45, sy + 2.3 * fs);
+  }
+  /* --- B–H plot --- */
+  const py0 = topH + .4 * fs, ph = Hh - py0 - .4 * fs, pw = W * 0.58, px0 = .4 * fs;
+  ctx.fillStyle = '#f8f9fa'; ctx.fillRect(px0, py0, pw, ph); ctx.strokeStyle = '#dee2e6'; ctx.strokeRect(px0, py0, pw, ph);
+  const L = px0 + 3.2 * fs, R = px0 + pw - .8 * fs, T = py0 + 1.6 * fs, B = py0 + ph - 1.8 * fs;
+  const Hmax = Math.max(4 * Math.abs(r.Hc), MAG.BSAT / (MAG.MU0 * S.mur) * 3, 50), Bmax = Math.max(S.sat ? 2 : 0, Math.abs(r.B) * 1.6, MAG.Bcore(Hmax, S.mur, S.sat) * (S.sat ? 1.05 : 0.0), 0.05);
+  const Bm = Math.min(Bmax, Math.max(Math.abs(r.B) * 1.6, S.sat ? 2.0 : 0.05, Math.min(2.2, MAG.Bcore(Hmax, S.mur, S.sat))));
+  const X = h => L + h / Hmax * (R - L), Y = b => B - b / Bm * (B - T);
+  ctx.strokeStyle = '#8994a1'; ctx.lineWidth = dpr; ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, B); ctx.lineTo(R, B); ctx.stroke();
+  ctx.save(); ctx.beginPath(); ctx.rect(L, T - .2 * fs, R - L, B - T + .2 * fs); ctx.clip();
+  ctx.strokeStyle = '#495057'; ctx.lineWidth = 2.6 * dpr; ctx.beginPath(); for (let i = 0; i <= 200; i++) { const h = Hmax * i / 200, b = MAG.Bcore(h, S.mur, S.sat); i ? ctx.lineTo(X(h), Y(b)) : ctx.moveTo(X(h), Y(b)); } ctx.stroke();
+  // gap load line: B = μ0 (NI − H ℓc)/ℓg
+  if (S.lg > 0) { ctx.strokeStyle = '#b08900'; ctx.setLineDash([7 * dpr, 4 * dpr]); ctx.lineWidth = 2 * dpr; ctx.beginPath(); ctx.moveTo(X(0), Y(MAG.MU0 * r.F / S.lg)); ctx.lineTo(X(r.F / S.lc), Y(0)); ctx.stroke(); ctx.setLineDash([]); }
+  ctx.restore();
+  ctx.fillStyle = '#c92a2a'; ctx.beginPath(); ctx.arc(X(r.Hc), Y(r.B), .45 * fs, 0, 7); ctx.fill();
+  ctx.font = `${.8 * fs}px system-ui`; ctx.fillStyle = '#16202a'; ctx.fillText('B (T)', px0 + .3 * fs, py0 + 1.0 * fs); ctx.textAlign = 'right'; ctx.fillText(Bm.toFixed(2), L - .2 * fs, T + .3 * fs); ctx.fillText('0', L - .2 * fs, B + .3 * fs); ctx.fillText(eng(Hmax, 'A/m', 2), R, B + 1.2 * fs); ctx.textAlign = 'left';
+  ctx.fillText('H_core', L + .3 * fs, B + 1.2 * fs);
+  ctx.fillStyle = '#495057'; ctx.fillText('core B–H', L + .4 * fs, T + .2 * fs); ctx.fillStyle = '#b08900'; if (S.lg > 0) ctx.fillText('gap load line', L + 6 * fs, T + .2 * fs); ctx.fillStyle = '#c92a2a'; ctx.fillText('operating point', L + 13 * fs, T + .2 * fs);
+  /* --- refraction mini-view --- */
+  const rx0 = px0 + pw + .5 * fs, rw = W - rx0 - .4 * fs, rcx = rx0 + rw / 2, rcy = py0 + ph / 2 + .6 * fs, rl = Math.min(rw, ph) * 0.38;
+  ctx.fillStyle = '#e7ebf3'; ctx.fillRect(rx0, py0, rw, ph / 2 + .6 * fs); ctx.fillStyle = '#fff'; ctx.fillRect(rx0, rcy, rw, py0 + ph - rcy); ctx.strokeStyle = '#dee2e6'; ctx.strokeRect(rx0, py0, rw, ph);
+  ctx.strokeStyle = '#495057'; ctx.lineWidth = 2 * dpr; ctx.beginPath(); ctx.moveTo(rx0, rcy); ctx.lineTo(rx0 + rw, rcy); ctx.stroke();
+  ctx.setLineDash([4 * dpr, 4 * dpr]); ctx.strokeStyle = '#adb5bd'; ctx.beginPath(); ctx.moveTo(rcx, py0 + 1.6 * fs); ctx.lineTo(rcx, py0 + ph - .3 * fs); ctx.stroke(); ctx.setLineDash([]);
+  const th2 = MAG.refract(S.th1, S.mur, 1), b1x = rcx - rl * Math.sin(S.th1), b1y = rcy - rl * Math.cos(S.th1);
+  arrow(ctx, b1x, b1y, rcx, rcy, '#1c64d6', 3 * dpr);
+  const l2 = rl * Math.max(0.35, Math.min(1.2, Math.cos(S.th1) / Math.max(1e-3, Math.cos(th2)))) ;
+  arrow(ctx, rcx, rcy, rcx + l2 * Math.sin(th2), rcy + l2 * Math.cos(th2), '#1c64d6', 3 * dpr);
+  ctx.fillStyle = '#1c64d6'; ctx.beginPath(); ctx.arc(b1x, b1y, .45 * fs, 0, 7); ctx.fill();
+  regions.handle = [b1x, b1y]; regions.ref = { rcx, rcy, rx0, rw, py0, ph };
+  ctx.fillStyle = '#16202a'; ctx.font = `bold ${.8 * fs}px system-ui`; ctx.fillText(`core μr = ${S.mur}`, rx0 + .3 * fs, py0 + 1.1 * fs); ctx.fillText('air μr = 1', rx0 + .3 * fs, rcy + 1.3 * fs);
+  ctx.font = `${.8 * fs}px system-ui`; ctx.fillText(`θ₁ = ${(S.th1 * 180 / Math.PI).toFixed(1)}°`, rcx + .4 * fs, rcy - .6 * fs); ctx.fillText(`θ₂ = ${(th2 * 180 / Math.PI).toFixed(2)}°`, rcx + .4 * fs, rcy + 2.5 * fs);
+  ctx.fillStyle = '#56616e'; ctx.font = `${.75 * fs}px system-ui`; ctx.fillText('drag ●', rx0 + .3 * fs, py0 + 2.1 * fs); ctx.textAlign = 'right'; ctx.fillText('tanθ₁/tanθ₂ = μ₁/μ₂', rx0 + rw - .3 * fs, py0 + ph - .4 * fs); ctx.textAlign = 'left';
+  /* --- readout --- */
+  const sat = S.sat && Math.abs(r.B) > 1.2;
+  $('read').innerHTML = `ℜ<sub>core</sub> = ${eng(S.sat && r.Phi > 0 ? r.mmfCore / r.Phi : r.Rc, 'A/Wb')}${S.sat ? '<sup>*</sup>' : ''} &nbsp; ℜ<sub>gap</sub> = ${eng(r.Rg, 'A/Wb')}<br>` +
+    `NI = ${eng(r.F, 'A·t')} &nbsp; Φ = <b>${eng(r.Phi, 'Wb')}</b><br>` +
+    `B<sub>core</sub> = B<sub>gap</sub> = <b>${r.B.toFixed(3)} T</b>${sat ? ' <span style="color:#c92a2a">(saturating)</span>' : ''}<br>` +
+    `H<sub>core</sub> = ${eng(r.Hc, 'A/m')} &nbsp; H<sub>gap</sub> = ${eng(r.Hg, 'A/m')}<br>` +
+    `L = NΦ/I = <b>${eng(r.L, 'H')}</b>${S.sat ? ` &nbsp;(N²/ℜ: ${eng(r.Llin, 'H')})` : ''}<br>` +
+    `W = ${eng(r.W, 'J')} &nbsp; gap share <b>${(100 * r.fracGap).toFixed(1)}%</b>` + (S.sat ? '<br><span style="color:#56616e">* effective H<sub>c</sub>ℓ<sub>c</sub>/Φ at the operating point</span>' : '');
+}
+let last = performance.now();
+function frame(t) { const dt = Math.min(.05, (t - last) / 1000); last = t; draw(dt); requestAnimationFrame(frame); }
+let drag = false;
+function setAngle(e) { const rr = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, x = (e.clientX - rr.left) * dpr, y = (e.clientY - rr.top) * dpr, g = regions.ref; S.th1 = Math.max(0, Math.min(1.5, Math.atan2(g.rcx - x, Math.max(1, g.rcy - y)))); }
+cv.addEventListener('pointerdown', e => { const rr = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, x = (e.clientX - rr.left) * dpr, y = (e.clientY - rr.top) * dpr, g = regions.ref; if (g && x > g.rx0 && y > g.py0 && y < g.rcy) { drag = true; cv.setPointerCapture(e.pointerId); setAngle(e); } });
+cv.addEventListener('pointermove', e => { if (drag) setAngle(e); });
+cv.addEventListener('pointerup', () => drag = false);
+new ResizeObserver(() => { const dpr = window.devicePixelRatio || 1; cv.width = Math.max(1, Math.round(cv.clientWidth * dpr)); cv.height = Math.max(1, Math.round(cv.clientHeight * dpr)); }).observe($('stage'));
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

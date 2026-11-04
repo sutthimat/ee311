@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lorentz Force and Loop Torque</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+:root{--bg:#f4f6f9;--panel:#fff;--ink:#16202a;--mut:#56616e;--line:#d5dbe3;--acc:#1c64d6;--pos:#2b8a3e;--fs:clamp(11px,min(1.6vw,2.8vh),26px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:var(--fs)}
+#app{height:100%;display:grid;grid-template-rows:auto 1fr}
+header{padding:.3em .8em;display:flex;align-items:baseline;gap:1em;border-bottom:1px solid var(--line);background:var(--panel)}
+h1{font-size:1.2em;margin:0;white-space:nowrap}
+.cap{color:var(--mut);font-size:.9em;flex:1;min-width:0}.cap b{color:var(--ink)}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,32%);min-height:0}
+#stage{position:relative;min-width:0;min-height:0;overflow:hidden}
+#stage canvas{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none}
+aside{background:var(--panel);border-left:1px solid var(--line);padding:.4em .7em;overflow:auto;display:flex;flex-direction:column;gap:.36em}
+.row{display:grid;grid-template-columns:minmax(0,9.6em) minmax(0,1fr);align-items:center;gap:.5em}
+.row label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+input[type=range]{width:100%;accent-color:var(--acc);margin:0}
+.seg{display:flex;gap:3px}
+button{font:inherit;font-size:.9em;padding:.15em .45em;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:.35em;cursor:pointer;flex:1}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.tabs button{font-weight:600}
+.read{font-variant-numeric:tabular-nums;font-size:.9em;line-height:1.38;background:#f6f7f9;border-radius:.4em;padding:.25em .5em}
+.ok{color:var(--pos);font-weight:600}
+.fx{background:#eef3fb;border-radius:.4em;padding:.2em .5em;font-size:.95em;line-height:1.6}
+.hint{color:var(--mut);font-size:.86em}
+.grp{display:flex;flex-direction:column;gap:.36em}
+</style>
+</head>
+<body>
+<div id="app">
+<header><h1 id="title">Lorentz force on a moving charge</h1><div class="cap" id="cap"></div></header>
+<main>
+<section id="stage"><canvas id="cv"></canvas></section>
+<aside>
+<div class="seg tabs"><button id="tabP" class="on">(a) Charged particle</button><button id="tabM">(b) Loop torque / DC motor</button></div>
+<div class="grp" id="gP">
+<div class="seg" id="pSeg"><button data-p="p" class="on">Proton</button><button data-p="e">Electron</button><button data-p="a">α particle</button></div>
+<div class="row"><label>B<sub>z</sub> = <b id="vB"></b></label><input type="range" id="B" min="0" max="0.5" step="0.005" value="0.1"></div>
+<div class="row"><label>|v₀| = <b id="vV"></b></label><input type="range" id="V" min="0.2" max="5" step="0.1" value="1"></div>
+<div class="row"><label>∠(v₀,B) = <b id="vPit"></b></label><input type="range" id="Pit" min="10" max="90" step="1" value="90"></div>
+<div class="row"><label>E<sub>y</sub> = <b id="vEy"></b></label><input type="range" id="Ey" min="-10" max="10" step="0.5" value="0"></div>
+<div class="row"><label>E<sub>z</sub> = <b id="vEz"></b></label><input type="range" id="Ez" min="-5" max="5" step="0.25" value="0"></div>
+<div class="seg"><button id="v2d" class="on">2D top view</button><button id="v3d">3D view</button><button id="restart">↺ Restart</button></div>
+</div>
+<div class="grp" id="gM" style="display:none">
+<div class="row"><label>B = <b id="vMB"></b></label><input type="range" id="MB" min="0.05" max="1" step="0.05" value="0.5"></div>
+<div class="row"><label>I = <b id="vMI"></b></label><input type="range" id="MI" min="0" max="10" step="0.5" value="4"></div>
+<div class="row"><label>N = <b id="vMN"></b></label><input type="range" id="MN" min="1" max="50" step="1" value="20"></div>
+<div class="row"><label>S = <b id="vMS"></b></label><input type="range" id="MS" min="10" max="100" step="5" value="40"></div>
+<div class="seg"><button id="comm">Commutator: OFF</button><button id="run" class="on">❚❚ Pause</button></div>
+<div class="row" id="rowAng" style="display:none"><label>θ = <b id="vAng"></b></label><input type="range" id="Ang" min="0" max="360" step="1" value="30"></div>
+</div>
+<div class="read" id="read"></div>
+<div class="fx" id="fx"></div>
+<div class="hint" id="hint"></div>
+</aside>
+</main>
+</div>
+
+<script id="physics">
+/* ===== Physics core (portable, no DOM). SI units. ===== */
+const LOR = (function () {
+  const QE = 1.602176634e-19, MP = 1.67262192e-27, ME = 9.1093837e-31;
+  const PARTICLES = { p: { Q: QE, m: MP, name: 'proton' }, e: { Q: -QE, m: ME, name: 'electron' }, a: { Q: 2 * QE, m: 6.6446573e-27, name: 'α particle' } };
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  function force(Q, v, E, B) { const c = cross(v, B); return [Q * (E[0] + c[0]), Q * (E[1] + c[1]), Q * (E[2] + c[2])]; }
+  // Boris pusher: exact gyration in B, 2nd-order accurate, energy-conserving for E = 0
+  function borisStep(st, Q, m, E, B, dt) {
+    const q = (Q * dt) / (2 * m);
+    const vm = [st.v[0] + q * E[0], st.v[1] + q * E[1], st.v[2] + q * E[2]];
+    const t = [q * B[0], q * B[1], q * B[2]], t2 = t[0] * t[0] + t[1] * t[1] + t[2] * t[2];
+    const s = [2 * t[0] / (1 + t2), 2 * t[1] / (1 + t2), 2 * t[2] / (1 + t2)];
+    const vp1 = cross(vm, t), vprime = [vm[0] + vp1[0], vm[1] + vp1[1], vm[2] + vp1[2]];
+    const vp2 = cross(vprime, s), vplus = [vm[0] + vp2[0], vm[1] + vp2[1], vm[2] + vp2[2]];
+    const v = [vplus[0] + q * E[0], vplus[1] + q * E[1], vplus[2] + q * E[2]];
+    return { r: [st.r[0] + v[0] * dt, st.r[1] + v[1] * dt, st.r[2] + v[2] * dt], v };
+  }
+  function simulate(Q, m, r0, v0, E, B, dt, n) {
+    let st = { r: r0.slice(), v: v0.slice() }; const out = [st.r.slice()];
+    for (let i = 0; i < n; i++) { st = borisStep(st, Q, m, E, B, dt); out.push(st.r.slice()); }
+    return { pts: out, final: st };
+  }
+  const cyclotronRadius = (m, vperp, Q, B) => (m * vperp) / (Math.abs(Q) * B);
+  const cyclotronFreq = (Q, B, m) => (Math.abs(Q) * B) / m;   // ω_c (rad/s)
+  const driftVelocity = (E, B) => { const c = cross(E, B), b2 = B[0] ** 2 + B[1] ** 2 + B[2] ** 2; return [c[0] / b2, c[1] / b2, c[2] / b2]; };
+  // Rectangular coil rotating about z in B = B a_x. θ = angle from B to the coil normal a_n (counter-clockwise).
+  // m = N I S a_n  ⇒  T = m × B = −N I S B sin θ a_z   (signed: + = counter-clockwise; it always pushes m toward B)
+  function loopTorque(N, I, S, B, theta) { return -N * I * S * B * Math.sin(theta); }
+  // Split-ring commutator: reverses the coil current every half turn so T_z keeps one sign (here ≥ 0, CCW)
+  function commutatedCurrent(I, theta) { return Math.sin(theta) > 0 ? -I : I; }
+  function avgTorque(N, I, S, B, comm, n = 3600) {
+    let s = 0; for (let i = 0; i < n; i++) { const th = (2 * Math.PI * (i + 0.5)) / n; s += loopTorque(N, comm ? commutatedCurrent(I, th) : I, S, B, th); }
+    return s / n;
+  }
+  return { QE, MP, ME, PARTICLES, cross, force, borisStep, simulate, cyclotronRadius, cyclotronFreq, driftVelocity, loopTorque, commutatedCurrent, avgTorque };
+})();
+if (typeof module !== 'undefined') module.exports = LOR;
+</script>
+
+<script>
+/* ===== UI ===== */
+const $ = id => document.getElementById(id);
+const tex = (el, s) => { if (window.katex) { try { katex.render(s, el, { throwOnError: false }); return; } catch (e) {} } el.textContent = s; };
+function eng(v, u = '', p = 3) { if (!isFinite(v)) return '—'; if (v === 0) return '0 ' + u; const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p']]; const a = Math.abs(v); for (const [s, n] of P) if (a >= s * 0.9995) return parseFloat((v / s).toPrecision(p)) + ' ' + n + u; return v.toExponential(2) + ' ' + u; }
+const cv = $('cv'), ctx = cv.getContext('2d');
+const fsPx = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
+const S = { tab: 'P', part: 'p', B: 0.1, v: 1e5, pitch: 90, Ey: 0, Ez: 0, view: '2d', yaw: -0.6, tilt: 0.45,
+  st: null, trail: [], t: 0, M: { B: 0.5, I: 4, N: 20, S: 40e-4, comm: false, run: true, th: 2.6, w: 0, hist: [] } };
+
+function bind(id, fn, show) { const el = $(id), o = $('v' + id); const u = () => { fn(+el.value); o.innerHTML = show(+el.value); }; el.addEventListener('input', () => { u(); onChange(id); }); u(); }
+bind('B', v => S.B = v, v => (v * 1000).toFixed(0) + ' mT');
+bind('V', v => S.v = v * 1e5, v => v.toFixed(1) + '×10⁵ m/s');
+bind('Pit', v => S.pitch = v, v => v + '°');
+bind('Ey', v => S.Ey = v * 1e3, v => v.toFixed(1) + ' kV/m');
+bind('Ez', v => S.Ez = v * 1e3, v => v.toFixed(2) + ' kV/m');
+bind('MB', v => S.M.B = v, v => v.toFixed(2) + ' T');
+bind('MI', v => S.M.I = v, v => v.toFixed(1) + ' A');
+bind('MN', v => S.M.N = v, v => v.toFixed(0));
+bind('MS', v => S.M.S = v * 1e-4, v => v + ' cm²');
+bind('Ang', v => { S.M.th = v * Math.PI / 180; }, v => v + '°');
+function onChange(id) { if ('B V Pit Ey Ez'.includes(id)) restart(); }
+document.querySelectorAll('#pSeg button').forEach(b => b.onclick = () => { S.part = b.dataset.p; document.querySelectorAll('#pSeg button').forEach(x => x.classList.toggle('on', x === b)); restart(); });
+$('v2d').onclick = () => { S.view = '2d'; $('v2d').classList.add('on'); $('v3d').classList.remove('on'); texts(); };
+$('v3d').onclick = () => { S.view = '3d'; $('v3d').classList.add('on'); $('v2d').classList.remove('on'); texts(); };
+$('restart').onclick = restart;
+$('tabP').onclick = () => setTab('P'); $('tabM').onclick = () => setTab('M');
+$('comm').onclick = () => { S.M.comm = !S.M.comm; $('comm').classList.toggle('on', S.M.comm); $('comm').textContent = 'Commutator: ' + (S.M.comm ? 'ON' : 'OFF'); S.M.hist = []; texts(); };
+$('run').onclick = () => { S.M.run = !S.M.run; $('run').classList.toggle('on', S.M.run); $('run').textContent = S.M.run ? '❚❚ Pause' : '▶ Run'; $('rowAng').style.display = S.M.run ? 'none' : ''; if (!S.M.run) { S.M.w = 0; const d = ((S.M.th * 180 / Math.PI) % 360 + 360) % 360; $('Ang').value = d; $('vAng').textContent = d.toFixed(0) + '°'; S.M.th = d * Math.PI / 180; } };
+function setTab(t) { S.tab = t; $('tabP').classList.toggle('on', t === 'P'); $('tabM').classList.toggle('on', t === 'M'); $('gP').style.display = t === 'P' ? 'flex' : 'none'; $('gM').style.display = t === 'M' ? 'flex' : 'none'; texts(); }
+
+function texts() {
+  let cap, fx, hint, title;
+  if (S.tab === 'P') {
+    title = 'Lorentz force on a moving charge';
+    cap = '<b>Notice:</b> B bends the path but never changes the speed (F ⊥ v); add E ⊥ B and the orbit drifts sideways at E/B — for either sign of charge.';
+    fx = '<span data-t="\\mathbf F=Q(\\mathbf E+\\mathbf v\\times\\mathbf B)"></span><br><span data-t="r=\\dfrac{m v_\\perp}{|Q|B},\\quad \\omega_c=\\dfrac{|Q|B}{m}"></span><br><span data-t="\\mathbf v_d=\\mathbf E\\times\\mathbf B/B^2"></span>';
+    hint = S.view === '3d' ? 'Drag to rotate the 3D view. B is along +z (vertical).' : 'Top view: B points out of the screen (⊙). Pitch < 90° gives a helix (use 3D view).';
+  } else {
+    title = 'Torque on a current loop — DC motor';
+    cap = S.M.comm ? '<b>Notice:</b> the commutator flips the current every half-turn, so T = m × B never reverses — the coil keeps turning one way.'
+      : '<b>Notice:</b> with fixed current the torque reverses after θ = 180°; the coil just rocks around the position where m ∥ B.';
+    fx = '<span data-t="\\mathbf T=\\mathbf m\\times\\mathbf B,\\quad \\mathbf m=N I S\\,\\mathbf a_n"></span><br><span data-t="T_z=-N I S B\\sin\\theta,\\quad \\mathbf F=I\\,\\mathbf L\\times\\mathbf B"></span>';
+    hint = 'End-on view: rotation axis points out of the screen; B is horizontal (→). θ = angle from B to the coil normal a<sub>n</sub> (counter-clockwise); m = NIS a<sub>n</sub> points opposite a<sub>n</sub> when the current is negative. T<sub>z</sub> &gt; 0 means counter-clockwise.';
+  }
+  $('title').textContent = title; $('cap').innerHTML = cap; $('hint').innerHTML = hint;
+  $('fx').innerHTML = fx; $('fx').querySelectorAll('[data-t]').forEach(e => tex(e, e.dataset.t));
+}
+
+function restart() {
+  const pa = LOR.PARTICLES[S.part], a = S.pitch * Math.PI / 180;
+  S.st = { r: [0, 0, 0], v: [S.v * Math.sin(a), 0, S.v * Math.cos(a)] }; S.trail = [[0, 0, 0]]; S.t = 0;
+}
+function arrow(c, x1, y1, x2, y2, col, w, hl) {
+  const dx = x2 - x1, dy = y2 - y1, m = Math.hypot(dx, dy) || 1, ux = dx / m, uy = dy / m; hl = hl || Math.max(6, w * 4);
+  c.strokeStyle = c.fillStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - ux * hl * .6, y2 - uy * hl * .6); c.stroke();
+  c.beginPath(); c.moveTo(x2, y2); c.lineTo(x2 - ux * hl - uy * hl * .45, y2 - uy * hl + ux * hl * .45); c.lineTo(x2 - ux * hl + uy * hl * .45, y2 - uy * hl - ux * hl * .45); c.closePath(); c.fill();
+}
+function sym(c, x, y, r, out, col, lw) { c.fillStyle = '#fff'; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); c.strokeStyle = c.fillStyle = col; c.lineWidth = lw; c.beginPath(); c.arc(x, y, r, 0, 7); c.stroke(); if (out) { c.beginPath(); c.arc(x, y, r * .3, 0, 7); c.fill(); } else { const d = r * .6; c.beginPath(); c.moveTo(x - d, y - d); c.lineTo(x + d, y + d); c.moveTo(x + d, y - d); c.lineTo(x - d, y + d); c.stroke(); } }
+
+/* ---------- (a) particle ---------- */
+function stepParticle(dtReal) {
+  const pa = LOR.PARTICLES[S.part], E = [0, S.Ey, S.Ez], B = [0, 0, S.B];
+  const wc = S.B > 0 ? LOR.cyclotronFreq(pa.Q, S.B, pa.m) : 0, Tc = wc ? 2 * Math.PI / wc : 1e-6;
+  const simPerReal = Tc / 2.2;             // one gyration ≈ 2.2 s on screen
+  const dt = wc ? Tc / 200 : 1e-9, n = Math.min(400, Math.ceil(dtReal * simPerReal / dt));
+  for (let i = 0; i < n; i++) { S.st = LOR.borisStep(S.st, pa.Q, pa.m, E, B, dt); S.t += dt; if (i % 2 === 0) S.trail.push(S.st.r.slice()); }
+  if (S.trail.length > 4000) S.trail.splice(0, S.trail.length - 4000);
+  return { pa, wc, Tc };
+}
+function drawParticle(dtReal) {
+  const W = cv.width, Hh = cv.height, dpr = window.devicePixelRatio || 1, fs = fsPx() * dpr;
+  const { pa, wc } = stepParticle(dtReal);
+  const a = S.pitch * Math.PI / 180, vperp = S.v * Math.sin(a), r = S.B > 0 ? LOR.cyclotronRadius(pa.m, vperp, pa.Q, S.B) : Infinity;
+  const rRef = LOR.cyclotronRadius(LOR.PARTICLES[S.part].m, 5e5, LOR.PARTICLES[S.part].Q, Math.max(S.B, 0.02));
+  const span = Math.min(Math.max(4.2 * Math.min(r, rRef * 0.5), 1e-4), 1e3);
+  const sc = Math.min(W, Hh) / (2 * span);
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, Hh);
+  const cur = S.st.r;
+  let proj;
+  if (S.view === '2d') {
+    // follow drift horizontally so the particle stays visible
+    let cx = 0, cy = 0; if (Math.abs(cur[0]) > span * 0.6) cx = cur[0] - Math.sign(cur[0]) * span * 0.6; if (Math.abs(cur[1]) > span * 0.6) cy = cur[1] - Math.sign(cur[1]) * span * 0.6;
+    proj = p => [W / 2 + (p[0] - cx) * sc, Hh / 2 - (p[1] - cy) * sc];
+    // B symbols
+    const g = 3 * fs; for (let y = g / 2; y < Hh; y += g) for (let x = g / 2; x < W; x += g) { if (S.B > 0) sym(ctx, x, y, 0.28 * fs, true, 'rgba(90,60,170,.35)', 1.2 * dpr); }
+    if (S.Ey) { for (let x = 4 * g; x < W; x += 2 * g) arrow(ctx, x, Hh - 1.2 * fs, x, Hh - 1.2 * fs - (S.Ey > 0 ? 1.6 : -1.6) * fs, 'rgba(201,42,42,.6)', 2 * dpr); ctx.fillStyle = '#c92a2a'; ctx.font = `${.85 * fs}px system-ui`; ctx.fillText('E', W - 1.5 * fs, Hh - 1.6 * fs); }
+    // predicted circle (E = 0)
+    if (isFinite(r) && !S.Ey) { const [x0, y0] = proj([0, pa.Q > 0 ? -r : r, 0]); ctx.setLineDash([6 * dpr, 6 * dpr]); ctx.strokeStyle = '#8994a1'; ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); ctx.arc(x0, y0, r * sc, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+      ctx.strokeStyle = '#2b8a3e'; ctx.lineWidth = 2 * dpr; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0 + r * sc * Math.cos(-0.6), y0 + r * sc * Math.sin(-0.6)); ctx.stroke(); ctx.fillStyle = '#2b8a3e'; ctx.font = `bold ${fs}px system-ui`; ctx.fillText('r', x0 + r * sc * 0.5 * Math.cos(-0.6) + .3 * fs, y0 + r * sc * 0.5 * Math.sin(-0.6) - .3 * fs); }
+  } else {
+    const cy_ = Math.cos(S.yaw), sy = Math.sin(S.yaw), ct = Math.cos(S.tilt), st = Math.sin(S.tilt);
+    const zc = cur[2], zoff = Math.abs(zc) > span ? zc - Math.sign(zc) * span : 0;
+    const xoff = Math.abs(cur[0]) > span ? cur[0] - Math.sign(cur[0]) * span : 0;
+    proj = p => { const x = p[0] - xoff, y = p[1], z = p[2] - zoff; const X = x * cy_ - y * sy, Y1 = x * sy + y * cy_; const Yv = z * ct + Y1 * st; /* +Y1 = away from viewer → keeps x,y,z right-handed on screen */ return [W / 2 + X * sc * 0.8, Hh / 2 - Yv * sc * 0.8]; };
+    // axes
+    const L = span * 0.9; [[[L, 0, 0], 'x'], [[0, L, 0], 'y'], [[0, 0, L], 'z']].forEach(([e, n]) => { const o = proj([xoff, 0, zoff]), q = proj([e[0] + xoff, e[1], e[2] + zoff]); arrow(ctx, o[0], o[1], q[0], q[1], '#8994a1', 1.5 * dpr); ctx.fillStyle = '#56616e'; ctx.font = `${.9 * fs}px system-ui`; ctx.fillText(n, q[0] + .3 * fs, q[1]); });
+    // B arrows (vertical)
+    if (S.B > 0) for (const [x, y] of [[-span, -span], [span, -span], [-span, span], [span, span]]) { const p1 = proj([x * .9 + xoff, y * .9, -span * .45 + zoff]), p2 = proj([x * .9 + xoff, y * .9, span * .45 + zoff]); arrow(ctx, p1[0], p1[1], p2[0], p2[1], 'rgba(90,60,170,.45)', 2 * dpr); }
+    ctx.fillStyle = 'rgba(90,60,170,.8)'; ctx.font = `bold ${fs}px system-ui`; const pb = proj([span * .9 + xoff, span * .9, span * .45 + zoff]); ctx.fillText('B', pb[0] + .3 * fs, pb[1]);
+  }
+  // trail
+  ctx.strokeStyle = pa.Q > 0 ? '#d9480f' : '#1864ab'; ctx.lineWidth = 2.5 * dpr; ctx.beginPath(); S.trail.forEach((p, i) => { const q = proj(p); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.stroke();
+  // particle + velocity + force
+  const q = proj(cur), vv = S.st.v, vm = Math.hypot(...vv) || 1, Fv = LOR.force(pa.Q, vv, [0, S.Ey, S.Ez], [0, 0, S.B]), Fm = Math.hypot(...Fv) || 1;
+  const tip = (vec, m, L) => proj([cur[0] + vec[0] / m * L, cur[1] + vec[1] / m * L, cur[2] + vec[2] / m * L]);
+  const tv = tip(vv, vm, span * 0.35), tf = tip(Fv, Fm, span * 0.28);
+  arrow(ctx, q[0], q[1], tv[0], tv[1], '#2b8a3e', 3 * dpr); arrow(ctx, q[0], q[1], tf[0], tf[1], '#c92a2a', 3 * dpr);
+  ctx.font = `bold ${.95 * fs}px system-ui`; ctx.fillStyle = '#2b8a3e'; ctx.fillText('v', tv[0] + .3 * fs, tv[1]); ctx.fillStyle = '#c92a2a'; ctx.fillText('F', tf[0] + .3 * fs, tf[1]);
+  ctx.fillStyle = pa.Q > 0 ? '#d9480f' : '#1864ab'; ctx.beginPath(); ctx.arc(q[0], q[1], .5 * fs, 0, 7); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = `bold ${.8 * fs}px system-ui`; ctx.textAlign = 'center'; ctx.fillText(pa.Q > 0 ? '+' : '−', q[0], q[1] + .3 * fs); ctx.textAlign = 'left';
+  // scale bar
+  let bar = 1e-6; while (bar * sc < 3 * fs) bar *= 10; if (bar * sc > 9 * fs) bar /= 2; if (bar * sc > 9 * fs) bar /= 2.5;
+  ctx.fillStyle = '#56616e'; ctx.fillRect(fs, Hh - fs, bar * sc, 3 * dpr); ctx.font = `${.85 * fs}px system-ui`; ctx.fillText(eng(bar, 'm', 2), fs, Hh - 1.4 * fs);
+  // readout
+  const speed = Math.hypot(...S.st.v), vd = S.B > 0 ? S.Ey / S.B : 0;
+  $('read').innerHTML = `${pa.name}: Q = ${pa.Q > 0 ? '+' : '−'}${eng(Math.abs(pa.Q), 'C')}, m = ${pa.m.toExponential(3)} kg<br>` +
+    `r = m v<sub>⊥</sub>/(|Q|B) = <b>${eng(r, 'm')}</b><br>f<sub>c</sub> = ${eng(wc / (2 * Math.PI), 'Hz')} &nbsp; T<sub>c</sub> = ${eng(wc ? 2 * Math.PI / wc : Infinity, 's')}<br>` +
+    `|v| now = ${eng(speed, 'm/s')} ${!S.Ey && !S.Ez ? '<span class="ok">(constant)</span>' : ''}` + (S.Ey && S.B ? `<br>E×B drift = ${eng(Math.abs(vd), 'm/s')} along ${vd > 0 ? '+' : '−'}x` : '');
+}
+
+/* ---------- (b) motor ---------- */
+function drawMotor(dtReal) {
+  const W = cv.width, Hh = cv.height, dpr = window.devicePixelRatio || 1, fs = fsPx() * dpr, M = S.M;
+  // dynamics: J dω/dt = T − bω (normalised so motion is visible)
+  const Iact = () => M.comm ? LOR.commutatedCurrent(M.I, M.th) : M.I;
+  if (M.run) {
+    const Tmax = M.N * M.I * M.S * M.B || 1e-9, J = Tmax / 40, b = J * 4, n = 20, h = dtReal / n;
+    for (let i = 0; i < n; i++) { const T = LOR.loopTorque(M.N, Iact(), M.S, M.B, M.th); M.w += h * (T - b * M.w) / J; M.th += h * M.w; }
+  }
+  const I = Iact(), T = LOR.loopTorque(M.N, I, M.S, M.B, M.th);
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, Hh);
+  const split = Math.max(Hh * 0.62, Hh - 13 * fs), cx = W * 0.5, cy = split / 2 + .3 * fs, R = Math.min(W * 0.3, split * 0.33);
+  // field lines (B → +x)
+  for (let y = cy - R * 1.25; y <= cy + R * 1.26; y += R * 0.25) arrow(ctx, cx - R * 1.9, y, cx + R * 1.9, y, 'rgba(90,60,170,.22)', 1.5 * dpr, 1.0 * fs);
+  ctx.fillStyle = 'rgba(90,60,170,.85)'; ctx.font = `bold ${fs}px system-ui`; ctx.fillText('B', cx + R * 1.9 + .3 * fs, cy - R * 1.25 + .4 * fs);
+  // pole faces
+  ctx.fillStyle = '#e9ecef'; ctx.fillRect(cx - R * 2.25, cy - R * 1.35, R * 0.3, R * 2.7); ctx.fillRect(cx + R * 1.95 + 2.2 * fs, cy - R * 1.35, R * 0.3, R * 2.7);
+  ctx.fillStyle = '#495057'; ctx.font = `bold ${1.1 * fs}px system-ui`; ctx.textAlign = 'center'; ctx.fillText('N', cx - R * 2.1, cy + .4 * fs); ctx.fillText('S', cx + R * 2.1 + 2.2 * fs, cy + .4 * fs); ctx.textAlign = 'left';
+  // coil: normal n = (cos θ, sin θ); coil plane ⟂ n → sides at ±(R)(−sin θ, cos θ)
+  const th = M.th, nx = Math.cos(th), ny = Math.sin(th), px_ = -ny, py_ = nx;
+  const A = [cx + px_ * R, cy - py_ * R], Bp = [cx - px_ * R, cy + py_ * R];
+  ctx.strokeStyle = '#adb5bd'; ctx.lineWidth = 6 * dpr; ctx.beginPath(); ctx.moveTo(...A); ctx.lineTo(...Bp); ctx.stroke();
+  ctx.fillStyle = '#343a40'; ctx.beginPath(); ctx.arc(cx, cy, .35 * fs, 0, 7); ctx.fill();
+  // side A carries current out of page (+z) when I > 0: F = I L a_z × B a_x = +a_y
+  const outA = I >= 0, rs = .75 * fs;
+  sym(ctx, A[0], A[1], rs, outA, '#d9480f', 2.5 * dpr); sym(ctx, Bp[0], Bp[1], rs, !outA, '#d9480f', 2.5 * dpr);
+  const fl = Math.min(R * 0.75, (M.I / 10) * R * 0.75 + .5 * fs) * (M.I > 0 ? 1 : 0), sgn = I >= 0 ? 1 : -1;
+  if (fl > 0) { arrow(ctx, A[0], A[1] - rs * sgn, A[0], A[1] - sgn * (rs + fl), '#c92a2a', 3.5 * dpr); arrow(ctx, Bp[0], Bp[1] + rs * sgn, Bp[0], Bp[1] + sgn * (rs + fl), '#c92a2a', 3.5 * dpr);
+    ctx.fillStyle = '#c92a2a'; ctx.font = `bold ${.9 * fs}px system-ui`; ctx.fillText('F', A[0] + .5 * fs, A[1] - sgn * (rs + fl * .6)); }
+  // magnetic moment m along ±n (right-hand rule: current out at A, in at B → m = sgn·(cos θ, sin θ) ... check: loop A(out)->B(in); m = a_z × (A−B)·? )
+  // For a loop with current +z at r_A and −z at r_B=−r_A, m ∝ r_A × (I a_z)·2 → direction (r_A × a_z) = (py_, −px_) = (nx, ny)·(+1)
+  const ml = R * 0.85, mx = cx + sgn * nx * ml, my = cy - sgn * ny * ml;
+  arrow(ctx, cx, cy, mx, my, '#1c64d6', 4 * dpr); ctx.fillStyle = '#1c64d6'; ctx.font = `bold ${fs}px system-ui`; ctx.fillText('m', mx + .3 * fs, my - .3 * fs);
+  // rotation sense
+  if (Math.abs(T) > 1e-3 * (M.N * M.I * M.S * M.B)) {
+    const r2 = R * 0.38, a0 = -th + 0.5, s_ = T > 0 ? 1 : -1, a1 = a0 - s_ * 1.3;     // canvas angles: CCW on screen = decreasing angle
+    ctx.strokeStyle = '#2b8a3e'; ctx.lineWidth = 3 * dpr; ctx.beginPath(); ctx.arc(cx, cy, r2, a0, a1, s_ > 0); ctx.stroke();
+    const ex = cx + r2 * Math.cos(a1), ey = cy + r2 * Math.sin(a1), tx = s_ * Math.sin(a1), ty = -s_ * Math.cos(a1);
+    arrow(ctx, ex - tx * 2, ey - ty * 2, ex + tx * .8 * fs, ey + ty * .8 * fs, '#2b8a3e', 3 * dpr, .8 * fs);
+    ctx.fillStyle = '#2b8a3e'; ctx.font = `bold ${fs}px system-ui`; ctx.fillText('T', ex + tx * 1.2 * fs + .2 * fs, ey + ty * 1.2 * fs); }
+  // commutator ring
+  const kx = W - 4.5 * fs, ky = 3 * fs, kr = 1.8 * fs;
+  ctx.font = `${.8 * fs}px system-ui`; ctx.fillStyle = '#56616e'; ctx.textAlign = 'center'; ctx.fillText(M.comm ? 'split-ring commutator' : 'slip rings (no reversal)', kx - .5 * fs, ky - kr - .5 * fs); ctx.textAlign = 'left';
+  if (M.comm) { for (let k = 0; k < 2; k++) { ctx.strokeStyle = k ? '#b08900' : '#d9480f'; ctx.lineWidth = .55 * fs; ctx.beginPath(); ctx.arc(kx, ky, kr, -th + k * Math.PI + 0.15 - Math.PI / 2, -th + (k + 1) * Math.PI - 0.15 - Math.PI / 2); ctx.stroke(); } }
+  else { ctx.strokeStyle = '#d9480f'; ctx.lineWidth = .3 * fs; ctx.beginPath(); ctx.arc(kx, ky, kr, 0, 7); ctx.stroke(); ctx.strokeStyle = '#b08900'; ctx.beginPath(); ctx.arc(kx, ky, kr * .6, 0, 7); ctx.stroke(); }
+  ctx.fillStyle = '#495057'; ctx.fillRect(kx - kr - .9 * fs, ky - .3 * fs, .7 * fs, .6 * fs); ctx.fillRect(kx + kr + .2 * fs, ky - .3 * fs, .7 * fs, .6 * fs);
+  ctx.fillStyle = '#16202a'; ctx.font = `${.8 * fs}px system-ui`; ctx.fillText('+', kx - kr - 1.6 * fs, ky + .3 * fs); ctx.fillText('−', kx + kr + 1.1 * fs, ky + .3 * fs);
+  // torque vs angle plot
+  const L = 3.6 * fs, Rr = W - fs, Tp = split + .9 * fs, Bt = Hh - 1.5 * fs, mid = (Tp + Bt) / 2, Tmax = M.N * M.I * M.S * M.B || 1;
+  ctx.fillStyle = '#f8f9fa'; ctx.fillRect(0, split, W, Hh - split); ctx.strokeStyle = '#dee2e6'; ctx.beginPath(); ctx.moveTo(0, split); ctx.lineTo(W, split); ctx.stroke();
+  const X = a => L + a / (2 * Math.PI) * (Rr - L), Y = t => mid - t / (Tmax * 1.15) * (Bt - Tp) / 2;
+  ctx.strokeStyle = '#8994a1'; ctx.lineWidth = dpr; ctx.beginPath(); ctx.moveTo(L, Tp); ctx.lineTo(L, Bt); ctx.moveTo(L, mid); ctx.lineTo(Rr, mid); ctx.stroke();
+  ctx.setLineDash([5 * dpr, 4 * dpr]); ctx.strokeStyle = '#adb5bd'; ctx.beginPath(); for (let i = 0; i <= 200; i++) { const a = 2 * Math.PI * i / 200, y = Y(LOR.loopTorque(M.N, M.I, M.S, M.B, a)); i ? ctx.lineTo(X(a), y) : ctx.moveTo(X(a), y); } ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle = '#2b8a3e'; ctx.lineWidth = 3 * dpr; ctx.beginPath(); for (let i = 0; i <= 400; i++) { const a = 2 * Math.PI * i / 400, Ii = M.comm ? LOR.commutatedCurrent(M.I, a) : M.I, y = Y(LOR.loopTorque(M.N, Ii, M.S, M.B, a)); i ? ctx.lineTo(X(a), y) : ctx.moveTo(X(a), y); } ctx.stroke();
+  const avg = LOR.avgTorque(M.N, M.I, M.S, M.B, M.comm, 720), Tmag = M.N * M.I * M.S * M.B; ctx.strokeStyle = '#1c64d6'; ctx.setLineDash([8 * dpr, 4 * dpr]); ctx.beginPath(); ctx.moveTo(L, Y(avg)); ctx.lineTo(Rr, Y(avg)); ctx.stroke(); ctx.setLineDash([]);
+  const thm = ((th % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI); ctx.fillStyle = '#c92a2a'; ctx.beginPath(); ctx.arc(X(thm), Y(T), .4 * fs, 0, 7); ctx.fill();
+  ctx.fillStyle = '#56616e'; ctx.font = `${.8 * fs}px system-ui`; ctx.fillText('T_z (N·m)', L + .4 * fs, Tp + .6 * fs); ctx.textAlign = 'right'; ctx.fillText(eng(Tmag, '', 2), L - .2 * fs, Y(Tmag) + .3 * fs); ctx.fillText('0', L - .2 * fs, mid + .3 * fs); ctx.textAlign = 'left';
+  [0, 90, 180, 270, 360].forEach(d => ctx.fillText(d + '°', X(d * Math.PI / 180) - .8 * fs, Bt + 1.1 * fs)); ctx.fillText('θ', Rr - .6 * fs, mid - .4 * fs);
+  ctx.fillStyle = '#1c64d6'; ctx.fillText('average', Rr - 8 * fs, Y(avg) - .3 * fs);
+  $('read').innerHTML = `m = N I S = ${eng(M.N * Math.abs(I) * M.S, 'A·m²')}<br>θ = ${(thm * 180 / Math.PI).toFixed(0)}° &nbsp; coil current ${I >= 0 ? '+' : '−'}${M.I.toFixed(1)} A<br>T<sub>z</sub> = −N I S B sin θ = <b>${eng(T, 'N·m')}</b><br>T<sub>max</sub> = ${eng(Tmax, 'N·m')} &nbsp; T<sub>avg</sub> = <b>${eng(Math.abs(avg) < 1e-9 * Tmax ? 0 : avg, 'N·m')}</b>`;
+}
+
+let last = performance.now();
+function frame(t) {
+  const dt = Math.min(0.05, (t - last) / 1000); last = t;
+  if (S.tab === 'P') drawParticle(dt); else drawMotor(dt);
+  requestAnimationFrame(frame);
+}
+let drag = null;
+cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, yaw: S.yaw, tilt: S.tilt }; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', e => { if (!drag || S.tab !== 'P' || S.view !== '3d') return; S.yaw = drag.yaw + (e.clientX - drag.x) * 0.01; S.tilt = Math.max(-1.4, Math.min(1.4, drag.tilt + (e.clientY - drag.y) * 0.01)); });
+cv.addEventListener('pointerup', () => drag = null);
+new ResizeObserver(() => { const dpr = window.devicePixelRatio || 1; cv.width = Math.max(1, Math.round(cv.clientWidth * dpr)); cv.height = Math.max(1, Math.round(cv.clientHeight * dpr)); }).observe($('stage'));
+restart(); texts(); window.addEventListener('load', texts);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

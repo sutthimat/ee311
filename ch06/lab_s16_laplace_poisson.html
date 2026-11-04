@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" crossorigin="anonymous"></script>
+<title>Laplace, Poisson &amp; the pn Junction</title>
+<style>/* ===== common UI kit (shared by all sims) ===== */
+:root{
+  --bg:#f7f8fb; --panel:#ffffff; --ink:#1b2333; --muted:#5a6478; --line:#d5dae5;
+  --accent:#1f6feb; --pos:#d1242f; --neg:#1f6feb; --ok:#1a7f37; --warn:#b35900;
+  --c1:#1f6feb; --c2:#d1242f; --c3:#1a7f37; --c4:#8250df; --c5:#b35900;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink)}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:clamp(12px,min(2.6vh,1.46vw),26px);line-height:1.25}
+.app{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100vh;width:100vw;padding:.45em .7em;gap:.4em}
+header{display:flex;align-items:baseline;gap:.8em;min-width:0}
+header h1{font-size:1.3em;margin:0;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .tag{font-size:.8em;color:#fff;background:var(--accent);border-radius:.3em;padding:.1em .45em;white-space:nowrap}
+header .modes{margin-left:auto}
+main{display:grid;grid-template-columns:minmax(0,1fr) 21em;gap:.6em;min-height:0}
+.stage{position:relative;min-height:0;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:.5em;overflow:hidden}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.panel{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:.5em;padding:.5em .7em;overflow-y:auto;overflow-x:hidden;min-height:0;display:flex;flex-direction:column;gap:.45em}
+.ctl{display:flex;flex-direction:column;gap:.05em}
+.ctl-row{display:flex;justify-content:space-between;align-items:baseline;gap:.5em}
+.ctl-row label{font-weight:600}
+.ctl-row output{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:600;white-space:nowrap}
+input[type=range]{width:100%;height:1.3em;margin:0;accent-color:var(--accent);cursor:pointer}
+.seg{display:inline-flex;border:1px solid var(--accent);border-radius:.4em;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.92em;border:0;background:#fff;color:var(--accent);padding:.18em .6em;cursor:pointer}
+.seg button+button{border-left:1px solid var(--accent)}
+.seg button.on{background:var(--accent);color:#fff}
+button.btn{font:inherit;font-size:.92em;border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:.4em;padding:.15em .6em;cursor:pointer}
+button.btn:hover,.seg button:hover:not(.on){background:#eaf1fe}
+.row{display:flex;gap:.4em;flex-wrap:wrap;align-items:center}
+.formula{border-top:1px solid var(--line);padding-top:.35em;font-size:.95em}
+.formula .katex{font-size:1.02em}
+.formula .eq{margin:.15em 0;overflow-x:auto;overflow-y:hidden}
+.readout{font-variant-numeric:tabular-nums;font-size:.95em}
+.readout b{color:var(--accent)}
+.big{font-size:1.25em;font-weight:700;color:var(--accent)}
+footer.notice{font-size:1em;background:#fff8e1;border:1px solid #f0d78c;border-radius:.4em;padding:.25em .6em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+footer.notice::before{content:"What to notice: ";font-weight:700;color:var(--warn)}
+.chk{display:flex;gap:.4em;align-items:center;cursor:pointer}
+.chk input{width:1em;height:1em;accent-color:var(--accent)}
+select{font:inherit;font-size:.92em;padding:.05em .2em}
+.hide{display:none!important}
+.small{font-size:.85em;color:var(--muted)}
+@media (max-width:760px),(max-aspect-ratio:1/1){
+  body{font-size:clamp(12px,2.2vw,20px)}
+  main{grid-template-columns:1fr;grid-template-rows:minmax(0,1.4fr) minmax(0,1fr)}
+  footer.notice{white-space:normal}
+}
+</style>
+</head><body>
+<div class="app">
+  <header><span class="tag">Session 16</span><h1>Poisson's &amp; Laplace's Equations in 1D</h1><div class="modes" id="modes"></div></header>
+  <main>
+    <div class="stage"><canvas id="cv"></canvas></div>
+    <aside class="panel" id="panel">
+      <div id="ctlA"></div><div id="ctlB" class="hide"></div>
+      <div class="readout" id="read"></div>
+      <div class="formula" id="fA">
+        <div class="eq" data-tex="\dfrac{d^2V}{dx^2}=-\dfrac{\rho_v}{\varepsilon}\quad(\rho_v=0:\ \text{Laplace})"></div>
+        <div class="eq" data-tex="V(x)=V_0\Big(1-\dfrac{x}{d}\Big)+\dfrac{\rho_v}{2\varepsilon}\,x(d-x)"></div>
+      </div>
+      <div class="formula hide" id="fB">
+        <div class="eq" data-tex="W=\sqrt{\dfrac{2\varepsilon(V_{bi}+V_R)}{q}\Big(\dfrac1{N_A}+\dfrac1{N_D}\Big)}"></div>
+        <div class="eq" data-tex="N_Ax_p=N_Dx_n,\quad V_{bi}=\dfrac{kT}{q}\ln\dfrac{N_AN_D}{n_i^2}"></div>
+        <div class="eq" data-tex="C=\dfrac{\varepsilon S}{W}\propto(V_{bi}+V_R)^{-1/2}"></div>
+      </div>
+    </aside>
+  </main>
+  <footer class="notice" id="notice"></footer>
+</div>
+
+<!-- ===================== PHYSICS (pure, testable; no DOM) ===================== -->
+<script id="physics">
+const PHYS = (() => {
+  const EPS0 = 8.854e-12, q = 1.602e-19, kB = 1.380649e-23;
+  // ---- parallel plates: V(0)=V0, V(d)=0, uniform rho between ----
+  const Vplates = (x, V0, d, rho, eps) => V0 * (1 - x / d) + rho / (2 * eps) * x * (d - x);
+  const Eplates = (x, V0, d, rho, eps) => V0 / d - rho / (2 * eps) * (d - 2 * x);   // E_x = -dV/dx
+  // ---- general 1D finite-difference Poisson solver (Dirichlet), for cross-checking ----
+  function poissonFD(rhoFn, eps, x0, x1, Va, Vb, N = 1000) {
+    const h = (x1 - x0) / N, n = N - 1, a = new Float64Array(n), b = new Float64Array(n), c = new Float64Array(n), d = new Float64Array(n);
+    for (let j = 0; j < n; j++) { a[j] = 1; b[j] = -2; c[j] = 1; d[j] = -rhoFn(x0 + (j + 1) * h) / eps * h * h; }
+    d[0] -= Va; d[n - 1] -= Vb;
+    for (let j = 1; j < n; j++) { const m = a[j] / b[j - 1]; b[j] -= m * c[j - 1]; d[j] -= m * d[j - 1]; }
+    const V = new Float64Array(N + 1); V[0] = Va; V[N] = Vb; V[n] = d[n - 1] / b[n - 1];
+    for (let j = n - 2; j >= 0; j--) V[j + 1] = (d[j] - c[j] * V[j + 2]) / b[j];
+    return { V, h };
+  }
+  // ---- abrupt pn junction (depletion approximation). SI units: N in m^-3. p-side x<0, n-side x>0 ----
+  const ni300 = 1.0e16; // intrinsic carrier density of Si at 300 K [m^-3] (1.0e10 cm^-3)
+  const Vbi = (NA, ND, T = 300, ni = ni300) => kB * T / q * Math.log(NA * ND / (ni * ni));
+  function junction(NA, ND, Vbi_, VR, epsr = 11.7) {
+    const eps = epsr * EPS0, Vt = Vbi_ + VR;
+    const W = Math.sqrt(2 * eps * Vt / q * (1 / NA + 1 / ND));
+    const xp = W * ND / (NA + ND), xn = W * NA / (NA + ND);
+    const Emax = q * NA * xp / eps;                 // |E| at the junction
+    const Cp = eps / W;                             // capacitance per unit area [F/m^2]
+    const rho = x => (x > -xp && x < 0) ? -q * NA : (x >= 0 && x < xn) ? q * ND : 0;
+    const E = x => (x <= -xp || x >= xn) ? 0 : x < 0 ? -q * NA / eps * (x + xp) : q * ND / eps * (x - xn); // E_x (negative: points n -> p)
+    const V = x => x <= -xp ? 0 : x >= xn ? Vt : x < 0 ? q * NA / (2 * eps) * (x + xp) ** 2 : Vt - q * ND / (2 * eps) * (x - xn) ** 2; // V(-xp)=0
+    return { eps, Vt, W, xp, xn, Emax, Cp, rho, E, V };
+  }
+  return { EPS0, q, kB, Vplates, Eplates, poissonFD, ni300, Vbi, junction };
+})();
+if (typeof module !== 'undefined') module.exports = PHYS;
+</script>
+
+<script>/* ===== common UI kit (shared by all sims; no physics here) ===== */
+const UI = (() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '+': '' };
+  // scientific notation with unicode superscripts: 1.53×10⁻¹⁹
+  function sci(x, d = 3) {
+    if (!isFinite(x)) return String(x);
+    if (x === 0) return '0';
+    const e = Math.floor(Math.log10(Math.abs(x)));
+    if (e >= -2 && e <= 3) return (+x.toPrecision(d)).toString();
+    let m = x / Math.pow(10, e);
+    let ms = (+m.toPrecision(d)).toString();
+    if (Math.abs(+ms) >= 10) { ms = (+(m / 10).toPrecision(d)).toString(); return ms + '×10' + String(e + 1).split('').map(c => SUP[c]).join(''); }
+    return ms + '×10' + String(e).split('').map(c => SUP[c]).join('');
+  }
+  // engineering format with SI prefix: eng(1.5e-9,'F') -> "1.50 nF"
+  const PRE = { '-24': 'y', '-21': 'z', '-18': 'a', '-15': 'f', '-12': 'p', '-9': 'n', '-6': 'µ', '-3': 'm', '0': '', '3': 'k', '6': 'M', '9': 'G', '12': 'T' };
+  function eng(x, unit = '', d = 3) {
+    if (!isFinite(x)) return String(x);
+    if (x === 0) return '0 ' + unit;
+    let e3 = Math.floor(Math.log10(Math.abs(x)) / 3) * 3;
+    e3 = Math.max(-24, Math.min(12, e3));
+    let m = x / Math.pow(10, e3);
+    let s = m.toPrecision(d);
+    if (Math.abs(+s) >= 1000 && e3 < 12) { e3 += 3; s = (x / Math.pow(10, e3)).toPrecision(d); }
+    return s + ' ' + PRE[e3] + unit;
+  }
+  // KaTeX is loaded with `defer`; anything rendered before it arrives is queued and re-rendered on load.
+  const texQueue = [];
+  function tex(el, src, display = false) {
+    if (typeof el === 'string') el = $(el);
+    if (!el) return;
+    if (window.katex) { try { katex.render(src, el, { displayMode: display, throwOnError: false }); return; } catch (e) { } }
+    el.textContent = src; // plain-TeX fallback when KaTeX is unavailable (offline)
+    texQueue.push([el, src, display]);
+  }
+  window.addEventListener('load', () => { if (window.katex) texQueue.splice(0).forEach(a => tex(...a)); });
+  // render every element carrying data-tex="..." (static formula panels)
+  function texAll(root = document) { root.querySelectorAll('[data-tex]').forEach(e => tex(e, e.dataset.tex, e.hasAttribute('data-display'))); }
+  function fontPx() { return parseFloat(getComputedStyle(document.body).fontSize) || 18; }
+
+  // canvas with DPR + resize handling; draw(ctx, w, h) in CSS px
+  function canvas(cv, draw) {
+    const ctx = cv.getContext('2d');
+    const obj = { cv, ctx, w: 0, h: 0, draw, redraw() { const dpr = window.devicePixelRatio || 1; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, obj.w, obj.h); obj.draw(ctx, obj.w, obj.h); } };
+    function resize() {
+      const r = cv.getBoundingClientRect(); const dpr = window.devicePixelRatio || 1;
+      obj.w = Math.max(10, r.width); obj.h = Math.max(10, r.height);
+      cv.width = Math.round(obj.w * dpr); cv.height = Math.round(obj.h * dpr); obj.redraw();
+    }
+    new ResizeObserver(resize).observe(cv); resize();
+    return obj;
+  }
+  function pointer(cv, { down, move, up, hover }) {
+    const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    let dragging = false;
+    cv.addEventListener('pointerdown', e => { const p = pos(e); if (down && down(p, e) !== false) { dragging = true; cv.setPointerCapture(e.pointerId); } });
+    cv.addEventListener('pointermove', e => { const p = pos(e); if (dragging) move && move(p, e); else hover && hover(p, e); });
+    const end = e => { if (dragging) { dragging = false; up && up(pos(e), e); } };
+    cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  }
+
+  // slider: {label(html), min,max,step,value, log:bool, fmt:fn, onInput:fn}
+  function slider(parent, o) {
+    const d = document.createElement('div'); d.className = 'ctl';
+    d.innerHTML = `<div class="ctl-row"><label>${o.label}</label><output></output></div><input type="range">`;
+    const inp = d.querySelector('input'), out = d.querySelector('output');
+    const N = 1000;
+    const toS = v => o.log ? Math.round((Math.log10(v) - Math.log10(o.min)) / (Math.log10(o.max) - Math.log10(o.min)) * N) : v;
+    const fromS = s => o.log ? Math.pow(10, Math.log10(o.min) + (Math.log10(o.max) - Math.log10(o.min)) * s / N) : +s;
+    if (o.log) { inp.min = 0; inp.max = N; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step || 'any'; }
+    const api = {
+      el: d, get value() { return api._v; },
+      set(v, fire = true) { api._v = v; inp.value = toS(v); out.innerHTML = o.fmt ? o.fmt(v) : (+v).toPrecision(3); if (fire && o.onInput) o.onInput(v); },
+    };
+    inp.addEventListener('input', () => api.set(fromS(inp.value)));
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(d);
+    api.set(o.value, false);
+    return api;
+  }
+  // segmented toggle: options [[value,label],...]
+  function seg(parent, options, value, onChange) {
+    const d = document.createElement('div'); d.className = 'seg';
+    const api = { el: d, value, set(v, fire = true) { api.value = v; [...d.children].forEach(b => b.classList.toggle('on', b.dataset.v === String(v))); if (fire && onChange) onChange(v); } };
+    options.forEach(([v, l]) => { const b = document.createElement('button'); b.dataset.v = v; b.innerHTML = l; b.onclick = () => api.set(v); d.appendChild(b); });
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(d);
+    api.set(value, false); return api;
+  }
+  function check(parent, label, value, onChange) {
+    const l = document.createElement('label'); l.className = 'chk';
+    l.innerHTML = `<input type="checkbox"> <span>${label}</span>`;
+    const i = l.querySelector('input'); i.checked = value; i.onchange = () => onChange(i.checked);
+    (typeof parent === 'string' ? $(parent) : parent).appendChild(l); return i;
+  }
+
+  // ---------- plotting ----------
+  function niceStep(range, n) {
+    const raw = range / Math.max(1, n); const p = Math.pow(10, Math.floor(Math.log10(raw))); const f = raw / p;
+    return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p;
+  }
+  function ticks(a, b, n) { const s = niceStep(b - a, n); const t = []; for (let v = Math.ceil(a / s - 1e-9) * s; v <= b + s * 1e-9; v += s) t.push(Math.abs(v) < s * 1e-9 ? 0 : v); return { t, s }; }
+  function tickLabel(v, s) {
+    if (v === 0) return '0';
+    const a = Math.abs(v);
+    if (a >= 1e5 || a < 1e-3) return sci(v, 2);
+    const dec = Math.max(0, -Math.floor(Math.log10(s) + 1e-9));
+    return v.toFixed(Math.min(dec, 4));
+  }
+  // o: {xlim:[a,b], ylim:[a,b], logx, logy, xlabel, ylabel, title, series:[{x,y,color,width,dash,label}],
+  //     points:[{x,y,color,r,label}], vlines:[{x,color,dash,label}], hlines:[...], fs, legend:true, zero:true}
+  function plot(ctx, R, o) {
+    const fs = o.fs || fontPx() * 0.85;
+    ctx.save();
+    ctx.font = `${fs}px system-ui, sans-serif`;
+    const padL = fs * (o.padL || 3.8), padB = fs * (o.xlabel ? 2.5 : 1.5), padT = fs * (o.title ? 1.5 : 0.6), padR = fs * (o.padR || 0.8);
+    const I = { x: R.x + padL, y: R.y + padT, w: Math.max(10, R.w - padL - padR), h: Math.max(10, R.h - padT - padB) };
+    const lx = v => o.logx ? Math.log10(v) : v, ly = v => o.logy ? Math.log10(v) : v;
+    const [x0, x1] = o.xlim.map(lx), [y0, y1] = o.ylim.map(ly);
+    const X = v => I.x + (lx(v) - x0) / (x1 - x0) * I.w;
+    const Y = v => I.y + I.h - (ly(v) - y0) / (y1 - y0) * I.h;
+    // background + grid
+    ctx.fillStyle = '#fff'; ctx.fillRect(I.x, I.y, I.w, I.h);
+    ctx.strokeStyle = '#e6e9f0'; ctx.lineWidth = 1; ctx.fillStyle = '#4a5468';
+    const nx = Math.max(2, Math.floor(I.w / (fs * 5))), ny = Math.max(2, Math.floor(I.h / (fs * 2.4)));
+    const logT = (a, b) => { const t = []; const st = Math.max(1, Math.ceil((b - a) / 8)); for (let e = Math.ceil(a); e <= Math.floor(b); e += st) t.push(e); return t; };
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    if (o.logx) logT(x0, x1).forEach(e => { const px = I.x + (e - x0) / (x1 - x0) * I.w; ctx.beginPath(); ctx.moveTo(px, I.y); ctx.lineTo(px, I.y + I.h); ctx.stroke(); ctx.fillText(sci(Math.pow(10, e), 1).replace(/^1×/, ''), px, I.y + I.h + fs * 0.25); });
+    else { const { t, s } = ticks(x0, x1, nx); t.forEach(v => { const px = X(v); ctx.beginPath(); ctx.moveTo(px, I.y); ctx.lineTo(px, I.y + I.h); ctx.stroke(); ctx.fillText(tickLabel(v, s), px, I.y + I.h + fs * 0.25); }); }
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    if (o.logy) logT(y0, y1).forEach(e => { const py = I.y + I.h - (e - y0) / (y1 - y0) * I.h; ctx.beginPath(); ctx.moveTo(I.x, py); ctx.lineTo(I.x + I.w, py); ctx.stroke(); ctx.fillText(sci(Math.pow(10, e), 1).replace(/^1×/, ''), I.x - fs * 0.3, py); });
+    else { const { t, s } = ticks(y0, y1, ny); t.forEach(v => { const py = Y(v); ctx.beginPath(); ctx.moveTo(I.x, py); ctx.lineTo(I.x + I.w, py); ctx.stroke(); ctx.fillText(tickLabel(v, s), I.x - fs * 0.3, py); }); }
+    // zero axis
+    ctx.strokeStyle = '#8a93a6'; ctx.lineWidth = 1.2;
+    if (!o.logy && y0 < 0 && y1 > 0) { ctx.beginPath(); ctx.moveTo(I.x, Y(0)); ctx.lineTo(I.x + I.w, Y(0)); ctx.stroke(); }
+    if (!o.logx && x0 < 0 && x1 > 0) { ctx.beginPath(); ctx.moveTo(X(0), I.y); ctx.lineTo(X(0), I.y + I.h); ctx.stroke(); }
+    ctx.strokeStyle = '#4a5468'; ctx.strokeRect(I.x, I.y, I.w, I.h);
+    // labels
+    ctx.fillStyle = '#1b2333';
+    if (o.xlabel) { ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText(o.xlabel, I.x + I.w / 2, R.y + R.h); }
+    if (o.ylabel) { ctx.save(); ctx.translate(R.x + fs * 0.1, I.y + I.h / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(o.ylabel, 0, 0); ctx.restore(); }
+    if (o.title) { ctx.font = `600 ${fs}px system-ui, sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(o.title, I.x, R.y + fs * 0.1); ctx.font = `${fs}px system-ui, sans-serif`; }
+    // data
+    ctx.save(); ctx.beginPath(); ctx.rect(I.x, I.y, I.w, I.h); ctx.clip();
+    (o.hlines || []).forEach(l => { ctx.strokeStyle = l.color || '#888'; ctx.setLineDash(l.dash || [6, 4]); ctx.lineWidth = l.width || 1.5; ctx.beginPath(); ctx.moveTo(I.x, Y(l.y)); ctx.lineTo(I.x + I.w, Y(l.y)); ctx.stroke(); });
+    (o.vlines || []).forEach(l => { ctx.strokeStyle = l.color || '#888'; ctx.setLineDash(l.dash || [6, 4]); ctx.lineWidth = l.width || 1.5; ctx.beginPath(); ctx.moveTo(X(l.x), I.y); ctx.lineTo(X(l.x), I.y + I.h); ctx.stroke(); });
+    ctx.setLineDash([]);
+    (o.series || []).forEach(s => {
+      if (s.fill) { ctx.fillStyle = s.fill; ctx.beginPath(); const yb = Y(o.logy ? o.ylim[0] : Math.max(o.ylim[0], Math.min(o.ylim[1], 0))); ctx.moveTo(X(s.x[0]), yb); for (let i = 0; i < s.x.length; i++) ctx.lineTo(X(s.x[i]), Y(s.y[i])); ctx.lineTo(X(s.x[s.x.length - 1]), yb); ctx.closePath(); ctx.fill(); }
+      ctx.strokeStyle = s.color || '#1f6feb'; ctx.lineWidth = s.width || 2.5; ctx.setLineDash(s.dash || []);
+      ctx.beginPath(); let pen = false;
+      for (let i = 0; i < s.x.length; i++) { const yv = s.y[i]; if (!isFinite(yv) || (o.logy && yv <= 0)) { pen = false; continue; } const px = X(s.x[i]), py = Y(yv); if (!pen) { ctx.moveTo(px, py); pen = true; } else ctx.lineTo(px, py); }
+      ctx.stroke(); ctx.setLineDash([]);
+    });
+    (o.points || []).forEach(p => { ctx.fillStyle = p.color || '#d1242f'; ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), p.r || fs * 0.35, 0, 7); ctx.fill(); });
+    ctx.restore();
+    (o.points || []).forEach(p => { if (p.label) { ctx.fillStyle = p.color || '#d1242f'; ctx.textAlign = p.align || 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(p.label, X(p.x) + (p.align === 'right' ? -fs * 0.5 : fs * 0.5), Y(p.y) - fs * 0.2); } });
+    // legend
+    const leg = (o.series || []).filter(s => s.label);
+    if (leg.length && o.legend !== false) {
+      let ly2 = I.y + fs * 0.4; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      const lw = Math.max(...leg.map(s => ctx.measureText(s.label).width)) + fs * 2.6;
+      const lx2 = o.legendLeft ? I.x + fs * 0.4 : I.x + I.w - lw - fs * 0.3;
+      ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(lx2 - fs * 0.2, ly2 - fs * 0.3, lw, leg.length * fs * 1.2 + fs * 0.2);
+      leg.forEach(s => { ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 2.5; ctx.setLineDash(s.dash || []); ctx.beginPath(); ctx.moveTo(lx2, ly2 + fs * .3); ctx.lineTo(lx2 + fs * 1.6, ly2 + fs * .3); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#1b2333'; ctx.fillText(s.label, lx2 + fs * 2.0, ly2 + fs * .3); ly2 += fs * 1.2; });
+    }
+    ctx.restore();
+    return { X, Y, I, fs };
+  }
+  function arrow(ctx, x0, y0, x1, y1, color, w = 2, head = 10) {
+    const a = Math.atan2(y1 - y0, x1 - x0), L = Math.hypot(x1 - x0, y1 - y0); head = Math.min(head, L * 0.6);
+    ctx.strokeStyle = ctx.fillStyle = color; ctx.lineWidth = w;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - head * 0.7 * Math.cos(a), y1 - head * 0.7 * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - head * Math.cos(a - 0.4), y1 - head * Math.sin(a - 0.4)); ctx.lineTo(x1 - head * Math.cos(a + 0.4), y1 - head * Math.sin(a + 0.4)); ctx.closePath(); ctx.fill();
+  }
+  // arrowhead in the middle of a polyline segment
+  function midHead(ctx, x, y, ang, color, s = 9) {
+    ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(x + s * Math.cos(ang), y + s * Math.sin(ang));
+    ctx.lineTo(x + s * Math.cos(ang + 2.5), y + s * Math.sin(ang + 2.5)); ctx.lineTo(x + s * Math.cos(ang - 2.5), y + s * Math.sin(ang - 2.5)); ctx.closePath(); ctx.fill();
+  }
+  // perceptual-ish colour map (blue -> cyan -> yellow -> red), t in [0,1]
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    const S = [[0, [49, 54, 149]], [0.25, [69, 117, 180]], [0.45, [171, 217, 233]], [0.6, [254, 224, 144]], [0.8, [244, 109, 67]], [1, [165, 0, 38]]];
+    for (let i = 1; i < S.length; i++) if (t <= S[i][0]) { const [a, ca] = S[i - 1], [b, cb] = S[i]; const u = (t - a) / (b - a); return ca.map((c, k) => Math.round(c + (cb[k] - c) * u)); }
+    return S[S.length - 1][1];
+  }
+  // marching-squares contour of node field f (nx*ny, row-major f[j*nx+i]); toPx(i,j)->[x,y]; mask(i,j) true = skip cell
+  function contour(ctx, f, nx, ny, level, toPx, mask) {
+    ctx.beginPath();
+    const lerp = (a, b) => (level - a) / (b - a);
+    for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+      if (mask && mask(i, j)) continue;
+      const v0 = f[j * nx + i], v1 = f[j * nx + i + 1], v2 = f[(j + 1) * nx + i + 1], v3 = f[(j + 1) * nx + i];
+      const c = (v0 > level) | ((v1 > level) << 1) | ((v2 > level) << 2) | ((v3 > level) << 3);
+      if (c === 0 || c === 15) continue;
+      const e = [];
+      if ((v0 > level) !== (v1 > level)) e.push([i + lerp(v0, v1), j]);
+      if ((v1 > level) !== (v2 > level)) e.push([i + 1, j + lerp(v1, v2)]);
+      if ((v3 > level) !== (v2 > level)) e.push([i + lerp(v3, v2), j + 1]);
+      if ((v0 > level) !== (v3 > level)) e.push([i, j + lerp(v0, v3)]);
+      for (let k = 0; k + 1 < e.length; k += 2) { const a = toPx(...e[k]), b = toPx(...e[k + 1]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    }
+    ctx.stroke();
+  }
+  function text(ctx, s, x, y, { color = '#1b2333', size, align = 'left', base = 'middle', weight = '', bg = null } = {}) {
+    const fz = size || fontPx();
+    ctx.font = `${weight} ${fz}px system-ui, sans-serif`; ctx.textAlign = align; ctx.textBaseline = base;
+    if (bg) { const wd = ctx.measureText(s).width, x0 = align === 'center' ? x - wd / 2 : align === 'right' ? x - wd : x, y0 = base === 'middle' ? y - fz * 0.6 : base === 'top' ? y - fz * 0.1 : y - fz * 1.1; ctx.fillStyle = bg; ctx.fillRect(x0 - fz * 0.2, y0, wd + fz * 0.4, fz * 1.2); }
+    ctx.fillStyle = color; ctx.fillText(s, x, y);
+  }
+  return { $, sci, eng, tex, texAll, contour, fontPx, canvas, pointer, slider, seg, check, plot, arrow, midHead, cmap, text, ticks };
+})();
+</script>
+
+<!-- ===================== UI / RENDERING ===================== -->
+<script id="app">
+(() => {
+  const { $, sci, eng, tex, texAll, canvas, slider, seg, check, plot, text } = UI;
+  const S = { mode: 'plates', V0: 50, rho: 40e-6, epsr: 1, d: 0.01, NA: 1e16 * 1e6, ND: 1e15 * 1e6, VR: 2, autoVbi: true, Vbi: 0.7 };
+  seg('#modes', [['plates', 'Plates: Laplace vs Poisson'], ['pn', 'pn junction (Si)']], S.mode, v => { S.mode = v; layout(); });
+  const cA = $('#ctlA'), cB = $('#ctlB');
+  slider(cA, { label: 'Plate voltage V<sub>0</sub> (x = 0)', min: -100, max: 100, step: 1, value: S.V0, fmt: v => v + ' V', onInput: v => { S.V0 = v; C.redraw(); } });
+  slider(cA, { label: 'Charge density ρ<sub>v</sub>', min: -100, max: 100, step: 1, value: 40, fmt: v => v + ' µC/m³', onInput: v => { S.rho = v * 1e-6; C.redraw(); } });
+  slider(cA, { label: 'ε<sub>r</sub>', min: 1, max: 10, step: 0.1, value: 1, fmt: v => v.toFixed(1), onInput: v => { S.epsr = v; C.redraw(); } });
+  const fmtN = v => sci(v / 1e6, 2) + ' cm⁻³';
+  slider(cB, { label: 'Acceptors N<sub>A</sub> (p side)', min: 1e20, max: 1e24, log: true, value: S.NA, fmt: fmtN, onInput: v => { S.NA = v; upd(); } });
+  slider(cB, { label: 'Donors N<sub>D</sub> (n side)', min: 1e20, max: 1e24, log: true, value: S.ND, fmt: fmtN, onInput: v => { S.ND = v; upd(); } });
+  slider(cB, { label: 'Reverse bias V<sub>R</sub>', min: 0, max: 20, step: 0.1, value: S.VR, fmt: v => v.toFixed(1) + ' V', onInput: v => { S.VR = v; upd(); } });
+  const vb = document.createElement('div'); cB.appendChild(vb);
+  const sVbi = slider(vb, { label: 'Built-in V<sub>bi</sub>', min: 0.3, max: 1.0, step: 0.01, value: 0.7, fmt: v => v.toFixed(3) + ' V', onInput: v => { S.Vbi = v; upd(); } });
+  check(cB, 'V<sub>bi</sub> from doping (T = 300 K, n<sub>i</sub> = 10¹⁰ cm⁻³)', true, v => { S.autoVbi = v; upd(); });
+  function upd() {
+    if (S.autoVbi) { S.Vbi = PHYS.Vbi(S.NA, S.ND); sVbi.set(Math.min(1, Math.max(0.3, S.Vbi)), false); sVbi.el.querySelector('output').textContent = S.Vbi.toFixed(3) + ' V'; }
+    sVbi.el.querySelector('input').disabled = S.autoVbi; C && C.redraw();
+  }
+  function layout() {
+    const a = S.mode === 'plates';
+    cA.classList.toggle('hide', !a); cB.classList.toggle('hide', a); $('#fA').classList.toggle('hide', !a); $('#fB').classList.toggle('hide', a);
+    $('#notice').textContent = a ? 'With ρ_v = 0, V is a straight line and E is constant; space charge bends V into a parabola and makes E vary linearly.'
+      : 'The lightly-doped side holds most of the depletion width; more reverse bias widens W and lowers C ∝ (V_bi + V_R)^−½.';
+    upd();
+  }
+
+  function drawPlates(ctx, w, h) {
+    const fs = UI.fontPx(), eps = S.epsr * PHYS.EPS0, d = S.d;
+    const sw = Math.min(w * 0.3, h * 0.55);
+    // sketch
+    const x0 = fs * 2.2, x1 = sw - fs * 0.8, y0 = fs * 2, y1 = h - fs * 2;
+    const nd = Math.round(Math.abs(S.rho) / 100e-6 * 160);
+    const rnd = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+    ctx.fillStyle = S.rho > 0 ? 'rgba(209,36,47,.75)' : 'rgba(31,111,235,.75)';
+    for (let i = 0; i < nd; i++) { ctx.beginPath(); ctx.arc(x0 + 8 + rnd() * (x1 - x0 - 16), y0 + rnd() * (y1 - y0), fs * 0.16, 0, 7); ctx.fill(); }
+    ctx.fillStyle = '#5a6478'; ctx.fillRect(x0 - fs * 0.5, y0 - fs * 0.6, fs * 0.5, y1 - y0 + fs * 1.2); ctx.fillRect(x1, y0 - fs * 0.6, fs * 0.5, y1 - y0 + fs * 1.2);
+    text(ctx, `V₀ = ${S.V0} V`, x0 - fs * 0.5, y0 - fs * 1.2, { size: fs * 0.85, weight: 700 });
+    text(ctx, '0 V', x1 + fs * 0.5, y0 - fs * 1.2, { size: fs * 0.85, weight: 700, align: 'right' });
+    text(ctx, 'x = 0', x0, y1 + fs * 1.2, { size: fs * 0.8, align: 'center', color: '#5a6478' }); text(ctx, 'x = d = 1 cm', x1, y1 + fs * 1.2, { size: fs * 0.8, align: 'right', color: '#5a6478' });
+    text(ctx, S.rho === 0 ? 'ρ_v = 0' : `ρ_v ${S.rho > 0 ? '> 0' : '< 0'}`, (x0 + x1) / 2, (y0 + y1) / 2, { align: 'center', weight: 700, bg: 'rgba(255,255,255,.85)' });
+    // plots
+    const xs = [], VL = [], VP = [], EL = [], EP = [];
+    for (let i = 0; i <= 200; i++) { const x = d * i / 200; xs.push(x * 100); VL.push(PHYS.Vplates(x, S.V0, d, 0, eps)); VP.push(PHYS.Vplates(x, S.V0, d, S.rho, eps)); EL.push(PHYS.Eplates(x, S.V0, d, 0, eps) / 1e3); EP.push(PHYS.Eplates(x, S.V0, d, S.rho, eps) / 1e3); }
+    const ext = (arr, m) => [Math.min(...arr.flat(), 0) * m, Math.max(...arr.flat(), 0) * m];
+    const vl = ext([VL, VP], 1.1), el = ext([EL, EP], 1.15); if (vl[1] - vl[0] < 1) vl[1] += 1; if (el[1] - el[0] < 0.1) { el[0] -= 0.1; el[1] += 0.1; }
+    const px = sw + fs * 0.6, pw = w - px - 4;
+    const vmax = VP.indexOf(Math.max(...VP));
+    plot(ctx, { x: px, y: 2, w: pw, h: h / 2 - 2 }, { xlim: [0, 1], ylim: vl, title: 'Potential V(x)', ylabel: 'V', series: [{ x: xs, y: VL, color: '#5a6478', dash: [8, 6], width: 2.5, label: 'Laplace (ρ_v = 0)' }, { x: xs, y: VP, color: '#1f6feb', width: 3, label: 'Poisson' }],
+      points: S.rho !== 0 && vmax > 0 && vmax < 200 ? [{ x: xs[vmax], y: VP[vmax], color: '#1f6feb', label: `V_max = ${VP[vmax].toFixed(1)} V` }] : [] });
+    plot(ctx, { x: px, y: h / 2 + 2, w: pw, h: h / 2 - 4 }, { xlim: [0, 1], ylim: el, title: 'Field E_x(x) = −dV/dx', xlabel: 'x (cm)', ylabel: 'kV/m', series: [{ x: xs, y: EL, color: '#5a6478', dash: [8, 6], width: 2.5, label: 'Laplace' }, { x: xs, y: EP, color: '#d1242f', width: 3, label: 'Poisson' }] });
+    const Q = S.rho * d; // per m^2
+    $('#read').innerHTML = `E(0) = <b>${(PHYS.Eplates(0, S.V0, d, S.rho, eps) / 1e3).toFixed(2)} kV/m</b>, E(d) = <b>${(PHYS.Eplates(d, S.V0, d, S.rho, eps) / 1e3).toFixed(2)} kV/m</b><br>
+      ε[E(d) − E(0)] = <b>${(eps * (PHYS.Eplates(d, S.V0, d, S.rho, eps) - PHYS.Eplates(0, S.V0, d, S.rho, eps)) * 1e6).toFixed(3)} µC/m²</b> = ρ<sub>v</sub>d (Gauss)<br><span class="small">plate gap d = 1 cm</span>`;
+  }
+
+  function drawPN(ctx, w, h) {
+    const fs = UI.fontPx(), J = PHYS.junction(S.NA, S.ND, S.Vbi, S.VR);
+    const um = 1e6, L = Math.max(J.xp, J.xn) * 1.6 * um; // half-span in µm
+    const lw = w * 0.62, rx = lw + fs * 0.4, rw = w - rx - 4;
+    // junction strip
+    const sy = 4, sh = fs * 2.6, padL = fs * 0.85 * 3.8, ix = padL, iw = lw - padL - fs * 0.85 * 0.8;
+    const X = x => ix + (x * um + L) / (2 * L) * iw;
+    ctx.fillStyle = '#fde2e4'; ctx.fillRect(ix, sy, iw / 2, sh); ctx.fillStyle = '#dbe8fd'; ctx.fillRect(ix + iw / 2, sy, iw / 2, sh);
+    ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(X(-J.xp), sy, X(J.xn) - X(-J.xp), sh);
+    ctx.strokeStyle = '#1b2333'; ctx.lineWidth = 1.5; ctx.strokeRect(ix, sy, iw, sh); ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(X(-J.xp), sy); ctx.lineTo(X(-J.xp), sy + sh); ctx.moveTo(X(J.xn), sy); ctx.lineTo(X(J.xn), sy + sh); ctx.stroke(); ctx.setLineDash([]);
+    text(ctx, 'p', ix + fs * 0.6, sy + sh / 2, { weight: 800, color: '#d1242f', size: fs * 1.2 }); text(ctx, 'n', ix + iw - fs * 0.6, sy + sh / 2, { weight: 800, color: '#1f6feb', size: fs * 1.2, align: 'right' });
+    text(ctx, '−', (X(-J.xp) + X(0)) / 2, sy + sh / 2, { align: 'center', color: '#1f6feb', weight: 800, size: fs * 1.2 }); text(ctx, '+', (X(0) + X(J.xn)) / 2, sy + sh / 2, { align: 'center', color: '#d1242f', weight: 800, size: fs * 1.2 });
+    text(ctx, `depletion W = ${(J.W * um).toFixed(3)} µm`, (X(-J.xp) + X(J.xn)) / 2, sy + sh + fs * 0.5, { align: 'center', size: fs * 0.8, weight: 600, bg: 'rgba(255,255,255,.9)' });
+    // profiles
+    const xs = [], rr = [], ee = [], vv = [];
+    for (let i = 0; i <= 600; i++) { const x = (-L + 2 * L * i / 600) / um; xs.push(x * um); rr.push(J.rho(x) / PHYS.q / 1e6 / 1e15); ee.push(J.E(x) / 1e5); vv.push(J.V(x)); }
+    const top = sy + sh + fs * 1.2, ph = (h - top) / 3;
+    const rmax = Math.max(S.NA, S.ND) / 1e6 / 1e15 * 1.15;
+    plot(ctx, { x: 0, y: top, w: lw, h: ph }, { xlim: [-L, L], ylim: [-rmax, rmax], title: 'Charge density ρ_v / q   (10¹⁵ cm⁻³)', series: [{ x: xs, y: rr, color: '#8250df', width: 2.5, fill: 'rgba(130,80,223,.18)' }], vlines: [{ x: 0, color: '#1b2333', dash: [2, 3] }] });
+    const emin = -J.Emax / 1e5 * 1.15;
+    plot(ctx, { x: 0, y: top + ph, w: lw, h: ph }, { xlim: [-L, L], ylim: [emin, -emin * 0.12], title: 'Electric field E_x  (kV/cm)', series: [{ x: xs, y: ee, color: '#d1242f', width: 3, fill: 'rgba(209,36,47,.12)' }], points: [{ x: 0, y: -J.Emax / 1e5, color: '#d1242f', label: `|E|max = ${(J.Emax / 1e5).toFixed(1)} kV/cm` }] });
+    plot(ctx, { x: 0, y: top + 2 * ph, w: lw, h: ph }, { xlim: [-L, L], ylim: [-0.05 * J.Vt, J.Vt * 1.12], title: 'Potential V(x)  (V),  V(−x_p) = 0', xlabel: 'x (µm)', series: [{ x: xs, y: vv, color: '#1f6feb', width: 3 }], hlines: [{ y: J.Vt, color: '#5a6478' }], points: [{ x: L * 0.55, y: J.Vt, r: 0.1, color: '#5a6478', label: 'V_bi + V_R', align: 'right' }] });
+    // C-V plot
+    const Vr = [], Cs = [], Ci = []; for (let i = 0; i <= 200; i++) { const v = 20 * i / 200; Vr.push(v); const j = PHYS.junction(S.NA, S.ND, S.Vbi, v); Cs.push(j.Cp * 1e-4 * 1e9); Ci.push(1 / (j.Cp * 1e-4 * 1e9) ** 2); }
+    const Cn = J.Cp * 1e-4 * 1e9;
+    plot(ctx, { x: rx, y: 2, w: rw, h: h * 0.5 - 2 }, { xlim: [0, 20], ylim: [0, Cs[0] * 1.1], title: "C' per area  (nF/cm²)", series: [{ x: Vr, y: Cs, color: '#1a7f37', width: 3 }], points: [{ x: S.VR, y: Cn, color: '#1a7f37', label: Cn.toPrecision(3), align: S.VR > 12 ? 'right' : 'left' }] });
+    plot(ctx, { x: rx, y: h * 0.5 + 2, w: rw, h: h * 0.5 - 4 }, { xlim: [-2, 20], ylim: [0, Ci[200] * 1.08], title: "1/C'²  (intercept at −V_bi)", xlabel: 'V_R (V)', series: [{ x: [-S.Vbi, 0], y: [0, Ci[0]], color: '#8250df', width: 2, dash: [5, 4] }, { x: Vr, y: Ci, color: '#8250df', width: 3 }], points: [{ x: S.VR, y: 1 / Cn ** 2, color: '#8250df' }, { x: -S.Vbi, y: 0, color: '#8250df' }] });
+    $('#read').innerHTML = `V<sub>bi</sub> = <b>${S.Vbi.toFixed(3)} V</b> &nbsp; W = <b>${(J.W * um).toFixed(3)} µm</b><br>x<sub>p</sub> = <b>${(J.xp * um).toFixed(3)} µm</b>, x<sub>n</sub> = <b>${(J.xn * um).toFixed(3)} µm</b><br>|E|<sub>max</sub> = <b>${(J.Emax / 1e5).toFixed(1)} kV/cm</b> &nbsp; C' = <b>${Cn.toPrecision(3)} nF/cm²</b>`;
+  }
+  const C = canvas($('#cv'), (ctx, w, h) => S.mode === 'plates' ? drawPlates(ctx, w, h) : drawPN(ctx, w, h));
+  texAll(); layout();
+})();
+</script>
+</body></html>

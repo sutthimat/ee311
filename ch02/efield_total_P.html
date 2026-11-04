@@ -1,0 +1,361 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Total Electric Field at P</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@700&family=IBM+Plex+Sans:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: the textbook figure fills the wide column, controls and computed values sit in a narrow column beside it; one column below 960px. */
+:root {
+  --bg: #f4f6f7;
+  --surface: #ffffff;
+  --paper: #ffffff;
+  --ink: #15191d;
+  --muted: #5a6670;
+  --line: #dbe1e5;
+  --accent: #0a8fd6;
+  --lblue: #8ad4f5;
+  --blue: #00a9f4;
+  --blue-lbl: #0b9de0;
+  --axis: #b9bec3;
+  --gray-vec: #bcc0c4;
+  --gray-fill: #e4e5e6;
+  --box0: #8fd0f6;
+  --box1: #ecf7fd;
+  --top0: #c4e6fa;
+  --top1: #f6fbfe;
+  --side: #38b3f0;
+  --side-op: 0.16;
+  --serif: 'STIX Two Text', 'Times New Roman', Times, serif;
+  --sans-fig: 'Arimo', Arial, Helvetica, sans-serif;
+  --ui: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a;
+    --accent: #4cb8f0; --lblue: #6fc3ec; --blue: #25b3f7; --blue-lbl: #3cb6f4; --axis: #5c6672; --gray-vec: #8a929b;
+    --gray-fill: #2b3239; --box0: #215f84; --box1: #1a2833; --top0: #25506b; --top1: #1a252e; --side: #38b3f0; --side-op: 0.2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a;
+  --accent: #4cb8f0; --lblue: #6fc3ec; --blue: #25b3f7; --blue-lbl: #3cb6f4; --axis: #5c6672; --gray-vec: #8a929b;
+  --gray-fill: #2b3239; --box0: #215f84; --box1: #1a2833; --top0: #25506b; --top1: #1a252e; --side: #38b3f0; --side-op: 0.2;
+  color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 28px 48px; }
+h1 { font-size: clamp(1.5rem, 3.4vw, 2rem); line-height: 1.2; margin: 0 0 6px; font-weight: 600; text-wrap: balance; }
+.lede { margin: 0 0 22px; color: var(--muted); max-width: 70ch; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+@media (max-width: 960px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+.fig { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 14px; }
+.fig svg { display: block; width: 100%; height: auto; max-width: 100%; }
+.fig figcaption { font-family: var(--serif); font-size: 1rem; line-height: 1.5; color: var(--ink); padding: 8px 14px 0; max-width: 75ch; }
+
+.panel { display: grid; gap: 14px; min-width: 0; }
+.grp { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px 14px; min-width: 0; }
+.grp h2 { font-size: .8rem; font-weight: 600; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; }
+.grp h2 i, .eq i { font-family: var(--serif); font-size: 1.05em; letter-spacing: 0; }
+.row { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr) 4.4rem; align-items: center; gap: 10px; padding-block: 3px; }
+.row label { font-size: .85rem; color: var(--ink); }
+.row input[type="range"] { width: 100%; min-width: 0; accent-color: var(--accent); }
+.row input[type="number"] { width: 100%; min-width: 0; font: inherit; font-size: .85rem; font-variant-numeric: tabular-nums; text-align: right; padding: 3px 6px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; }
+.chk { display: flex; align-items: center; gap: 8px; padding-block: 3px; font-size: .88rem; }
+.chk input { accent-color: var(--accent); width: 16px; height: 16px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+button { font: inherit; font-size: .85rem; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+button:hover { border-color: var(--accent); }
+input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.eq { font-family: var(--serif); font-size: 1.02rem; line-height: 1.9; overflow-x: auto; padding-bottom: 2px; }
+.eq .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.25; margin-inline: 2px; }
+.eq .frac > span:first-child { border-bottom: 1px solid var(--ink); padding-inline: 4px; }
+.vals { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; row-gap: 2px; margin: 8px 0 0; font-size: .88rem; font-variant-numeric: tabular-nums; }
+.vals dt { color: var(--muted); }
+.vals dd { margin: 0; text-align: right; }
+.note { font-size: .78rem; color: var(--muted); margin: 10px 0 0; }
+
+/* figure drawing */
+.vec line { stroke: var(--c); stroke-width: var(--w); }
+.vec polygon { fill: var(--c); }
+.lblue { --c: var(--lblue); --w: 2.4; }
+.blue { --c: var(--blue); --w: 2.4; }
+.gvec { --c: var(--gray-vec); --w: 2.1; }
+.black { --c: var(--ink); --w: 3.2; }
+.axisv { --c: var(--axis); --w: 1.6; }
+.guide { stroke: var(--axis); stroke-width: 1.2; stroke-dasharray: 6 5; fill: none; }
+.edge { stroke: var(--axis); stroke-width: 1.2; fill: none; }
+.edge.dash { stroke-dasharray: 5 4; }
+.dot { fill: var(--ink); }
+.fig svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-linejoin: round; }
+.tk { font-family: var(--serif); font-weight: 700; fill: var(--ink); font-size: 22px; }
+.tb { font-family: var(--sans-fig); font-weight: 700; fill: var(--blue-lbl); font-size: 20px; }
+.ti { font-family: var(--serif); font-style: italic; fill: var(--ink); font-size: 21px; }
+.ta { font-family: var(--serif); font-style: italic; fill: var(--axis); font-size: 20px; }
+.sub { font-size: .66em; font-style: normal; }
+.g0 { stop-color: var(--box0); }
+.g1 { stop-color: var(--box1); }
+.t0 { stop-color: var(--top0); }
+.t1 { stop-color: var(--top1); }
+.face-r { fill: var(--side); fill-opacity: var(--side-op); }
+.pfill { fill: var(--gray-fill); }
+</style>
+
+<main class="wrap">
+  <h1>Total Electric Field at P</h1>
+  <p class="lede">The vector sum of the electric field intensities at point P due to charges Q₁ and Q₂. You can change the positions and values of the charges. The figure is recomputed from Coulomb’s law every time. The default values match the reference figure.</p>
+
+  <div class="layout">
+    <figure class="fig">
+      <svg id="fig" viewBox="0 0 900 730" role="img" aria-label="3D diagram of the vectors r, r1, r2, r − r1, r − r2, E1, E2 and E(r) at point P"></svg>
+      <figcaption>The vector addition of the total electric field intensity at <i>P</i> due to <i>Q</i><sub>1</sub> and <i>Q</i><sub>2</sub> is made possible by the linearity of Coulomb’s law.</figcaption>
+    </figure>
+
+    <aside class="panel" id="panel">
+      <section class="grp" id="grp-q1"><h2>Charge <i>Q</i>₁</h2></section>
+      <section class="grp" id="grp-q2"><h2>Charge <i>Q</i>₂</h2></section>
+      <section class="grp" id="grp-p"><h2>Observation point <i>P</i></h2></section>
+      <section class="grp" id="grp-view">
+        <h2>Display</h2>
+        <div id="view-sliders"></div>
+        <label class="chk"><input type="checkbox" id="f-guides" checked> Dashed coordinate guides for Q₁, Q₂</label>
+        <label class="chk"><input type="checkbox" id="f-box" checked> Coordinate box of P</label>
+        <label class="chk"><input type="checkbox" id="f-par" checked> Parallelogram of E₁, E₂, E(r)</label>
+        <label class="chk"><input type="checkbox" id="f-clip" checked> Grey plane clipped at the top edge, as in the reference figure</label>
+        <label class="chk"><input type="checkbox" id="f-labels" checked> Vector labels</label>
+        <div class="btns">
+          <button type="button" id="btn-fit">Auto-fit E arrow length</button>
+          <button type="button" id="btn-reset">Reset to reference figure</button>
+        </div>
+      </section>
+      <section class="grp" id="grp-out">
+        <h2>Computed values</h2>
+        <div class="eq">
+          <i>E</i>(<b><i>r</i></b>) = <i>E</i>₁ + <i>E</i>₂ = Σ
+          <span class="frac"><span><i>Q</i><sub>m</sub>(<b><i>r</i></b> − <b><i>r</i></b><sub>m</sub>)</span><span>4π<i>ε</i><sub>0</sub>|<b><i>r</i></b> − <b><i>r</i></b><sub>m</sub>|³</span></span>
+        </div>
+        <dl class="vals">
+          <dt>|r − r₁|</dt><dd id="o-d1"></dd>
+          <dt>|r − r₂|</dt><dd id="o-d2"></dd>
+          <dt>|E₁|</dt><dd id="o-e1"></dd>
+          <dt>|E₂|</dt><dd id="o-e2"></dd>
+          <dt>E(r), x component</dt><dd id="o-ex"></dd>
+          <dt>E(r), y component</dt><dd id="o-ey"></dd>
+          <dt>E(r), z component</dt><dd id="o-ez"></dd>
+          <dt>|E(r)|</dt><dd id="o-et"></dd>
+        </dl>
+        <p class="note">Coordinates are in metres, charges in microcoulombs and fields in V/m. The arrow-length scale changes only the drawn size, not the computed values. A negative charge makes the field point toward the charge.</p>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script>
+(function () {
+  var K = 8.9875517923e9;
+  var U = 50, OX = 327, OY = 432, EXx = -32, EXy = 47.5;
+  var DEF = { q1: 2.3, x1: 4.3, y1: 0, z1: 5.6, q2: 1.0, x2: 0, y2: 6, z2: 6.5, px: 1.2, py: 4.2, pz: 2.1, scale: 117, alen: 1.35 };
+  var S = {}; Object.keys(DEF).forEach(function (k) { S[k] = DEF[k]; });
+  var flags = { guides: true, box: true, par: true, clip: true, labels: true };
+
+  var CFG = {
+    'grp-q1': [['q1', 'Charge (μC)', -6, 6, 0.1], ['x1', 'x (m)', -1.5, 5, 0.1], ['y1', 'y (m)', -1, 8.5, 0.1], ['z1', 'z (m)', -0.5, 7.2, 0.1]],
+    'grp-q2': [['q2', 'Charge (μC)', -6, 6, 0.1], ['x2', 'x (m)', -1.5, 5, 0.1], ['y2', 'y (m)', -1, 8.5, 0.1], ['z2', 'z (m)', -0.5, 7.2, 0.1]],
+    'grp-p': [['px', 'x (m)', -1.5, 5, 0.1], ['py', 'y (m)', -1, 8.5, 0.1], ['pz', 'z (m)', -0.5, 7.2, 0.1]],
+    'view-sliders': [['scale', 'V/m per 1 m', 20, 800, 1], ['alen', 'Length of a (m)', 0.5, 3, 0.05]]
+  };
+  var inputs = {};
+
+  function buildRows() {
+    Object.keys(CFG).forEach(function (gid) {
+      var host = document.getElementById(gid);
+      CFG[gid].forEach(function (c) {
+        var key = c[0];
+        var row = document.createElement('div'); row.className = 'row';
+        var lab = document.createElement('label'); lab.htmlFor = 'n-' + key; lab.textContent = c[1];
+        var rng = document.createElement('input'); rng.type = 'range'; rng.id = 'r-' + key;
+        var num = document.createElement('input'); num.type = 'number'; num.id = 'n-' + key;
+        [rng, num].forEach(function (el) { el.min = c[2]; el.max = c[3]; el.step = c[4]; el.value = S[key]; });
+        rng.setAttribute('aria-label', c[1]);
+        rng.addEventListener('input', function () { S[key] = parseFloat(rng.value); num.value = rng.value; render(); });
+        num.addEventListener('input', function () {
+          var v = parseFloat(num.value);
+          if (isNaN(v)) return;
+          S[key] = v; rng.value = v; render();
+        });
+        row.appendChild(lab); row.appendChild(rng); row.appendChild(num);
+        host.appendChild(row);
+        inputs[key] = [rng, num];
+      });
+    });
+  }
+  function syncInputs() {
+    Object.keys(inputs).forEach(function (k) { inputs[k][0].value = S[k]; inputs[k][1].value = S[k]; });
+  }
+
+  /* vector helpers (3D, metres) */
+  function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function add(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+  function mul(a, s) { return [a[0] * s, a[1] * s, a[2] * s]; }
+  function len(a) { return Math.hypot(a[0], a[1], a[2]); }
+  /* oblique projection: x toward viewer (down-left), y right, z up */
+  function pv(v) { return { x: EXx * v[0] + U * v[1], y: EXy * v[0] - U * v[2] }; }
+  function pp(p) { var v = pv(p); return { x: OX + v.x, y: OY + v.y }; }
+  function off(pt, v) { return { x: pt.x + v.x, y: pt.y + v.y }; }
+  function f1(n) { return n.toFixed(1); }
+
+  function arrow(a, b, cls, hl, hw, nt) {
+    hl = hl || 13; hw = hw || 4.6; nt = nt || 3.4;
+    var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy);
+    if (L < 3) return '';
+    var ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+    var h = Math.min(hl, L * 0.9), w = hw * h / hl;
+    var bx = b.x - ux * h, by = b.y - uy * h;
+    var qx = b.x - ux * (h - nt), qy = b.y - uy * (h - nt);
+    return '<g class="vec ' + cls + '"><line x1="' + f1(a.x) + '" y1="' + f1(a.y) + '" x2="' + f1(qx) + '" y2="' + f1(qy) + '"/>' +
+      '<polygon points="' + f1(b.x) + ',' + f1(b.y) + ' ' + f1(bx + nx * w) + ',' + f1(by + ny * w) + ' ' + f1(qx) + ',' + f1(qy) + ' ' + f1(bx - nx * w) + ',' + f1(by - ny * w) + '"/></g>';
+  }
+  function seg(a, b, cls) {
+    if (Math.hypot(a.x - b.x, a.y - b.y) < 0.5) return '';
+    return '<line class="' + cls + '" x1="' + f1(a.x) + '" y1="' + f1(a.y) + '" x2="' + f1(b.x) + '" y2="' + f1(b.y) + '"/>';
+  }
+  function poly(pts, cls, extra) {
+    return '<polygon class="' + cls + '" ' + (extra || '') + ' points="' + pts.map(function (p) { return f1(p.x) + ',' + f1(p.y); }).join(' ') + '"/>';
+  }
+  /* label: parts = [[text, sub?], ...]; (x, y) is the visual centre of the text */
+  function T(x, y, parts, cls) {
+    var s = '<text x="' + f1(x) + '" y="' + f1(y + 7) + '" class="' + cls + '" text-anchor="middle">', down = false;
+    parts.forEach(function (p) {
+      s += '<tspan' + (down ? ' dy="-5"' : '') + '>' + p[0] + '</tspan>'; down = false;
+      if (p[1]) { s += '<tspan class="sub" dy="5">' + p[1] + '</tspan>'; down = true; }
+    });
+    return s + '</text>';
+  }
+  function lerp(a, b, t) { return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }; }
+  function at(pt, dx, dy) { return { x: pt.x + dx, y: pt.y + dy }; }
+
+  function guides(p) {
+    var x = p[0], y = p[1], z = p[2];
+    var A = pp([0, 0, z]), B = pp([x, 0, z]), C = pp([x, y, z]), D = pp([x, y, 0]), E = pp([x, 0, 0]), F = pp([0, y, 0]);
+    return seg(A, B, 'guide') + seg(B, C, 'guide') + seg(C, D, 'guide') + seg(D, E, 'guide') + seg(D, F, 'guide');
+  }
+
+  var svg = document.getElementById('fig');
+
+  function render() {
+    var Q1 = [S.x1, S.y1, S.z1], Q2 = [S.x2, S.y2, S.z2], P = [S.px, S.py, S.pz];
+    var d1 = sub(P, Q1), d2 = sub(P, Q2);
+    var m1 = Math.max(len(d1), 0.05), m2 = Math.max(len(d2), 0.05);
+    var E1 = mul(d1, K * S.q1 * 1e-6 / Math.pow(m1, 3));
+    var E2 = mul(d2, K * S.q2 * 1e-6 / Math.pow(m2, 3));
+    var Et = add(E1, E2);
+    var kd = 1 / S.scale;
+    var sg1 = S.q1 < 0 ? -1 : 1, sg2 = S.q2 < 0 ? -1 : 1;
+
+    var O = { x: OX, y: OY };
+    var Q1s = pp(Q1), Q2s = pp(Q2), Ps = pp(P);
+    var E1t = off(Ps, pv(mul(E1, kd))), E2t = off(Ps, pv(mul(E2, kd))), Ett = off(Ps, pv(mul(Et, kd)));
+    var a1t = off(Ps, pv(mul(d1, sg1 * S.alen / m1))), a2t = off(Ps, pv(mul(d2, sg2 * S.alen / m2)));
+
+    var xp = S.px, yp = S.py, zp = S.pz;
+    var s = '';
+
+    /* defs */
+    var ys = [Ps.y, E1t.y, E2t.y, Ett.y], minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+    var yclip = flags.clip ? minY + 0.372 * (maxY - minY) : -2000;
+    s += '<defs>' +
+      '<linearGradient id="gF" x1="0" y1="0" x2="1" y2="0"><stop class="g0" offset="0"/><stop class="g1" offset="1"/></linearGradient>' +
+      '<linearGradient id="gT" x1="0" y1="0" x2="1" y2="0"><stop class="t0" offset="0"/><stop class="t1" offset="1"/></linearGradient>' +
+      '<clipPath id="cp"><rect x="-500" y="' + f1(yclip) + '" width="2000" height="3000"/></clipPath></defs>';
+
+    /* axes */
+    var zEnd = pp([0, 0, 7.74]), yEnd = pp([0, 9.26, 0]), xEnd = pp([5.2, 0, 0]);
+    s += arrow(O, zEnd, 'axisv', 12, 4.2, 3) + arrow(O, yEnd, 'axisv', 12, 4.2, 3) + arrow(O, xEnd, 'axisv', 12, 4.2, 3);
+
+    /* dashed coordinate guides */
+    if (flags.guides) s += guides(Q1) + guides(Q2);
+
+    /* grey parallelogram under the box */
+    if (flags.par) {
+      s += '<polygon class="pfill" clip-path="url(#cp)" points="' + [Ps, E1t, Ett, E2t].map(function (p) { return f1(p.x) + ',' + f1(p.y); }).join(' ') + '"/>';
+    }
+    /* coordinate box of P */
+    if (flags.box) {
+      var f = [pp([xp, 0, 0]), pp([xp, yp, 0]), pp([xp, yp, zp]), pp([xp, 0, zp])];
+      var t = [pp([0, 0, zp]), pp([xp, 0, zp]), pp([xp, yp, zp]), pp([0, yp, zp])];
+      var r = [pp([0, yp, 0]), pp([xp, yp, 0]), pp([xp, yp, zp]), pp([0, yp, zp])];
+      s += poly(r, 'face-r') + poly(f, '', 'fill="url(#gF)"') + poly(t, '', 'fill="url(#gT)"');
+    }
+    if (flags.par) {
+      s += seg(E1t, Ett, 'edge dash') + seg(E2t, Ett, 'edge');
+    }
+
+    /* position vectors and difference vectors */
+    s += arrow(O, Q1s, 'lblue') + arrow(O, Ps, 'lblue') + arrow(O, Q2s, 'lblue');
+    s += arrow(Q1s, Ps, 'blue') + arrow(Q2s, Ps, 'blue');
+
+    /* field vectors and unit vectors */
+    s += arrow(Ps, E1t, 'gvec') + arrow(Ps, E2t, 'gvec');
+    s += arrow(Ps, a1t, 'gvec') + arrow(Ps, a2t, 'gvec');
+    s += arrow(Ps, Ett, 'black', 15, 6, 4);
+
+    /* points */
+    s += '<circle class="dot" cx="' + f1(Q1s.x) + '" cy="' + f1(Q1s.y) + '" r="5.5"/>' +
+         '<circle class="dot" cx="' + f1(Q2s.x) + '" cy="' + f1(Q2s.y) + '" r="5.5"/>' +
+         '<circle class="dot" cx="' + f1(Ps.x) + '" cy="' + f1(Ps.y) + '" r="5"/>';
+
+    /* labels */
+    var c;
+    c = at(zEnd, 1, -17); s += T(c.x, c.y, [['z']], 'ta');
+    c = at(yEnd, 15, 1); s += T(c.x, c.y, [['y']], 'ta');
+    c = at(xEnd, 0, 17); s += T(c.x, c.y, [['x']], 'ta');
+    c = at(Q1s, -24, 6); s += T(c.x, c.y, [['Q', '1']], 'ti');
+    c = at(Q2s, 31, -8); s += T(c.x, c.y, [['Q', '2']], 'ti');
+    c = at(Ps, -9, -19); s += T(c.x, c.y, [['P']], 'ti');
+    if (flags.labels) {
+      c = at(lerp(O, Q1s, 0.5), -8, 11); s += T(c.x, c.y, [['r', '1']], 'tk');
+      c = at(lerp(O, Ps, 0.37), 0, -10); s += T(c.x, c.y, [['r']], 'tk');
+      c = at(lerp(O, Q2s, 0.58), -30, 0); s += T(c.x, c.y, [['r', '2']], 'tk');
+      c = at(lerp(Q1s, Ps, 0.27), 0, -13); s += T(c.x, c.y, [['r − r', '1']], 'tb');
+      c = at(lerp(Q2s, Ps, 0.656), 47, 1); s += T(c.x, c.y, [['r − r', '2']], 'tb');
+      c = at(a1t, 25, -16); s += T(c.x, c.y, [['a', '1']], 'tb');
+      c = at(a2t, -26, 8); s += T(c.x, c.y, [['a', '2']], 'tb');
+      c = at(E1t, 24, -3); s += T(c.x, c.y, [['E', '1']], 'tb');
+      c = at(E2t, -19, 9); s += T(c.x, c.y, [['E', '2']], 'tb');
+      c = at(Ett, 1, 22); s += T(c.x, c.y, [['E(r)']], 'tk');
+    }
+    svg.innerHTML = s;
+
+    /* readouts */
+    function fm(n) { return n.toFixed(Math.abs(n) >= 100 ? 0 : 1); }
+    document.getElementById('o-d1').textContent = len(d1).toFixed(2) + ' m';
+    document.getElementById('o-d2').textContent = len(d2).toFixed(2) + ' m';
+    document.getElementById('o-e1').textContent = fm(len(E1)) + ' V/m';
+    document.getElementById('o-e2').textContent = fm(len(E2)) + ' V/m';
+    document.getElementById('o-ex').textContent = fm(Et[0]) + ' V/m';
+    document.getElementById('o-ey').textContent = fm(Et[1]) + ' V/m';
+    document.getElementById('o-ez').textContent = fm(Et[2]) + ' V/m';
+    document.getElementById('o-et').textContent = fm(len(Et)) + ' V/m';
+    render.last = { E1: len(E1), E2: len(E2) };
+  }
+
+  buildRows();
+  ['guides', 'box', 'par', 'clip', 'labels'].forEach(function (k) {
+    document.getElementById('f-' + k).addEventListener('change', function (e) { flags[k] = e.target.checked; render(); });
+  });
+  document.getElementById('btn-fit').addEventListener('click', function () {
+    var m = Math.max(render.last.E1, render.last.E2, 1e-9);
+    S.scale = Math.min(800, Math.max(20, Math.round(m / 4.5)));
+    syncInputs(); render();
+  });
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    Object.keys(DEF).forEach(function (k) { S[k] = DEF[k]; });
+    syncInputs(); render();
+  });
+  render();
+})();
+</script>
+
+</body></html>

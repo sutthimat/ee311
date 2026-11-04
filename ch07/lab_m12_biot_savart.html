@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Biot–Savart Field Explorer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+:root{--bg:#f4f6f9;--panel:#fff;--ink:#16202a;--mut:#56616e;--line:#d5dbe3;--acc:#1c64d6;--cur:#d9480f;--fld:#5a2bb0;--pos:#2b8a3e;--neg:#c92a2a;--fs:clamp(11px,min(1.6vw,2.8vh),26px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:var(--fs)}
+#app{height:100%;display:grid;grid-template-rows:auto 1fr}
+header{padding:.3em .8em;display:flex;align-items:baseline;gap:1em;border-bottom:1px solid var(--line);background:var(--panel)}
+h1{font-size:1.2em;margin:0;white-space:nowrap}
+.cap{color:var(--mut);font-size:.9em;flex:1;min-width:0}
+.cap b{color:var(--ink)}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,32%);min-height:0}
+#stage{position:relative;min-width:0;min-height:0;overflow:hidden}
+#stage canvas{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none}
+#chart{left:auto!important;top:auto!important;right:.4em;bottom:.4em;width:40%!important;height:38%!important;pointer-events:none}
+aside{background:var(--panel);border-left:1px solid var(--line);padding:.4em .7em;overflow:auto;display:flex;flex-direction:column;gap:.38em}
+.row{display:grid;grid-template-columns:minmax(0,7.6em) minmax(0,1fr);align-items:center;gap:.5em}
+.row label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+input[type=range]{width:100%;accent-color:var(--acc);margin:0}
+.seg{display:flex;gap:3px}
+button{font:inherit;font-size:.9em;padding:.15em .45em;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:.35em;cursor:pointer;flex:1}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.read{font-variant-numeric:tabular-nums;font-size:.9em;line-height:1.35;background:#f6f7f9;border-radius:.4em;padding:.25em .5em}
+.read .ok{color:var(--pos);font-weight:600}
+.fx{background:#eef3fb;border-radius:.4em;padding:.25em .5em;font-size:.95em;line-height:1.6}
+.hint{color:var(--mut);font-size:.9em}
+</style>
+</head>
+<body>
+<div id="app">
+<header><h1>Biot–Savart: field of a current filament</h1>
+<div class="cap" id="cap"><b>Notice:</b> each tiny element I dL adds dH ∝ dL × a<sub>R</sub>/R²; the sum approaches the closed-form result.</div></header>
+<main>
+<section id="stage"><canvas id="cv"></canvas><canvas id="chart"></canvas></section>
+<aside>
+<div class="seg" id="modeSeg"><button data-m="wire" class="on">Straight wire</button><button data-m="loop">Loop</button><button data-m="sol">Solenoid</button></div>
+<div class="row"><label>I = <b id="vI"></b></label><input type="range" id="I" min="0.5" max="20" step="0.5" value="5"></div>
+<div class="row" id="rowL"><label>L = <b id="vL"></b></label><input type="range" id="L" min="0.1" max="1.2" step="0.02" value="0.5"></div>
+<div class="row" id="rowA"><label>a = <b id="vA"></b></label><input type="range" id="A" min="0.04" max="0.25" step="0.01" value="0.1"></div>
+<div class="row" id="rowN"><label>N = <b id="vN"></b></label><input type="range" id="N" min="2" max="40" step="1" value="12"></div>
+<div class="row" id="rowS"><label>ℓ = <b id="vS"></b></label><input type="range" id="S" min="0.05" max="0.8" step="0.01" value="0.4"></div>
+<div class="seg"><button id="bB">Show B</button><button id="bLines" class="on">Field lines</button><button id="bHeat" class="on">|H| shading</button></div>
+<div class="read" id="read"></div>
+<div class="fx" id="fx"></div>
+<div class="hint">Drag in the view to move the probe ●. Slice: x–z plane (y = 0).</div>
+</aside>
+</main>
+</div>
+
+<script id="physics">
+/* ===== Physics core (portable, no DOM) ===== */
+const BS = (function () {
+  const MU0 = 4 * Math.PI * 1e-7;
+  // Filaments are stored as Float64Array of segments [x1,y1,z1,x2,y2,z2,...]
+  function wireSegs(L, n = 400) {
+    const s = new Float64Array(n * 6);
+    for (let i = 0; i < n; i++) {
+      s[i * 6 + 2] = -L / 2 + (L * i) / n;
+      s[i * 6 + 5] = -L / 2 + (L * (i + 1)) / n;
+    }
+    return s;
+  }
+  function ringInto(arr, off, a, z0, n) {
+    for (let i = 0; i < n; i++) {
+      const t1 = (2 * Math.PI * i) / n, t2 = (2 * Math.PI * (i + 1)) / n, k = off + i * 6;
+      arr[k] = a * Math.cos(t1); arr[k + 1] = a * Math.sin(t1); arr[k + 2] = z0;
+      arr[k + 3] = a * Math.cos(t2); arr[k + 4] = a * Math.sin(t2); arr[k + 5] = z0;
+    }
+  }
+  function loopSegs(a, n = 180) { const s = new Float64Array(n * 6); ringInto(s, 0, a, 0, n); return s; }
+  function ringPositions(N, len) { const p = []; for (let k = 0; k < N; k++) p.push(N === 1 ? 0 : -len / 2 + (len * (k + 0.5)) / N); return p; }
+  function solenoidSegs(a, len, N, n = 72) {
+    const s = new Float64Array(N * n * 6);
+    ringPositions(N, len).forEach((z, k) => ringInto(s, k * n * 6, a, z, n));
+    return s;
+  }
+  // Numeric Biot–Savart (midpoint rule): H = (I/4π) Σ dL × R / R³
+  function H(segs, I, x, y, z) {
+    let hx = 0, hy = 0, hz = 0;
+    for (let i = 0; i < segs.length; i += 6) {
+      const dx = segs[i + 3] - segs[i], dy = segs[i + 4] - segs[i + 1], dz = segs[i + 5] - segs[i + 2];
+      const rx = x - 0.5 * (segs[i] + segs[i + 3]), ry = y - 0.5 * (segs[i + 1] + segs[i + 4]), rz = z - 0.5 * (segs[i + 2] + segs[i + 5]);
+      const r2 = rx * rx + ry * ry + rz * rz;
+      if (r2 < 1e-18) continue;
+      const r3 = r2 * Math.sqrt(r2);
+      hx += (dy * rz - dz * ry) / r3; hy += (dz * rx - dx * rz) / r3; hz += (dx * ry - dy * rx) / r3;
+    }
+    const k = I / (4 * Math.PI);
+    return [hx * k, hy * k, hz * k];
+  }
+  // Closed forms
+  function wireFinite(I, L, rho, z) { // wire on z-axis from -L/2..L/2 ; H = I/(4πρ)(sinα2 − sinα1)
+    const s2 = (L / 2 - z) / Math.hypot(rho, L / 2 - z), s1 = (-L / 2 - z) / Math.hypot(rho, -L / 2 - z);
+    return (I / (4 * Math.PI * rho)) * (s2 - s1);
+  }
+  function wireInfinite(I, rho) { return I / (2 * Math.PI * rho); }
+  function loopAxis(I, a, z) { return (I * a * a) / (2 * Math.pow(a * a + z * z, 1.5)); }
+  function solenoidSheetAxis(I, N, a, len, z) {
+    const u = len / 2 - z, w = len / 2 + z;
+    return ((N * I) / (2 * len)) * (u / Math.hypot(a, u) + w / Math.hypot(a, w));
+  }
+  function solenoidRingsAxis(I, N, a, len, z) { return ringPositions(N, len).reduce((s, zk) => s + loopAxis(I, a, z - zk), 0); }
+  return { MU0, wireSegs, loopSegs, solenoidSegs, ringPositions, H, wireFinite, wireInfinite, loopAxis, solenoidSheetAxis, solenoidRingsAxis };
+})();
+if (typeof module !== 'undefined') module.exports = BS;
+</script>
+
+<script>
+/* ===== UI ===== */
+const $ = id => document.getElementById(id);
+function eng(v, u = '', p = 3) {
+  if (!isFinite(v)) return '—'; if (v === 0) return '0 ' + u;
+  const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p']];
+  const a = Math.abs(v); for (const [s, n] of P) if (a >= s * 0.9995) return parseFloat((v / s).toPrecision(p)) + ' ' + n + u;
+  return v.toExponential(2) + ' ' + u;
+}
+function tex(el, s) { if (window.katex) { try { katex.render(s, el, { throwOnError: false }); return; } catch (e) {} } el.textContent = s; }
+function renderFx(html) { const fx = $('fx'); fx.innerHTML = html; fx.querySelectorAll('[data-tex]').forEach(e => tex(e, e.dataset.tex)); }
+
+const S = { mode: 'wire', I: 5, L: 0.5, a: 0.1, N: 12, len: 0.4, showB: false, lines: true, heat: true, probe: { x: 0.12, z: 0.05 } };
+const cv = $('cv'), ctx = cv.getContext('2d'), ch = $('chart'), cctx = ch.getContext('2d');
+let view = { x0: -1, x1: 1, z0: -1, z1: 1 }, segs = null, grid = null, heatImg = null, flines = [];
+const fsPx = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
+
+function bind(id, key, fmt) {
+  const el = $(id), out = $('v' + id);
+  const upd = () => { S[key] = parseFloat(el.value); out.textContent = fmt(S[key]); };
+  el.addEventListener('input', () => { upd(); schedule(true); }); upd();
+}
+bind('I', 'I', v => v.toFixed(1) + ' A');
+bind('L', 'L', v => (v * 100).toFixed(0) + ' cm');
+bind('A', 'a', v => (v * 100).toFixed(0) + ' cm');
+bind('N', 'N', v => v.toFixed(0));
+bind('S', 'len', v => (v * 100).toFixed(0) + ' cm');
+document.querySelectorAll('#modeSeg button').forEach(b => b.onclick = () => {
+  S.mode = b.dataset.m; document.querySelectorAll('#modeSeg button').forEach(x => x.classList.toggle('on', x === b));
+  S.probe = S.mode === 'wire' ? { x: 0.12, z: 0.05 } : { x: 0, z: S.mode === 'loop' ? 0.06 : 0.1 };
+  layoutRows(); schedule(true);
+});
+$('bB').onclick = () => { S.showB = !S.showB; $('bB').classList.toggle('on', S.showB); $('bB').textContent = S.showB ? 'Show H' : 'Show B'; schedule(false); };
+$('bLines').onclick = () => { S.lines = !S.lines; $('bLines').classList.toggle('on', S.lines); schedule(false); };
+$('bHeat').onclick = () => { S.heat = !S.heat; $('bHeat').classList.toggle('on', S.heat); schedule(false); };
+function layoutRows() {
+  $('rowL').style.display = S.mode === 'wire' ? '' : 'none';
+  $('rowA').style.display = S.mode === 'wire' ? 'none' : '';
+  $('rowN').style.display = $('rowS').style.display = S.mode === 'sol' ? '' : 'none';
+  const caps = {
+    wire: '<b>Notice:</b> H circles the wire (⊗ into / ⊙ out of the slice). Near the middle of a long wire it matches I/(2πρ); near the ends it drops — only the angles α₁, α₂ matter.',
+    loop: '<b>Notice:</b> lines close around each wire crossing; on the axis the numeric sum equals Ia²/[2(a²+z²)<sup>3/2</sup>].',
+    sol: '<b>Notice:</b> as N grows the turns merge into a current sheet; when ℓ ≫ a the inside field becomes uniform ≈ NI/ℓ and the outside field becomes weak.'
+  };
+  $('cap').innerHTML = caps[S.mode];
+  const F = {
+    wire: '<span data-tex="d\\mathbf H=\\dfrac{I\\,d\\mathbf L\\times\\mathbf a_R}{4\\pi R^2}"></span><br><span data-tex="H_\\phi=\\dfrac{I}{4\\pi\\rho}(\\sin\\alpha_2-\\sin\\alpha_1)\\;\\to\\;\\dfrac{I}{2\\pi\\rho}"></span>',
+    loop: '<span data-tex="d\\mathbf H=\\dfrac{I\\,d\\mathbf L\\times\\mathbf a_R}{4\\pi R^2}"></span><br><span data-tex="H_z(0,0,z)=\\dfrac{I a^2}{2(a^2+z^2)^{3/2}}"></span>',
+    sol: '<span data-tex="H_z=\\dfrac{NI}{2\\ell}(\\cos\\theta_1+\\cos\\theta_2)"></span><br><span data-tex="\\cos\\theta_{1,2}=\\dfrac{\\ell/2\\mp z}{\\sqrt{a^2+(\\ell/2\\mp z)^2}}"></span><br><span data-tex="\\ell\\gg a:\\;H\\approx NI/\\ell,\\quad \\mathbf B=\\mu_0\\mathbf H"></span>'
+  };
+  renderFx(F[S.mode]);
+}
+
+let pending = 0, needRecalc = true;
+function schedule(recalc) { needRecalc = needRecalc || recalc; if (!pending) pending = requestAnimationFrame(() => { pending = 0; if (needRecalc) { recalc_(); needRecalc = false; } draw(); }); }
+
+function setView() {
+  const W = cv.clientWidth || 800, Hh = cv.clientHeight || 500, asp = W / Hh;
+  let hz;
+  if (S.mode === 'wire') hz = Math.max(0.75 * S.L, 0.25);
+  else if (S.mode === 'loop') hz = 2.6 * S.a;
+  else hz = Math.max(0.8 * S.len, 2.4 * S.a);
+  const hx = hz * asp;
+  view = { x0: -hx * 0.62, x1: hx * 1.38, z0: -hz, z1: hz }; // shift so the chart corner shows mostly empty field
+  if (S.mode !== 'wire') view = { x0: -hx, x1: hx, z0: -hz, z1: hz };
+}
+const toPx = (x, z) => [(x - view.x0) / (view.x1 - view.x0) * cv.width, (view.z1 - z) / (view.z1 - view.z0) * cv.height];
+const toW = (px, py) => [view.x0 + px / cv.width * (view.x1 - view.x0), view.z1 - py / cv.height * (view.z1 - view.z0)];
+
+function recalc_() {
+  setView();
+  segs = S.mode === 'wire' ? BS.wireSegs(S.L) : S.mode === 'loop' ? BS.loopSegs(S.a) : BS.solenoidSegs(S.a, S.len, S.N);
+  const nx = 112, nz = Math.max(30, Math.round(nx * (view.z1 - view.z0) / (view.x1 - view.x0)));
+  const hx = new Float32Array(nx * nz), hy = new Float32Array(nx * nz), hz = new Float32Array(nx * nz), mag = new Float32Array(nx * nz);
+  const dx = (view.x1 - view.x0) / nx, dz = (view.z1 - view.z0) / nz;
+  for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
+    const x = view.x0 + (i + 0.5) * dx, z = view.z1 - (j + 0.5) * dz;
+    const h = BS.H(segs, S.I, x, 0, z), k = j * nx + i;
+    hx[k] = h[0]; hy[k] = h[1]; hz[k] = h[2]; mag[k] = Math.hypot(h[0], h[1], h[2]);
+  }
+  grid = { nx, nz, dx, dz, hx, hy, hz, mag };
+  // heat image (log scale, percentile-normalised)
+  const logs = Array.from(mag, m => Math.log10(m + 1e-12)).sort((a, b) => a - b);
+  const lo = logs[Math.floor(logs.length * 0.04)], hi = logs[Math.floor(logs.length * 0.985)];
+  grid.lo = lo; grid.hi = hi;
+  const oc = document.createElement('canvas'); oc.width = nx; oc.height = nz;
+  const oct = oc.getContext('2d'), im = oct.createImageData(nx, nz);
+  const stops = [[255, 255, 255], [222, 232, 252], [168, 190, 245], [140, 120, 222], [96, 52, 176]];
+  for (let k = 0; k < nx * nz; k++) {
+    let t = (Math.log10(mag[k] + 1e-12) - lo) / (hi - lo); t = Math.min(1, Math.max(0, t)) * (stops.length - 1);
+    const i0 = Math.min(stops.length - 2, Math.floor(t)), f = t - i0;
+    for (let c = 0; c < 3; c++) im.data[k * 4 + c] = stops[i0][c] * (1 - f) + stops[i0 + 1][c] * f;
+    im.data[k * 4 + 3] = 255;
+  }
+  oct.putImageData(im, 0, 0); heatImg = oc;
+  flines = S.mode === 'wire' ? [] : traceAll();
+}
+
+function sample(x, z) { // bilinear interpolation of (Hx,Hz) in plane
+  const g = grid, fi = (x - view.x0) / g.dx - 0.5, fj = (view.z1 - z) / g.dz - 0.5;
+  const i = Math.floor(fi), j = Math.floor(fj);
+  if (i < 0 || j < 0 || i >= g.nx - 1 || j >= g.nz - 1) return null;
+  const u = fi - i, v = fj - j, k = j * g.nx + i;
+  const L = (A) => (A[k] * (1 - u) + A[k + 1] * u) * (1 - v) + (A[k + g.nx] * (1 - u) + A[k + g.nx + 1] * u) * v;
+  return [L(g.hx), L(g.hz)];
+}
+function trace(x, z, dir) {
+  const h = (view.z1 - view.z0) / 260, pts = [[x, z]]; let px = x, pz = z;
+  for (let s = 0; s < 2600; s++) {
+    const f1 = sample(px, pz); if (!f1) break; let m = Math.hypot(f1[0], f1[1]); if (m < 1e-12) break;
+    const mx = px + dir * 0.5 * h * f1[0] / m, mz = pz + dir * 0.5 * h * f1[1] / m;
+    const f2 = sample(mx, mz); if (!f2) break; m = Math.hypot(f2[0], f2[1]); if (m < 1e-12) break;
+    px += dir * h * f2[0] / m; pz += dir * h * f2[1] / m; pts.push([px, pz]);
+    if (s > 20 && Math.hypot(px - x, pz - z) < 0.7 * h) { pts.push([x, z]); return { pts, closed: true }; }
+  }
+  return { pts, closed: false };
+}
+function traceAll() {
+  // seeds on z = 0 inside the coil, spaced at equal flux increments (line density ∝ |B|)
+  const a = S.a, n = 60, rmax = 0.9 * a, cum = [0];
+  for (let i = 1; i <= n; i++) { const r = rmax * (i - 0.5) / n; cum.push(cum[i - 1] + BS.H(segs, S.I, r, 0, 0)[2] * 2 * Math.PI * r * rmax / n); }
+  const nl = S.mode === 'loop' ? 5 : 6, seeds = [[0, 0]], tot = cum[n];
+  for (let q = 1; q <= nl; q++) {
+    const target = tot * (q - 0.35) / (nl + 0.15); let i = 1; while (i < n && cum[i] < target) i++;
+    const r = rmax * (i - 1 + (target - cum[i - 1]) / (cum[i] - cum[i - 1] || 1)) / n;
+    seeds.push([r, 0], [-r, 0]);
+  }
+  const out = [];
+  for (const [x, z] of seeds) {
+    const f = trace(x, z, 1);
+    if (f.closed) out.push(f.pts); else { const b = trace(x, z, -1); out.push(b.pts.reverse().concat(f.pts.slice(1))); }
+  }
+  return out;
+}
+
+function arrow(c, x, y, ux, uy, len, col, w) {
+  const x2 = x + ux * len, y2 = y + uy * len, hl = Math.max(4, len * 0.35);
+  c.strokeStyle = c.fillStyle = col; c.lineWidth = w;
+  c.beginPath(); c.moveTo(x - ux * len * 0.5, y - uy * len * 0.5); c.lineTo(x2 - ux * len * 0.5, y2 - uy * len * 0.5); c.stroke();
+  const tx = x2 - ux * len * 0.5, ty = y2 - uy * len * 0.5;
+  c.beginPath(); c.moveTo(tx, ty); c.lineTo(tx - ux * hl - uy * hl * 0.5, ty - uy * hl + ux * hl * 0.5); c.lineTo(tx - ux * hl + uy * hl * 0.5, ty - uy * hl - ux * hl * 0.5); c.closePath(); c.fill();
+}
+function dotCross(c, x, y, r, out, col, lw) {
+  c.strokeStyle = c.fillStyle = col; c.lineWidth = lw;
+  c.beginPath(); c.arc(x, y, r, 0, 7); c.stroke();
+  if (out) { c.beginPath(); c.arc(x, y, r * 0.28, 0, 7); c.fill(); }
+  else { const d = r * 0.62; c.beginPath(); c.moveTo(x - d, y - d); c.lineTo(x + d, y + d); c.moveTo(x + d, y - d); c.lineTo(x - d, y + d); c.stroke(); }
+}
+
+function draw() {
+  if (!grid) return;
+  const W = cv.width, Hh = cv.height, dpr = window.devicePixelRatio || 1, fs = fsPx() * dpr;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, Hh);
+  if (S.heat) { ctx.imageSmoothingEnabled = true; ctx.drawImage(heatImg, 0, 0, W, Hh); }
+  // axes
+  ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = dpr; ctx.setLineDash([6 * dpr, 6 * dpr]);
+  let [ox, oz] = toPx(0, 0); ctx.beginPath(); ctx.moveTo(0, oz); ctx.lineTo(W, oz); ctx.moveTo(ox, 0); ctx.lineTo(ox, Hh); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = '#56616e'; ctx.font = `${0.9 * fs}px system-ui,sans-serif`; ctx.fillText('x', W - fs, oz - 0.4 * fs); ctx.fillText('z', ox + 0.4 * fs, fs);
+  const g = grid, step = Math.max(2.2 * fs, 28 * dpr);
+  // field arrows / symbols
+  for (let py = step / 2; py < Hh; py += step) for (let px = step / 2; px < W; px += step) {
+    const [x, z] = toW(px, py);
+    const i = Math.min(g.nx - 1, Math.max(0, Math.floor((x - view.x0) / g.dx))), j = Math.min(g.nz - 1, Math.max(0, Math.floor((view.z1 - z) / g.dz)));
+    const k = j * g.nx + i, m = g.mag[k]; let t = (Math.log10(m + 1e-12) - g.lo) / (g.hi - g.lo); t = Math.min(1, Math.max(0.12, t));
+    if (S.mode === 'wire') { if (Math.abs(x) < 0.01) continue; dotCross(ctx, px, py, step * (0.12 + 0.2 * t), g.hy[k] < 0, `rgba(40,20,90,${0.35 + 0.6 * t})`, 1.4 * dpr); }
+    else { const ux = g.hx[k] / (m || 1), uz = -g.hz[k] / (m || 1); arrow(ctx, px, py, ux, uz, step * 0.62, `rgba(40,20,90,${0.25 + 0.6 * t})`, 1.5 * dpr); }
+  }
+  // field lines
+  if (S.lines && flines.length) {
+    ctx.strokeStyle = '#3d1a8a'; ctx.lineWidth = 2.2 * dpr;
+    for (const L of flines) {
+      ctx.beginPath(); L.forEach((p, i) => { const [a, b] = toPx(p[0], p[1]); i ? ctx.lineTo(a, b) : ctx.moveTo(a, b); }); ctx.stroke();
+      for (const fr of [0.25, 0.75]) { const i = Math.floor(L.length * fr); if (i + 1 >= L.length) continue;
+        const [a, b] = toPx(L[i][0], L[i][1]), [c, d] = toPx(L[i + 1][0], L[i + 1][1]), m = Math.hypot(c - a, d - b) || 1; arrow(ctx, a, b, (c - a) / m, (d - b) / m, fs * 0.9, '#3d1a8a', 2.2 * dpr); }
+    }
+  }
+  // filament
+  const cur = '#d9480f';
+  if (S.mode === 'wire') {
+    const [x1, y1] = toPx(0, -S.L / 2), [x2, y2] = toPx(0, S.L / 2);
+    ctx.strokeStyle = cur; ctx.lineWidth = 6 * dpr; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    arrow(ctx, x1 + 1.2 * fs, (y1 + y2) / 2, 0, -1, 2 * fs, cur, 3 * dpr); ctx.fillStyle = cur; ctx.font = `bold ${fs}px system-ui`; ctx.fillText('I', x1 + 1.9 * fs, (y1 + y2) / 2 + 0.3 * fs);
+    // alpha construction to the probe
+    const p = S.probe, rho = Math.abs(p.x); if (rho > 1e-4) {
+      const [pX, pY] = toPx(p.x, p.z), [fX, fY] = toPx(0, p.z);
+      ctx.setLineDash([5 * dpr, 4 * dpr]); ctx.strokeStyle = '#1c64d6'; ctx.lineWidth = 1.6 * dpr; ctx.beginPath();
+      ctx.moveTo(pX, pY); ctx.lineTo(x1, y1); ctx.moveTo(pX, pY); ctx.lineTo(x2, y2); ctx.moveTo(pX, pY); ctx.lineTo(fX, fY); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = '#1c64d6'; ctx.font = `${0.9 * fs}px system-ui`; const sx = p.x > 0 ? 1 : -1;
+      ctx.fillText('α₂', pX - sx * 2.2 * fs, pY - 0.6 * fs); ctx.fillText('α₁', pX - sx * 2.2 * fs, pY + 1.2 * fs);
+    }
+  } else {
+    const zs = S.mode === 'loop' ? [0] : BS.ringPositions(S.N, S.len), r = Math.max(4 * dpr, Math.min(0.45 * fs, 0.45 * Math.abs(toPx(0, 0)[1] - toPx(0, S.len / S.N)[1]) || 99));
+    if (S.mode === 'sol') { const [ax, ay] = toPx(-S.a, S.len / 2), [bx, by] = toPx(S.a, -S.len / 2); ctx.strokeStyle = 'rgba(217,72,15,.35)'; ctx.lineWidth = 1.5 * dpr; ctx.strokeRect(ax, ay, bx - ax, by - ay); }
+    for (const z of zs) { const [l, y] = toPx(-S.a, z), [rr] = toPx(S.a, z); dotCross(ctx, l, y, r, true, cur, 2 * dpr); dotCross(ctx, rr, y, r, false, cur, 2 * dpr); }
+  }
+  // probe
+  const [qx, qy] = toPx(S.probe.x, S.probe.z);
+  ctx.fillStyle = '#1c64d6'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 * dpr; ctx.beginPath(); ctx.arc(qx, qy, 0.45 * fs, 0, 7); ctx.fill(); ctx.stroke();
+  const h = BS.H(segs, S.I, S.probe.x, 0, S.probe.z).map((v, _, A) => Math.abs(v) < 1e-9 * Math.hypot(...A) ? 0 : v), hm = Math.hypot(h[0], h[1], h[2]);
+  if (S.mode !== 'wire' && hm > 0) arrow(ctx, qx + h[0] / hm * 1.6 * fs, qy - h[2] / hm * 1.6 * fs, h[0] / hm, -h[2] / hm, 3.2 * fs, '#1c64d6', 3 * dpr);
+  ctx.fillStyle = '#56616e'; ctx.font = `${0.9 * fs}px system-ui`;
+  const sc = (view.x1 - view.x0) / W; let bar = 0.01; while (bar / sc < 3 * fs) bar *= bar < 0.05 ? 5 : 2;
+  ctx.fillRect(fs, Hh - fs, bar / sc, 3 * dpr); ctx.fillText((bar * 100).toFixed(0) + ' cm', fs, Hh - 1.4 * fs);
+  readout(h, hm); drawChart();
+}
+
+function readout(h, hm) {
+  const p = S.probe, f = S.showB ? BS.MU0 : 1, u = S.showB ? 'T' : 'A/m', nm = S.showB ? 'B' : 'H';
+  let s = `Probe (x, z) = (${(p.x * 100).toFixed(1)}, ${(p.z * 100).toFixed(1)}) cm<br>`;
+  if (S.mode === 'wire') {
+    const rho = Math.abs(p.x), fin = BS.wireFinite(S.I, S.L, rho, p.z), inf = BS.wireInfinite(S.I, rho);
+    s += `Numeric |${nm}| = <b>${eng(hm * f, u)}</b><br>Closed form (α₁, α₂): ${eng(fin * f, u)} <span class="ok">${(100 * (hm - fin) / fin).toFixed(2)}%</span><br>Infinite wire I/(2πρ): ${eng(inf * f, u)}`;
+  } else {
+    const ax = S.mode === 'loop' ? BS.loopAxis(S.I, S.a, p.z) : BS.solenoidSheetAxis(S.I, S.N, S.a, S.len, p.z);
+    s += `Numeric ${nm}<sub>x</sub>, ${nm}<sub>z</sub> = ${eng(h[0] * f, u)}, <b>${eng(h[2] * f, u)}</b><br>`;
+    if (Math.abs(p.x) < 0.02 * S.a + 1e-9) s += `Closed form on axis: ${eng(ax * f, u)} <span class="ok">${(100 * (h[2] - ax) / ax).toFixed(2)}%</span>`;
+    else s += `<span style="color:#56616e">Closed form is for the axis — drag probe to x = 0</span>`;
+    if (S.mode === 'sol') s += `<br>Long-solenoid NI/ℓ: ${eng(S.N * S.I / S.len * f, u)}`;
+  }
+  $('read').innerHTML = s;
+}
+
+function drawChart() {
+  const dpr = window.devicePixelRatio || 1, r = ch.getBoundingClientRect(); ch.width = r.width * dpr; ch.height = r.height * dpr;
+  const W = ch.width, Hh = ch.height, fs = fsPx() * dpr * 0.85, c = cctx, f = S.showB ? BS.MU0 : 1;
+  c.clearRect(0, 0, W, Hh); c.fillStyle = 'rgba(255,255,255,.93)'; c.strokeStyle = '#c8d0da'; c.lineWidth = dpr; c.fillRect(0, 0, W, Hh); c.strokeRect(0, 0, W, Hh);
+  const L = 3.2 * fs, R = W - 0.6 * fs, T = 3.0 * fs, B = Hh - 1.6 * fs;
+  let xs, xlab, curve, dots, extra = null, mark;
+  const p = S.probe;
+  if (S.mode === 'wire') {
+    const r0 = Math.max(0.01, 0.04 * S.L), r1 = Math.max(view.x1, 0.2); xlab = `ρ (at z = ${(p.z * 100).toFixed(0)} cm)`;
+    xs = [r0, r1]; curve = x => BS.wireFinite(S.I, S.L, x, p.z); extra = x => BS.wireInfinite(S.I, x);
+    dots = []; for (let i = 0; i < 9; i++) { const x = r0 + (r1 - r0) * (i + 0.5) / 9; dots.push([x, Math.abs(BS.H(segs, S.I, x, 0, p.z)[1])]); } mark = Math.abs(p.x);
+  } else {
+    xs = [view.z0, view.z1]; xlab = 'z on axis (x = 0)'; mark = p.z;
+    curve = S.mode === 'loop' ? z => BS.loopAxis(S.I, S.a, z) : z => BS.solenoidSheetAxis(S.I, S.N, S.a, S.len, z);
+    dots = []; for (let i = 0; i < 11; i++) { const z = xs[0] + (xs[1] - xs[0]) * (i + 0.5) / 11; dots.push([z, BS.H(segs, S.I, 0, 0, z)[2]]); }
+    if (S.mode === 'sol') extra = () => S.N * S.I / S.len;
+  }
+  let ymax = 0; for (let i = 0; i <= 100; i++) { const x = xs[0] + (xs[1] - xs[0]) * i / 100; ymax = Math.max(ymax, curve(x)); } dots.forEach(d => ymax = Math.max(ymax, d[1]));
+  if (extra && S.mode === 'sol') ymax = Math.max(ymax, extra()); ymax *= 1.12;
+  const X = x => L + (x - xs[0]) / (xs[1] - xs[0]) * (R - L), Y = y => B - Math.min(y, ymax * 1.05) / ymax * (B - T);
+  c.strokeStyle = '#8994a1'; c.beginPath(); c.moveTo(L, T); c.lineTo(L, B); c.lineTo(R, B); c.stroke();
+  c.fillStyle = '#16202a'; c.font = `${fs}px system-ui`; c.fillText((S.showB ? 'B' : 'H') + ' (' + (S.showB ? 'T' : 'A/m') + ')', 0.4 * fs, 1.1 * fs);
+  c.fillStyle = '#56616e'; c.fillText(xlab, L + 0.3 * fs, Hh - 0.35 * fs); c.fillText(eng(ymax * f, '', 2), 0.3 * fs, T + 0.9 * fs);
+  if (extra) { c.setLineDash([6 * dpr, 4 * dpr]); c.strokeStyle = '#8994a1'; c.lineWidth = 1.5 * dpr; c.beginPath(); for (let i = 0; i <= 120; i++) { const x = xs[0] + (xs[1] - xs[0]) * i / 120; i ? c.lineTo(X(x), Y(extra(x))) : c.moveTo(X(x), Y(extra(x))); } c.stroke(); c.setLineDash([]); }
+  c.strokeStyle = '#1c64d6'; c.lineWidth = 2.5 * dpr; c.beginPath(); for (let i = 0; i <= 160; i++) { const x = xs[0] + (xs[1] - xs[0]) * i / 160; i ? c.lineTo(X(x), Y(curve(x))) : c.moveTo(X(x), Y(curve(x))); } c.stroke();
+  c.fillStyle = '#d9480f'; dots.forEach(d => { c.beginPath(); c.arc(X(d[0]), Y(d[1]), 0.28 * fs, 0, 7); c.fill(); });
+  if (mark >= xs[0] && mark <= xs[1]) { c.strokeStyle = 'rgba(28,100,214,.5)'; c.lineWidth = dpr; c.beginPath(); c.moveTo(X(mark), T); c.lineTo(X(mark), B); c.stroke(); }
+  c.font = `${0.9 * fs}px system-ui`; let lx = L; const ly = 2.2 * fs;
+  [['— closed form', '#1c64d6'], ['● numeric', '#d9480f']].concat(extra ? [[S.mode === 'wire' ? '-- I/(2πρ)' : '-- NI/ℓ', '#56616e']] : []).forEach(([t, col]) => { c.fillStyle = col; c.fillText(t, lx, ly); lx += c.measureText(t).width + 0.9 * fs; });
+}
+
+// pointer interaction: drag probe
+let drag = false;
+function setProbe(e) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  let [x, z] = toW((e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr);
+  if (S.mode !== 'wire' && Math.abs(x) < 0.04 * S.a) x = 0; // snap to axis
+  if (S.mode === 'wire' && Math.abs(x) < 0.005) x = 0.005 * Math.sign(x || 1);
+  S.probe = { x, z }; schedule(false);
+}
+cv.addEventListener('pointerdown', e => { drag = true; cv.setPointerCapture(e.pointerId); setProbe(e); });
+cv.addEventListener('pointermove', e => { if (drag) setProbe(e); });
+cv.addEventListener('pointerup', () => drag = false);
+
+new ResizeObserver(() => { const dpr = window.devicePixelRatio || 1; cv.width = Math.max(1, Math.round(cv.clientWidth * dpr)); cv.height = Math.max(1, Math.round(cv.clientHeight * dpr)); schedule(true); }).observe($('stage'));
+layoutRows();
+window.addEventListener('load', layoutRows);
+</script>
+</body>
+</html>

@@ -1,0 +1,611 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Electric Potential Along a Path</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@700&family=IBM+Plex+Sans:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: part tabs, the field and its formula, then two views side by side (the 3D path with E arrows / the potential profile along the path), then controls beside the numbers that prove path independence. */
+:root {
+  --bg: #f4f6f7;
+  --surface: #ffffff;
+  --paper: #ffffff;
+  --ink: #15191d;
+  --muted: #5a6670;
+  --line: #dbe1e5;
+  --band: #eef3f6;
+  --accent: #0a8fd6;
+  --up: #d9480f;
+  --down: #0b86c9;
+  --axis: #b4bac0;
+  --serif: 'STIX Two Text', 'Times New Roman', Times, serif;
+  --sans-fig: 'Arimo', Arial, Helvetica, sans-serif;
+  --ui: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a; --band: #1c2329;
+    --accent: #4cb8f0; --up: #ff8a4c; --down: #3cb6f4; --axis: #5c6672;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a; --band: #1c2329;
+  --accent: #4cb8f0; --up: #ff8a4c; --down: #3cb6f4; --axis: #5c6672;
+  color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 28px 56px; }
+h1 { font-size: clamp(1.5rem, 3.4vw, 2rem); line-height: 1.2; margin: 0 0 6px; font-weight: 600; text-wrap: balance; }
+h2 { font-size: .8rem; font-weight: 600; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; line-height: 1.5; }
+.lede { margin: 0 0 18px; color: var(--muted); max-width: 74ch; }
+i, .m { font-family: var(--serif); font-style: italic; }
+.v { font-family: var(--serif); font-weight: 700; font-style: italic; }
+.u { font-style: normal; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.tabs button, .seg button { font: inherit; font-size: .92rem; line-height: 1.4; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.tabs button[aria-pressed="true"], .seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+:root[data-theme="dark"] .tabs button[aria-pressed="true"], :root[data-theme="dark"] .seg button[aria-pressed="true"] { color: #07202f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tabs button[aria-pressed="true"], :root:not([data-theme="light"]) .seg button[aria-pressed="true"] { color: #07202f; } }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.seg button { padding: 5px 11px; font-size: .85rem; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 16px; min-width: 0; }
+.field { margin-bottom: 16px; display: grid; gap: 10px; }
+.field .eqline { font-family: var(--serif); font-size: 1.12rem; line-height: 1.8; overflow-x: auto; }
+.field .pt { font-size: .92rem; color: var(--muted); }
+.band { background: var(--band); padding: 8px 14px; font-family: var(--serif); font-size: 1.05rem; line-height: 1.9; overflow-x: auto; }
+
+.figs { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 16px; margin-bottom: 16px; }
+@media (max-width: 860px) { .figs { grid-template-columns: minmax(0, 1fr); } }
+.fig { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 12px; min-width: 0; }
+.fig svg { display: block; width: 100%; height: auto; max-width: 100%; }
+#sc { cursor: grab; }
+#sc.drag { cursor: grabbing; }
+#ch { touch-action: pan-y; cursor: crosshair; }
+.fig figcaption { font-size: .85rem; line-height: 1.55; color: var(--muted); padding: 6px 10px 0; }
+.sw { display: inline-block; width: 16px; height: 4px; vertical-align: middle; margin-right: 4px; border-radius: 1px; }
+.sw.up { background: var(--up); } .sw.down { background: var(--down); }
+
+.bottom { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 960px) { .bottom { grid-template-columns: minmax(0, 1fr); } }
+.sep { height: 1px; background: var(--line); margin: 12px 0; }
+.row { display: grid; grid-template-columns: 6.2rem minmax(0, 1fr) 4.4rem; align-items: center; gap: 10px; padding-block: 2px; line-height: 1.5; }
+.row label { font-size: .88rem; }
+.row input[type="range"] { width: 100%; min-width: 0; accent-color: var(--accent); }
+.row input[type="number"] { width: 100%; min-width: 0; font: inherit; font-size: .85rem; font-variant-numeric: tabular-nums; text-align: right; padding: 3px 6px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; }
+.chk { display: flex; align-items: center; gap: 8px; padding-block: 2px; font-size: .88rem; line-height: 1.5; }
+.chk input { accent-color: var(--accent); width: 16px; height: 16px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.btns button { font: inherit; font-size: .85rem; line-height: 1.4; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.btns button:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sub-h { font-size: .85rem; font-weight: 600; margin: 8px 0 2px; }
+.cur { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; row-gap: 2px; margin: 8px 0 0; font-size: .86rem; font-variant-numeric: tabular-nums; }
+.cur dt { color: var(--muted); } .cur dd { margin: 0; text-align: right; }
+
+.big { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 22px; margin-bottom: 4px; }
+.big .val { font-size: 1.9rem; font-weight: 600; line-height: 1.3; font-variant-numeric: tabular-nums; }
+.big .sub { color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; }
+.pos { color: var(--up); } .neg { color: var(--down); }
+.deriv { font-family: var(--serif); font-size: 1.02rem; line-height: 1.95; background: var(--band); padding: 8px 14px; margin: 8px 0; overflow-x: auto; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tablewrap { overflow-x: auto; max-width: 100%; margin: 8px 0; }
+table.ft { border-collapse: collapse; width: 100%; min-width: 460px; font-size: .88rem; font-variant-numeric: tabular-nums; }
+table.ft th, table.ft td { padding: 5px 10px; text-align: right; border-bottom: 1px solid var(--line); }
+table.ft th:first-child, table.ft td:first-child { text-align: left; }
+table.ft th { font-weight: 600; color: var(--muted); font-size: .8rem; }
+table.ft tr.sum td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 600; }
+.meaning { margin: 10px 0 0; max-width: 72ch; }
+.check { margin: 10px 0 0; font-size: .88rem; color: var(--muted); }
+.check b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* drawing */
+.vec line { stroke: var(--c); stroke-width: var(--w); }
+.vec polygon { fill: var(--c); }
+.vax { --c: var(--axis); --w: 1.6; }
+.vu { --c: var(--up); --w: 4.2; }
+.vd { --c: var(--down); --w: 4.2; }
+.vE { --c: var(--ink); --w: 2.2; }
+.vEm { --c: var(--accent); --w: 3.8; }
+.guide { stroke: var(--axis); stroke-width: 1.2; stroke-dasharray: 5 4; fill: none; }
+.pth { fill: none; stroke-width: 4.2; stroke-linecap: round; stroke-linejoin: round; }
+.pth.pu { stroke: var(--up); } .pth.pd { stroke: var(--down); }
+.dot { fill: var(--ink); }
+.mk { fill: var(--paper); stroke: var(--accent); stroke-width: 3; }
+.gl { stroke: var(--line); stroke-width: 1; }
+.axl { stroke: var(--axis); stroke-width: 1.5; }
+.cmp { fill: none; stroke: var(--muted); stroke-width: 2.2; stroke-dasharray: 7 5; stroke-linejoin: round; }
+.curl { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 4 4; }
+svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3.5px; stroke-linejoin: round; font-family: var(--sans-fig); user-select: none; -webkit-user-select: none; }
+.ta { font-family: var(--serif); font-style: italic; fill: var(--axis); font-size: 19px; }
+.tp { font-family: var(--sans-fig); font-weight: 700; fill: var(--ink); font-size: 14px; stroke-width: 5px; }
+.tb { font-family: var(--serif); font-weight: 700; font-style: italic; fill: var(--accent); font-size: 18px; }
+.tk { font-family: var(--sans-fig); fill: var(--muted); font-size: 13px; }
+.tt { font-family: var(--ui); fill: var(--ink); font-size: 14px; }
+.tv { font-family: var(--serif); font-style: italic; font-weight: 700; fill: var(--ink); font-size: 17px; stroke-width: 5px; }
+.sub { font-size: .7em; font-style: normal; }
+</style>
+
+<main class="wrap">
+  <h1>Electric Potential Along a Path</h1>
+  <p class="lede">Drill Problem D4.4: find the electric potential from the field <i>E</i>. The potential difference between two points is −∫<b class="v">E</b>·d<b class="v">L</b>. Change the path from the initial point to the final point. The potential along the way changes, but the value at the final point does not.</p>
+
+  <div class="tabs" role="group" aria-label="Choose part">
+    <button type="button" data-part="a" aria-pressed="true">(a) <i>V</i><sub class="u">MN</sub></button>
+    <button type="button" data-part="b" aria-pressed="false">(b) <i>V</i><sub class="u">M</sub></button>
+    <button type="button" data-part="c" aria-pressed="false">(c) <i>V</i><sub class="u">N</sub></button>
+  </div>
+
+  <section class="card field">
+    <div class="eqline"><b class="v">E</b> = 6<i>x</i>² <b class="v">a</b><sub class="u"><i>x</i></sub> + 6<i>y</i> <b class="v">a</b><sub class="u"><i>y</i></sub> + 4 <b class="v">a</b><sub class="u"><i>z</i></sub> &nbsp;V/m</div>
+    <div class="pt" id="d-task"></div>
+    <div class="band" id="f-eq"></div>
+  </section>
+
+  <div class="figs">
+    <figure class="fig">
+      <svg id="sc" viewBox="0 0 480 460" role="img" aria-label="3D path from the initial point to the final point, with electric field arrows along the path"></svg>
+      <figcaption><span class="sw down"></span>Potential decreases (moving along <i>E</i>) <span class="sw up" style="margin-left:10px"></span>Potential increases (moving against <i>E</i>). Black arrows are <b class="v">E</b> at points along the path. The blue arrow is at the probe point. Drag on the figure to rotate it.<span id="cap-z"></span></figcaption>
+    </figure>
+    <figure class="fig">
+      <svg id="ch" viewBox="0 0 640 470" role="img" aria-label="Graph of potential versus position along the path"></svg>
+      <figcaption id="cap-ch"></figcaption>
+    </figure>
+  </div>
+
+  <div class="bottom">
+    <section class="card" id="ctl">
+      <h2 id="h-a"></h2>
+      <div id="rows-a"></div>
+      <h2 id="h-b" style="margin-top:10px"></h2>
+      <div id="rows-b"></div>
+      <div id="rows-va"></div>
+      <div class="sep"></div>
+      <h2>Path from the initial point to the final point</h2>
+      <div class="seg" id="seg-path" role="group" aria-label="Choose path">
+        <button type="button" data-path="line" aria-pressed="true">Straight line</button>
+        <button type="button" data-path="xyz" aria-pressed="false">Staircase x→y→z</button>
+        <button type="button" data-path="zyx" aria-pressed="false">Staircase z→y→x</button>
+        <button type="button" data-path="curve" aria-pressed="false">Curve</button>
+      </div>
+      <div id="rows-bulge" hidden></div>
+      <div class="sep"></div>
+      <h2>Probe point on the path</h2>
+      <div id="rows-s"></div>
+      <dl class="cur" id="o-cur"></dl>
+      <div class="sep"></div>
+      <h2>View</h2>
+      <div id="rows-cam"></div>
+      <div class="btns" style="margin-top:4px">
+        <button type="button" data-view="home">Default view</button>
+        <button type="button" data-view="front">Front</button>
+        <button type="button" data-view="top">Top</button>
+      </div>
+      <div class="sep"></div>
+      <label class="chk"><input type="checkbox" id="f-arrows" checked> <i>E</i> arrows along the path</label>
+      <label class="chk"><input type="checkbox" id="f-guides" checked> Dashed coordinate guides for the initial and final points</label>
+      <label class="chk"><input type="checkbox" id="f-cmp" checked> Compare with the straight line in the graph</label>
+      <label class="chk"><input type="checkbox" id="f-zs" checked> Compress the z axis when the z range is much longer than the x, y ranges</label>
+      <div class="btns"><button type="button" id="btn-reset">Reset to the problem values</button></div>
+    </section>
+
+    <section class="card" id="out">
+      <h2>Results</h2>
+      <div class="big"><span class="val" id="o-big"></span><span class="sub" id="o-num"></span></div>
+      <div class="deriv" id="o-der"></div>
+      <div class="tablewrap">
+        <table class="ft">
+          <thead><tr><th>Component</th><th>Line integral along the path (V)</th><th>From the formula (V)</th></tr></thead>
+          <tbody id="o-tab"></tbody>
+        </table>
+      </div>
+      <p class="meaning" id="o-mean"></p>
+      <p class="check" id="o-check"></p>
+    </section>
+  </div>
+</main>
+
+<script>
+(function () {
+  var D2R = Math.PI / 180;
+  function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function add(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+  function mul(a, s) { return [a[0] * s, a[1] * s, a[2] * s]; }
+  function len(a) { return Math.hypot(a[0], a[1], a[2]); }
+  function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+  function unit(a) { var l = len(a) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+  function lerp3(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  function M(n, d) { var s = Math.abs(n).toFixed(d); var neg = n < 0 && parseFloat(s) !== 0; return (neg ? '−' : '') + s; }
+  function Nn(n) { return parseFloat(n.toFixed(2)).toString().replace('-', '−'); }
+  function P1(n) { return n < 0 ? '(' + Nn(n) + ')' : Nn(n); }
+  function f1(n) { return n.toFixed(1); }
+
+  /* the field and its potential function */
+  function Ef(r) { return [6 * r[0] * r[0], 6 * r[1], 4]; }
+  function Phi(r) { return -2 * r[0] * r[0] * r[0] - 3 * r[1] * r[1] - 4 * r[2]; }
+
+  var PARTS = {
+    a: {
+      An: 'N', Bn: 'M', Ad: [-3, -3, 2], Bd: [2, 6, -1], VA: 0, useVA: false, book: -139.0,
+      task: 'Find <i>V</i><sub class="u">MN</sub> for <i>M</i>(2, 6, −1) and <i>N</i>(−3, −3, 2). Initial point = <i>N</i>, final point = <i>M</i>',
+      eq: '<i>V</i><sub class="u">MN</sub> = <i>V</i><sub class="u">M</sub> − <i>V</i><sub class="u">N</sub> = −∫<sub class="u"><i>N</i></sub><sup class="u"><i>M</i></sup> <b class="v">E</b>·d<b class="v">L</b> &nbsp;&nbsp; Potential at any point: <i>V</i> = −2<i>x</i>³ − 3<i>y</i>² − 4<i>z</i> + <i>C</i>',
+      big: '<i>V</i><sub class="u">MN</sub>', cur: '<i>V</i> − <i>V</i><sub class="u">N</sub>', ytitle: 'Potential relative to point N (volts)',
+      startParts: function () { return [['V', 'N'], [' = 0 (reference)']]; },
+      endLines: function (v) { return [[['V', 'M'], [' − '], ['V', 'N']], [['= ' + M(v, 1) + ' V']]]; }
+    },
+    b: {
+      An: 'Q', Bn: 'M', Ad: [4, -2, -35], Bd: [2, 6, -1], VA: 0, useVA: true, book: -120.0,
+      task: 'Find <i>V</i><sub class="u">M</sub> if <i>V</i> = 0 at <i>Q</i>(4, −2, −35), with <i>M</i>(2, 6, −1). Initial point = <i>Q</i>, final point = <i>M</i>',
+      eq: '<i>V</i><sub class="u">M</sub> = <i>V</i><sub class="u">Q</sub> − ∫<sub class="u"><i>Q</i></sub><sup class="u"><i>M</i></sup> <b class="v">E</b>·d<b class="v">L</b> &nbsp;&nbsp; Potential at any point: <i>V</i> = −2<i>x</i>³ − 3<i>y</i>² − 4<i>z</i> + <i>C</i>',
+      big: '<i>V</i><sub class="u">M</sub>', cur: '<i>V</i>', ytitle: 'Potential V (volts)',
+      startParts: function (va) { return [['V', 'Q'], [' = ' + Nn(va) + ' V']]; },
+      endLines: function (v) { return [[['V', 'M']], [['= ' + M(v, 1) + ' V']]]; }
+    },
+    c: {
+      An: 'P', Bn: 'N', Ad: [1, 2, -4], Bd: [-3, -3, 2], VA: 2, useVA: true, book: 19.0,
+      task: 'Find <i>V</i><sub class="u">N</sub> if <i>V</i> = 2 at <i>P</i>(1, 2, −4), with <i>N</i>(−3, −3, 2). Initial point = <i>P</i>, final point = <i>N</i>',
+      eq: '<i>V</i><sub class="u">N</sub> = <i>V</i><sub class="u">P</sub> − ∫<sub class="u"><i>P</i></sub><sup class="u"><i>N</i></sup> <b class="v">E</b>·d<b class="v">L</b> &nbsp;&nbsp; Potential at any point: <i>V</i> = −2<i>x</i>³ − 3<i>y</i>² − 4<i>z</i> + <i>C</i>',
+      big: '<i>V</i><sub class="u">N</sub>', cur: '<i>V</i>', ytitle: 'Potential V (volts)',
+      startParts: function (va) { return [['V', 'P'], [' = ' + Nn(va) + ' V']]; },
+      endLines: function (v) { return [[['V', 'N']], [['= ' + M(v, 1) + ' V']]]; }
+    }
+  };
+  var part = 'a';
+  var vals = {};
+  Object.keys(PARTS).forEach(function (k) { vals[k] = { A: PARTS[k].Ad.slice(), B: PARTS[k].Bd.slice(), VA: PARTS[k].VA }; });
+  var pathType = 'line', bulge = [3, 2], sCur = 0.5;
+  var flags = { arrows: true, guides: true, cmp: true, zshrink: true };
+  var cam = { az: 30, el: 25 }, camB = null, Vw = null, ZS = 1;
+
+  /* ---------- path building and exact-enough integration ---------- */
+  var NS = 120;
+  function pieces(A, B, type) {
+    var d = sub(B, A);
+    function leg(P0, P1) { var dd = sub(P1, P0); return { f: function (t) { return lerp3(P0, P1, t); }, d: function () { return dd; } }; }
+    if (type === 'xyz') { var a1 = [B[0], A[1], A[2]], a2 = [B[0], B[1], A[2]]; return [leg(A, a1), leg(a1, a2), leg(a2, B)]; }
+    if (type === 'zyx') { var b1 = [A[0], A[1], B[2]], b2 = [A[0], B[1], B[2]]; return [leg(A, b1), leg(b1, b2), leg(b2, B)]; }
+    if (type === 'curve') {
+      var w1 = cross(d, [0, 0, 1]); if (len(w1) < 1e-6 * (len(d) || 1)) w1 = cross(d, [1, 0, 0]);
+      w1 = unit(w1); var w2 = unit(cross(d, w1));
+      var off = add(mul(w1, bulge[0]), mul(w2, bulge[1]));
+      return [{
+        f: function (t) { return add(add(A, mul(d, t)), mul(off, Math.sin(Math.PI * t))); },
+        d: function (t) { return add(d, mul(off, Math.PI * Math.cos(Math.PI * t))); }
+      }];
+    }
+    return [leg(A, B)];
+  }
+  function gvec(pc, t) { var r = pc.f(t), e = Ef(r), dr = pc.d(t); return [e[0] * dr[0], e[1] * dr[1], e[2] * dr[2]]; }
+  function buildPath(A, B, type) {
+    var P = pieces(A, B, type), pts = [], arc = [], I = [], Ix = 0, Iy = 0, Iz = 0;
+    P.forEach(function (pc, pi) {
+      for (var i = 0; i <= NS; i++) {
+        if (i === 0) { if (pi === 0) { pts.push(pc.f(0)); arc.push(0); I.push(0); } continue; }
+        var t0 = (i - 1) / NS, t1 = i / NS, tm = (t0 + t1) / 2, h = t1 - t0;
+        var g0 = gvec(pc, t0), gm = gvec(pc, tm), g1 = gvec(pc, t1);
+        Ix += h / 6 * (g0[0] + 4 * gm[0] + g1[0]); Iy += h / 6 * (g0[1] + 4 * gm[1] + g1[1]); Iz += h / 6 * (g0[2] + 4 * gm[2] + g1[2]);
+        var r1 = pc.f(t1), prev = pts[pts.length - 1];
+        pts.push(r1); arc.push(arc[arc.length - 1] + len(sub(r1, prev))); I.push(Ix + Iy + Iz);
+      }
+    });
+    var tot = arc[arc.length - 1], n = pts.length, s = arc.map(function (a, i) { return tot > 1e-12 ? a / tot : i / (n - 1); });
+    return { pts: pts, s: s, I: I, Ix: Ix, Iy: Iy, Iz: Iz, total: I[n - 1], length: tot };
+  }
+  function posAt(path, sf) {
+    var s = path.s, n = s.length;
+    if (sf <= 0) return { r: path.pts[0].slice(), I: 0 };
+    if (sf >= 1) return { r: path.pts[n - 1].slice(), I: path.I[n - 1] };
+    var lo = 0, hi = n - 1;
+    while (hi - lo > 1) { var m = (lo + hi) >> 1; if (s[m] <= sf) lo = m; else hi = m; }
+    var dd = s[hi] - s[lo], f = dd > 1e-12 ? (sf - s[lo]) / dd : 0;
+    return { r: lerp3(path.pts[lo], path.pts[hi], f), I: path.I[lo] + (path.I[hi] - path.I[lo]) * f };
+  }
+  function runs(path, VA, toPt) {
+    var out = [], cur = null, last = 'pd';
+    for (var i = 0; i < path.pts.length - 1; i++) {
+      var dV = -(path.I[i + 1] - path.I[i]);
+      var c = dV > 1e-9 ? 'pu' : dV < -1e-9 ? 'pd' : last;
+      last = c;
+      if (!cur || cur.c !== c) { cur = { c: c, pts: [toPt(i)] }; out.push(cur); }
+      cur.pts.push(toPt(i + 1));
+    }
+    return { runs: out, last: last };
+  }
+
+  /* ---------- svg helpers ---------- */
+  function arrow(a, b, cls, hl, hw, nt) {
+    hl = hl || 12; hw = hw || 4.4; nt = nt || 3;
+    var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy);
+    if (L < 3) return '';
+    var ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+    var h = Math.min(hl, L * 0.9), w = hw * h / hl;
+    var bx = b.x - ux * h, by = b.y - uy * h, qx = b.x - ux * (h - nt), qy = b.y - uy * (h - nt);
+    return '<g class="vec ' + cls + '"><line x1="' + f1(a.x) + '" y1="' + f1(a.y) + '" x2="' + f1(qx) + '" y2="' + f1(qy) + '"/>' +
+      '<polygon points="' + f1(b.x) + ',' + f1(b.y) + ' ' + f1(bx + nx * w) + ',' + f1(by + ny * w) + ' ' + f1(qx) + ',' + f1(qy) + ' ' + f1(bx - nx * w) + ',' + f1(by - ny * w) + '"/></g>';
+  }
+  function seg(a, b, cls) {
+    if (Math.hypot(a.x - b.x, a.y - b.y) < 0.5) return '';
+    return '<line class="' + cls + '" x1="' + f1(a.x) + '" y1="' + f1(a.y) + '" x2="' + f1(b.x) + '" y2="' + f1(b.y) + '"/>';
+  }
+  function polyl(pts, cls) { return '<polyline class="' + cls + '" points="' + pts.map(function (p) { return f1(p.x) + ',' + f1(p.y); }).join(' ') + '"/>'; }
+  function T(x, y, parts, cls, anchor) {
+    var s = '<text x="' + f1(x) + '" y="' + f1(y + 5) + '" class="' + cls + '" text-anchor="' + (anchor || 'middle') + '">', down = false;
+    parts.forEach(function (p) {
+      s += '<tspan' + (down ? ' dy="-4"' : '') + '>' + p[0] + '</tspan>'; down = false;
+      if (p[1]) { s += '<tspan class="sub" dy="4">' + p[1] + '</tspan>'; down = true; }
+    });
+    return s + '</text>';
+  }
+
+  /* ---------- camera ---------- */
+  function camBasis() {
+    var a = cam.az * D2R, e = cam.el * D2R;
+    return { r: [-Math.sin(a), Math.cos(a), 0], u: [-Math.sin(e) * Math.cos(a), -Math.sin(e) * Math.sin(a), Math.cos(e)] };
+  }
+  function proj(p) { var q = [p[0], p[1], p[2] * ZS]; return { x: dot(q, camB.r), y: -dot(q, camB.u) }; }
+  function fitView(pts, W, H, m, cap) {
+    var minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
+    pts.forEach(function (p) { var q = proj(p); minx = Math.min(minx, q.x); maxx = Math.max(maxx, q.x); miny = Math.min(miny, q.y); maxy = Math.max(maxy, q.y); });
+    var w = Math.max(maxx - minx, 1e-6), h = Math.max(maxy - miny, 1e-6);
+    var s = Math.min((W - 2 * m) / w, (H - 2 * m) / h, cap);
+    return { s: s, ox: W / 2 - s * (minx + maxx) / 2, oy: H / 2 - s * (miny + maxy) / 2 };
+  }
+  function po(p) { var q = proj(p); return { x: Vw.ox + Vw.s * q.x, y: Vw.oy + Vw.s * q.y }; }
+
+  /* ---------- 3D scene ---------- */
+  function coordLabel(name, p) { return name + '(' + Nn(p[0]) + ', ' + Nn(p[1]) + ', ' + Nn(p[2]) + ')'; }
+  function drawScene(path, A, B, cfg, cur) {
+    var s = '', lo = [0, 0, 0], hi = [0, 0, 0], plo = [1e9, 1e9, 1e9], phi = [-1e9, -1e9, -1e9], k;
+    path.pts.forEach(function (p) { for (k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], p[k]); hi[k] = Math.max(hi[k], p[k]); plo[k] = Math.min(plo[k], p[k]); phi[k] = Math.max(phi[k], p[k]); } });
+    var posEnd = [], negEnd = [], fit = path.pts.slice();
+    for (k = 0; k < 3; k++) {
+      var span = (hi[k] - lo[k]) || 1, e = [0, 0, 0], g = [0, 0, 0];
+      e[k] = hi[k] + 0.16 * span; g[k] = lo[k] - 0.16 * span; posEnd.push(e); negEnd.push(g); fit.push(e, g);
+    }
+    var hs = Math.max(hi[0] - lo[0], hi[1] - lo[1], 1e-9), zr = Math.max(hi[2] - lo[2], 1e-9);
+    ZS = (flags.zshrink && zr > 2.5 * hs) ? 2 * hs / zr : 1;
+    document.getElementById('cap-z').textContent = ZS < 1 ? ' The z axis is compressed to ×' + ZS.toFixed(2) + ' to show detail. Turn this off with the checkbox on the left.' : '';
+    Vw = fitView(fit, 480, 460, 58, 200);
+    var O = po([0, 0, 0]), lab = ['x', 'y', 'z'];
+    if (flags.guides) {
+      [A, B].forEach(function (p) {
+        var base = [p[0], p[1], 0];
+        s += seg(po(p), po(base), 'guide') + seg(po(base), po([p[0], 0, 0]), 'guide') + seg(po(base), po([0, p[1], 0]), 'guide');
+      });
+    }
+    for (k = 0; k < 3; k++) {
+      s += seg(O, po(negEnd[k]), 'guide');
+      var tip = po(posEnd[k]); s += arrow(O, tip, 'vax', 12, 4.2, 3);
+      var dx = tip.x - O.x, dy = tip.y - O.y, L = Math.hypot(dx, dy) || 1;
+      s += T(tip.x + dx / L * 17, tip.y + dy / L * 15, [[lab[k]]], 'ta');
+    }
+    var rr = runs(path, 0, function (i) { return po(path.pts[i]); });
+    rr.runs.forEach(function (r) { s += polyl(r.pts, 'pth ' + r.c); });
+    var st = posAt(path, 0.93).r, endP = po(B);
+    s += arrow(po(st), endP, rr.last === 'pu' ? 'vu' : 'vd', 17, 7, 5);
+
+    var diag = len(sub(phi, plo)) || 1, maxE = 1e-9, sf, E, p, i2;
+    var samples = [];
+    for (i2 = 0; i2 < 6; i2++) { sf = (i2 + 0.5) / 6; p = posAt(path, sf).r; E = Ef(p); samples.push([p, E]); maxE = Math.max(maxE, len(E)); }
+    maxE = Math.max(maxE, len(Ef(cur.r)));
+    var kE = 0.2 * diag / maxE;
+    function eArrow(p, E, cls, hl, hw, nt) {
+      var a = po(p), b = po(add(p, mul(E, kE))), bl = Math.hypot(b.x - a.x, b.y - a.y);
+      if (bl < 1e-6) return '';
+      if (bl < 26) { var kk = 26 / bl; b = { x: a.x + (b.x - a.x) * kk, y: a.y + (b.y - a.y) * kk }; }
+      return arrow(a, b, cls, hl, hw, nt);
+    }
+    if (flags.arrows) samples.forEach(function (q) { s += eArrow(q[0], q[1], 'vE', 11, 4, 3) + '<circle class="dot" cx="' + f1(po(q[0]).x) + '" cy="' + f1(po(q[0]).y) + '" r="3"/>'; });
+
+    var Ec = Ef(cur.r), cp = po(cur.r);
+    s += eArrow(cur.r, Ec, 'vEm', 14, 5.4, 3.6);
+    var etip = po(add(cur.r, mul(Ec, kE)));
+    var edx = etip.x - cp.x, edy = etip.y - cp.y, el = Math.hypot(edx, edy) || 1;
+    s += '<circle class="mk" cx="' + f1(cp.x) + '" cy="' + f1(cp.y) + '" r="7"/>';
+    s += T(cp.x + edx / el * Math.max(el, 26) + 14, cp.y + edy / el * Math.max(el, 26) - 6, [['E']], 'tb');
+
+    var pa = po(A), pb = po(B);
+    [[pa, A, cfg.An], [pb, B, cfg.Bn]].forEach(function (it) {
+      s += '<circle class="dot" cx="' + f1(it[0].x) + '" cy="' + f1(it[0].y) + '" r="6.5"/>';
+      var left = it[0].x >= 240;
+      s += '<text x="' + f1(it[0].x + (left ? -12 : 12)) + '" y="' + f1(it[0].y - 12) + '" class="tp" text-anchor="' + (left ? 'end' : 'start') + '">' + coordLabel(it[2], it[1]) + '</text>';
+    });
+    document.getElementById('sc').innerHTML = s;
+  }
+
+  /* ---------- chart ---------- */
+  function niceStep(raw) {
+    var e = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / e;
+    var nf = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10; return nf * e;
+  }
+  function niceTicks(mn, mx, cnt) {
+    var step = niceStep((mx - mn) / cnt), a = Math.floor(mn / step + 1e-9) * step, b = Math.ceil(mx / step - 1e-9) * step, out = [];
+    for (var v = a; v <= b + step * 1e-6; v += step) out.push(Math.abs(v) < step * 1e-9 ? 0 : v);
+    return { t: out, step: step };
+  }
+  function drawChart(path, line, VA, cfg, cur, final) {
+    var W = 640, H = 470, ml = 78, mr = 150, mt = 26, mb = 66, pw = W - ml - mr, ph = H - mt - mb;
+    var Vc = path.I.map(function (i) { return VA - i; });
+    var Vl = line ? line.I.map(function (i) { return VA - i; }) : null;
+    var all = Vc.slice(); if (Vl) all = all.concat(Vl);
+    var mn = Math.min.apply(null, all), mx = Math.max.apply(null, all);
+    if (mx - mn < 1e-9) { mn -= 1; mx += 1; }
+    var nt = niceTicks(mn, mx, 6), y0 = nt.t[0], y1 = nt.t[nt.t.length - 1];
+    function X(sf) { return ml + pw * sf; }
+    function Y(v) { return mt + ph * (1 - (v - y0) / (y1 - y0)); }
+    var dec = Math.abs(nt.step - Math.round(nt.step)) < 1e-9 ? 0 : Math.abs(nt.step * 10 - Math.round(nt.step * 10)) < 1e-9 ? 1 : 2;
+    var s = '';
+    nt.t.forEach(function (v) {
+      s += '<line class="gl" x1="' + ml + '" y1="' + f1(Y(v)) + '" x2="' + (ml + pw) + '" y2="' + f1(Y(v)) + '"/>';
+      s += '<text x="' + (ml - 10) + '" y="' + f1(Y(v) + 4) + '" class="tk" text-anchor="end">' + M(v, dec) + '</text>';
+    });
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (sf) {
+      s += '<line class="axl" x1="' + f1(X(sf)) + '" y1="' + (mt + ph) + '" x2="' + f1(X(sf)) + '" y2="' + (mt + ph + 6) + '"/>';
+      s += '<text x="' + f1(X(sf)) + '" y="' + (mt + ph + 22) + '" class="tk" text-anchor="middle">' + sf.toFixed(2).replace(/\.?0+$/, '') + '</text>';
+    });
+    s += '<line class="axl" x1="' + ml + '" y1="' + mt + '" x2="' + ml + '" y2="' + (mt + ph) + '"/><line class="axl" x1="' + ml + '" y1="' + (mt + ph) + '" x2="' + (ml + pw) + '" y2="' + (mt + ph) + '"/>';
+    s += '<text x="' + (ml + pw / 2) + '" y="' + (H - 12) + '" class="tt" text-anchor="middle">Position along the path s (0 = initial point, 1 = final point)</text>';
+    s += '<text transform="translate(18 ' + (mt + ph / 2) + ') rotate(-90)" class="tt" text-anchor="middle">' + cfg.ytitle + '</text>';
+    if (Vl) s += polyl(line.s.map(function (sf, i) { return { x: X(sf), y: Y(Vl[i]) }; }), 'cmp');
+    var rr = runs(path, VA, function (i) { return { x: X(path.s[i]), y: Y(Vc[i]) }; });
+    rr.runs.forEach(function (r) { s += polyl(r.pts, 'pth ' + r.c); });
+    var x0 = X(0), yA = Y(Vc[0]), x1 = X(1), yB = Y(Vc[Vc.length - 1]);
+    var curV = VA - cur.I, cx = X(sCur), cy = Y(curV);
+    s += '<line class="curl" x1="' + f1(cx) + '" y1="' + mt + '" x2="' + f1(cx) + '" y2="' + (mt + ph) + '"/>';
+    s += '<circle class="mk" cx="' + f1(cx) + '" cy="' + f1(cy) + '" r="6.5"/>';
+    var rightSide = sCur < 0.6;
+    s += T(cx + (rightSide ? 12 : -12), cy - 14, [['V = ' + M(curV, 1)]], 'tv', rightSide ? 'start' : 'end');
+    s += '<circle class="dot" cx="' + f1(x0) + '" cy="' + f1(yA) + '" r="6"/><circle class="dot" cx="' + f1(x1) + '" cy="' + f1(yB) + '" r="6"/>';
+    s += T(x0 + 12, yA + (yA < mt + ph / 2 ? 26 : -16), cfg.startParts(VA), 'tv', 'start');
+    var el2 = cfg.endLines(final);
+    el2.forEach(function (ln, i) { s += T(x1 + 14, yB - 11 * (el2.length - 1) + i * 22, ln, 'tv', 'start'); });
+    document.getElementById('ch').innerHTML = s;
+    document.getElementById('ch').dataset.geom = [ml, pw].join(',');
+    document.getElementById('cap-ch').innerHTML = '<span class="sw down"></span>Potential decreases <span class="sw up" style="margin-left:10px"></span>Potential increases. ' + (Vl ? 'The grey dashed curve is the straight-line path, for comparison. ' : '') + 'Both curves start and end at the same values. Move the mouse over the graph to move the probe point.';
+  }
+
+  /* ---------- readouts ---------- */
+  function cls(n) { return n > 1e-9 ? 'pos' : n < -1e-9 ? 'neg' : ''; }
+  function render() {
+    camB = camBasis();
+    var cfg = PARTS[part], st = vals[part], A = st.A, B = st.B, VA = cfg.useVA ? st.VA : 0;
+    var path = buildPath(A, B, pathType), line = pathType === 'line' ? null : buildPath(A, B, 'line');
+    if (!flags.cmp) line = null;
+    var cur = posAt(path, sCur);
+    var dVnum = -path.total, dVcl = Phi(B) - Phi(A), final = VA + dVnum;
+    drawScene(path, A, B, cfg, cur);
+    drawChart(path, line, VA, cfg, cur, final);
+
+    var el = function (id) { return document.getElementById(id); };
+    el('d-task').innerHTML = cfg.task;
+    el('f-eq').innerHTML = cfg.eq;
+    el('h-a').innerHTML = 'Initial point <i>' + cfg.An + '</i> (x, y, z in metres)';
+    el('h-b').innerHTML = 'Final point <i>' + cfg.Bn + '</i>';
+    el('o-big').innerHTML = cfg.big + ' = <span class="' + cls(final) + '">' + M(final, 1) + '</span> <span style="font-size:1rem;font-weight:400">V</span>';
+    el('o-num').innerHTML = 'From the line integral along the path: ' + M(final, 3) + ' V · From the formula: ' + M(VA + dVcl, 3) + ' V';
+
+    var nA = cfg.An, nB = cfg.Bn;
+    function sb(v, n) { return '<i>' + v + '</i><sub class="u"><i>' + n + '</i></sub>'; }
+    var t1 = 2 * (Math.pow(B[0], 3) - Math.pow(A[0], 3)), t2 = 3 * (B[1] * B[1] - A[1] * A[1]), t3 = 4 * (B[2] - A[2]);
+    var d = '<i>V</i><sub class="u"><i>' + nB + '</i></sub> − <i>V</i><sub class="u"><i>' + nA + '</i></sub> = −[2(' + sb('x', nB) + '³ − ' + sb('x', nA) + '³) + 3(' + sb('y', nB) + '² − ' + sb('y', nA) + '²) + 4(' + sb('z', nB) + ' − ' + sb('z', nA) + ')]<br>' +
+      '= −[2(' + P1(B[0]) + '³ − ' + P1(A[0]) + '³) + 3(' + P1(B[1]) + '² − ' + P1(A[1]) + '²) + 4(' + P1(B[2]) + ' − ' + P1(A[2]) + ')]<br>' +
+      '= −[' + P1(t1) + ' + ' + P1(t2) + ' + ' + P1(t3) + '] = <b>' + Nn(dVcl) + ' V</b>';
+    if (cfg.useVA) d += '<br><i>V</i><sub class="u"><i>' + nB + '</i></sub> = <i>V</i><sub class="u"><i>' + nA + '</i></sub> + (' + Nn(dVcl) + ') = ' + Nn(VA) + ' + (' + Nn(dVcl) + ') = <b>' + Nn(VA + dVcl) + ' V</b>';
+    el('o-der').innerHTML = d;
+
+    var rows = [
+      ['−∫<i>E</i><sub class="u"><i>x</i></sub> d<i>x</i> = −∫6<i>x</i>² d<i>x</i>', -path.Ix, -t1],
+      ['−∫<i>E</i><sub class="u"><i>y</i></sub> d<i>y</i> = −∫6<i>y</i> d<i>y</i>', -path.Iy, -t2],
+      ['−∫<i>E</i><sub class="u"><i>z</i></sub> d<i>z</i> = −∫4 d<i>z</i>', -path.Iz, -t3]
+    ];
+    el('o-tab').innerHTML = rows.map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + M(r[1], 3) + '</td><td>' + M(r[2], 3) + '</td></tr>'; }).join('') +
+      '<tr class="sum"><td>Total = <i>V</i><sub class="u"><i>' + nB + '</i></sub> − <i>V</i><sub class="u"><i>' + nA + '</i></sub></td><td class="' + cls(dVnum) + '">' + M(dVnum, 3) + '</td><td class="' + cls(dVcl) + '">' + M(dVcl, 3) + '</td></tr>';
+    el('o-mean').innerHTML = 'The total does not depend on the path, because each component of <b class="v">E</b> depends only on its own coordinate. Hence ∇×<b class="v">E</b> = 0 and this field is conservative. Change the path and look at the table above. The total stays the same, but the potential graph along the way changes.';
+    var atDef = ['A', 'B'].every(function (kk) { return st[kk].every(function (v, i) { return Math.abs(v - (kk === 'A' ? cfg.Ad : cfg.Bd)[i]) < 1e-9; }); }) && (!cfg.useVA || Math.abs(st.VA - cfg.VA) < 1e-9);
+    el('o-check').innerHTML = 'Textbook answer: <b>' + M(cfg.book, 1) + '</b> V' + (atDef ? ', which matches the value computed above.' : '. You have changed a point or the reference potential from the problem values. Press “Reset to the problem values” to compare.');
+
+    var Ec = Ef(cur.r);
+    function vec(v) { return '(' + v.map(function (n) { return M(n, 2); }).join(', ') + ')'; }
+    el('o-cur').innerHTML = '<dt>Position</dt><dd>' + vec(cur.r) + ' m</dd><dt><b class="v">E</b></dt><dd>' + vec(Ec) + ' V/m</dd><dt>' + cfg.cur + '</dt><dd>' + M(VA - cur.I, 2) + ' V</dd>';
+  }
+
+  /* ---------- controls ---------- */
+  var reg = [];
+  function makeRow(id, label, min, max, step, value, onChange, tag) {
+    var row = document.createElement('div'); row.className = 'row';
+    var lab = document.createElement('label'); lab.htmlFor = 'n-' + id; lab.textContent = label;
+    var rng = document.createElement('input'); rng.type = 'range'; rng.id = 'r-' + id; rng.setAttribute('aria-label', label);
+    var num = document.createElement('input'); num.type = 'number'; num.id = 'n-' + id;
+    [rng, num].forEach(function (e) { e.min = min; e.max = max; e.step = step; e.value = value; });
+    rng.addEventListener('input', function () { num.value = rng.value; onChange(parseFloat(rng.value)); });
+    num.addEventListener('input', function () { var v = parseFloat(num.value); if (isNaN(v)) return; rng.value = v; onChange(v); });
+    row.appendChild(lab); row.appendChild(rng); row.appendChild(num);
+    reg.push({ tag: tag, rng: rng, num: num, get: null });
+    return row;
+  }
+  function setVal(tag, v) { reg.forEach(function (it) { if (it.tag === tag) { it.rng.value = v; it.num.value = v; } }); }
+  function buildRows() {
+    reg = reg.filter(function (it) { return it.tag === 'az' || it.tag === 'el' || it.tag === 's' || it.tag === 'b0' || it.tag === 'b1'; });
+    ['rows-a', 'rows-b', 'rows-va'].forEach(function (id) { document.getElementById(id).innerHTML = ''; });
+    var st = vals[part], cfg = PARTS[part], names = ['x (m)', 'y (m)', 'z (m)'];
+    function zr(k) { return k === 2 && part === 'b' ? [-40, 10] : [-8, 8]; }
+    [['rows-a', 'A', cfg.An], ['rows-b', 'B', cfg.Bn]].forEach(function (g) {
+      for (var k = 0; k < 3; k++) (function (k) {
+        var r = zr(k);
+        document.getElementById(g[0]).appendChild(makeRow(g[1] + k, names[k], r[0], r[1], 0.1, st[g[1]][k], function (v) { st[g[1]][k] = v; render(); }, g[1] + k));
+      })(k);
+    });
+    var hv = document.getElementById('rows-va');
+    hv.hidden = !cfg.useVA;
+    if (cfg.useVA) hv.appendChild(makeRow('VA', 'Potential at initial point (V)', -150, 150, 0.5, st.VA, function (v) { st.VA = v; render(); }, 'VA'));
+  }
+  function syncAll() {
+    var st = vals[part];
+    for (var k = 0; k < 3; k++) { setVal('A' + k, st.A[k]); setVal('B' + k, st.B[k]); }
+    setVal('VA', st.VA);
+  }
+
+  document.getElementById('rows-bulge').appendChild(makeRow('b0', 'Sideways bulge (m)', -10, 10, 0.1, bulge[0], function (v) { bulge[0] = v; render(); }, 'b0'));
+  document.getElementById('rows-bulge').appendChild(makeRow('b1', 'Up–down bulge (m)', -10, 10, 0.1, bulge[1], function (v) { bulge[1] = v; render(); }, 'b1'));
+  document.getElementById('rows-s').appendChild(makeRow('s', 'Position s', 0, 1, 0.01, sCur, function (v) { sCur = v; render(); }, 's'));
+  document.getElementById('rows-cam').appendChild(makeRow('az', 'Azimuth (°)', -180, 180, 1, cam.az, function (v) { cam.az = v; render(); }, 'az'));
+  document.getElementById('rows-cam').appendChild(makeRow('el', 'Elevation (°)', -85, 85, 1, cam.el, function (v) { cam.el = v; render(); }, 'el'));
+  function setCam(az, e) { cam.az = az; cam.el = e; setVal('az', az); setVal('el', e); render(); }
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-part]'), function (b) {
+    b.addEventListener('click', function () {
+      part = b.getAttribute('data-part');
+      Array.prototype.forEach.call(document.querySelectorAll('[data-part]'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      buildRows(); render();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-path]'), function (b) {
+    b.addEventListener('click', function () {
+      pathType = b.getAttribute('data-path');
+      Array.prototype.forEach.call(document.querySelectorAll('[data-path]'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      document.getElementById('rows-bulge').hidden = pathType !== 'curve';
+      render();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-view]'), function (b) {
+    b.addEventListener('click', function () {
+      var v = b.getAttribute('data-view');
+      if (v === 'home') setCam(30, 25); else if (v === 'front') setCam(0, 8); else setCam(0, 80);
+    });
+  });
+  [['f-arrows', 'arrows'], ['f-guides', 'guides'], ['f-cmp', 'cmp'], ['f-zs', 'zshrink']].forEach(function (p) {
+    document.getElementById(p[0]).addEventListener('change', function (e) { flags[p[1]] = e.target.checked; render(); });
+  });
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    var cfg = PARTS[part]; vals[part] = { A: cfg.Ad.slice(), B: cfg.Bd.slice(), VA: cfg.VA }; syncAll(); render();
+  });
+
+  var sc = document.getElementById('sc'), drag = null;
+  sc.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'touch') return;
+    drag = { x: e.clientX, y: e.clientY }; sc.classList.add('drag');
+    try { sc.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  sc.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag = { x: e.clientX, y: e.clientY };
+    var az = cam.az - dx * 0.5; az = ((az + 180) % 360 + 360) % 360 - 180;
+    setCam(Math.round(az), Math.round(Math.max(-85, Math.min(85, cam.el + dy * 0.5))));
+  });
+  function endDrag() { drag = null; sc.classList.remove('drag'); }
+  sc.addEventListener('pointerup', endDrag); sc.addEventListener('pointercancel', endDrag);
+
+  var ch = document.getElementById('ch');
+  function scrub(e) {
+    var g = ch.dataset.geom.split(',').map(Number), box = ch.getBoundingClientRect();
+    var vx = (e.clientX - box.left) * (640 / box.width), sf = (vx - g[0]) / g[1];
+    sCur = Math.max(0, Math.min(1, Math.round(sf * 100) / 100)); setVal('s', sCur); render();
+  }
+  ch.addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse' || e.buttons) scrub(e); });
+  ch.addEventListener('pointerdown', scrub);
+
+  buildRows(); render();
+})();
+</script>
+
+</body></html>

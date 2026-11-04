@@ -1,0 +1,567 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Field, Potential, Energy</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Academic figure pages: white paper, serif type, textbook-style line art. White background is fixed by request. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff; --ink: #1a1a1a; --muted: #5f6368; --line: #d9dce0; --soft: #f5f6f7; --accent: #1f4e8c;
+  --serif: 'STIX Two Text', 'Times New Roman', Times, serif;
+  --sans: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
+}
+html, body { background: #ffffff; color: var(--ink); }
+body { font-family: var(--serif); font-size: 17px; line-height: 1.55; }
+.wrap { max-width: 1220px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 26px 56px; }
+.kicker { font-family: var(--sans); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+h1 { font-size: clamp(1.6rem, 3.2vw, 2.15rem); font-weight: 600; line-height: 1.2; margin: 0 0 8px; text-wrap: balance; }
+h2 { font-family: var(--sans); font-size: .76rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+h3 { font-size: 1.08rem; font-weight: 600; margin: 0 0 4px; }
+.lede { margin: 0 0 18px; max-width: 80ch; color: #333; }
+.rule { border: 0; border-top: 1.5px solid var(--ink); margin: 0 0 18px; }
+.fig { margin: 0; min-width: 0; }
+.fig > svg { display: block; width: 100%; height: auto; background: #fff; touch-action: none; }
+.fig figcaption { font-size: .93rem; line-height: 1.5; padding: 8px 2px 0; color: #222; }
+.fig figcaption b { font-weight: 700; }
+.figbox { border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px 12px; background: #fff; min-width: 0; }
+.tools { display: flex; gap: 6px; justify-content: flex-end; margin: -2px 0 4px; }
+.tools button { font-family: var(--sans); font-size: .74rem; letter-spacing: .03em; padding: 3px 9px; border: 1px solid var(--line); border-radius: 3px; background: #fff; color: var(--muted); cursor: pointer; }
+.tools button:hover { color: var(--ink); border-color: #9aa0a6; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; margin: 14px 0; }
+@media (max-width: 960px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.tri { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 14px 0; }
+@media (max-width: 1120px) { .tri { grid-template-columns: minmax(0, 1fr); max-width: 680px; } }
+.duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 14px 0; }
+@media (max-width: 1000px) { .duo { grid-template-columns: minmax(0, 1fr); } }
+.panel { display: grid; gap: 12px; min-width: 0; font-family: var(--sans); }
+.grp { border: 1px solid var(--line); border-radius: 4px; padding: 10px 14px 12px; min-width: 0; }
+.ctl { font-family: var(--sans); margin-top: 8px; }
+.row { display: grid; grid-template-columns: 7.2rem minmax(0, 1fr) 4.6rem; align-items: center; gap: 10px; padding-block: 2px; font-size: .86rem; line-height: 1.4; }
+.row label i, .kv i { font-family: var(--serif); font-size: 1.08em; }
+.row input[type="range"] { width: 100%; min-width: 0; accent-color: var(--accent); }
+.row input[type="number"] { width: 100%; min-width: 0; font: inherit; font-variant-numeric: tabular-nums; text-align: right; padding: 3px 6px; border: 1px solid var(--line); border-radius: 3px; background: #fff; color: var(--ink); }
+.chk { display: flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: .86rem; padding-block: 2px; }
+.chk input { accent-color: var(--accent); width: 15px; height: 15px; }
+.btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-family: var(--sans); }
+.btns button, .tabs button { font: inherit; font-family: var(--sans); font-size: .84rem; padding: 5px 12px; border: 1px solid #b9bec4; border-radius: 3px; background: #fff; color: var(--ink); cursor: pointer; }
+.btns button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tabs { display: flex; flex-wrap: wrap; gap: 0; margin: 0 0 6px; border-bottom: 1px solid var(--line); }
+.tabs button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 7px 14px; color: var(--muted); }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card { border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px 16px; min-width: 0; }
+.out { display: grid; gap: 14px 30px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.kv { display: grid; grid-template-columns: auto 1fr; column-gap: 16px; row-gap: 3px; margin: 0; font-family: var(--sans); font-size: .88rem; font-variant-numeric: tabular-nums; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; text-align: right; color: var(--ink); }
+.eqn { margin: 10px 0 0; padding: 8px 12px; background: var(--soft); overflow-x: auto; font-size: 1rem; }
+.note { font-family: var(--sans); font-size: .8rem; color: var(--muted); margin: 8px 0 0; line-height: 1.5; }
+.warn { font-family: var(--sans); font-size: .84rem; color: #a3261b; margin: 8px 0 0; }
+.q { margin: 10px 0 0; padding: 4px 0 4px 12px; border-left: 2px solid var(--ink); font-style: italic; }
+.map { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.map th, .map td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.map thead th { font-family: var(--sans); font-size: .76rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1.5px solid var(--ink); }
+.tablewrap { overflow-x: auto; }
+.split { display: flex; height: 14px; border: 1px solid var(--line); margin-top: 4px; }
+.split span { display: block; height: 100%; }
+.toast { font-family: var(--sans); font-size: .78rem; color: var(--muted); min-height: 1em; text-align: right; }
+[hidden] { display: none !important; }
+mjx-container { font-size: 100% !important; }
+
+</style>
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, svg: { fontCache: 'none' }, startup: { typeset: false } };</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js"></script>
+
+<main class="wrap">
+  <p class="kicker">Electromagnetic Fields · Introduction · Topic 3 · Slides 3–4</p>
+  <h1>Electric Field, Potential and Energy</h1>
+  <hr class="rule">
+  <p class="lede">Charge on a pair of plates sets up an electric field. The field exerts a force on a test charge, and the work done in moving a charge depends only on the potential difference between its end points. Drag the points in the figure.</p>
+
+  <div class="tabs" role="tablist" aria-label="Slide">
+    <button type="button" role="tab" id="t3" aria-selected="true">Slide 3 · Field and force</button>
+    <button type="button" role="tab" id="t4" aria-selected="false">Slide 4 · Potential and work</button>
+  </div>
+
+  <div class="layout">
+    <div class="figbox">
+      <figure class="fig"><svg id="fg" viewBox="0 0 700 500" role="img" aria-label="Field lines and equipotentials of a charged parallel-plate pair"></svg>
+        <figcaption id="cap"></figcaption></figure>
+    </div>
+    <aside class="panel">
+      <section class="grp" id="gP"><h2>Plates</h2></section>
+      <section class="grp" id="gQ"><h2>Test charge</h2></section>
+      <section class="grp">
+        <h2>Display</h2>
+        <label class="chk"><input type="checkbox" id="fFl" checked> Field lines</label>
+        <label class="chk"><input type="checkbox" id="fAr"> Field vectors on a grid</label>
+        <label class="chk"><input type="checkbox" id="fEq"> Equipotentials</label>
+        <div class="btns" id="mvBtns" hidden><button type="button" id="btnMove">Move charge from A to B</button></div>
+      </section>
+    </aside>
+  </div>
+
+  <section class="card">
+    <h2>Computed values</h2>
+    <div class="out"><dl class="kv" id="o1"></dl><dl class="kv" id="o2"></dl></div>
+    <p class="q" id="mean" style="font-style:normal"></p>
+    <div class="eqn" id="eqband"></div>
+    <p class="note">Two-dimensional model: the plates are very long normal to the page, so quantities are per unit length. The plate charge is found by the method of moments (60 strips per plate) so that each plate is an equipotential; edge fringing is therefore exact for this geometry, not sketched.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  var MU0 = 4e-7 * Math.PI, EPS0 = 8.854187817e-12;
+  var COL = { ink: '#1a1a1a', gray: '#7a7f85', lgray: '#b5b9be', ef: '#1f4e8c', ef2: '#9db7d8', bf: '#4b2c91', bf2: '#b9a8de', pos: '#c0392b', neg: '#1f4e8c',
+    cu: '#9a5326', cuB: '#d8b49a', iron: '#c3c7cc', ironD: '#959ba2', ironL: '#e2e4e7', plate: '#b4b9bf', plateT: '#dde0e4', plateS: '#9ca2a9', diel: '#d7e6f4', shade: '#e3eef8', glow: '#f6d365' };
+  function f1(n) { return (Math.round(n * 10) / 10).toString(); }
+  function M(n, d) { var s = Math.abs(n).toFixed(d); var neg = n < 0 && parseFloat(s) !== 0; return (neg ? '−' : '') + s; }
+  function eng(v, unit, sig) {
+    sig = sig || 3; if (v === 0 || !isFinite(v)) return '0 ' + unit;
+    var P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p']], a = Math.abs(v), i;
+    for (i = 0; i < P.length; i++) if (a >= P[i][0] * 0.9995) break;
+    if (i === P.length) i = P.length - 1;
+    var x = v / P[i][0], dg = Math.max(0, sig - 1 - Math.floor(Math.log10(Math.abs(x) * 1.0000001)));
+    return M(x, dg) + ' ' + P[i][1] + unit;
+  }
+  /* ---- primitives with inline attributes (so exported SVG is self-contained) ---- */
+  function at(o) { var s = ''; for (var k in o) if (o[k] !== undefined && o[k] !== null) s += ' ' + k + '="' + o[k] + '"'; return s; }
+  function st(o) { o = o || {}; return at({ stroke: o.stroke || 'none', 'stroke-width': o.w, fill: o.fill || 'none', 'stroke-dasharray': o.dash, opacity: o.op, 'fill-opacity': o.fop, 'stroke-linecap': o.cap || 'round', 'stroke-linejoin': 'round' }); }
+  function Ln(x1, y1, x2, y2, o) { return '<line x1="' + f1(x1) + '" y1="' + f1(y1) + '" x2="' + f1(x2) + '" y2="' + f1(y2) + '"' + st(o) + '/>'; }
+  function ptsS(p) { return p.map(function (q) { return f1(q.x) + ',' + f1(q.y); }).join(' '); }
+  function Pl(p, o) { return '<polyline points="' + ptsS(p) + '"' + st(o) + '/>'; }
+  function Pg(p, o) { return '<polygon points="' + ptsS(p) + '"' + st(o) + '/>'; }
+  function Ci(x, y, r, o) { return '<circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="' + f1(r) + '"' + st(o) + '/>'; }
+  function Pa(d, o) { return '<path d="' + d + '"' + st(o) + '/>'; }
+  function Rc(x, y, w, h, o) { return '<rect x="' + f1(x) + '" y="' + f1(y) + '" width="' + f1(Math.max(0, w)) + '" height="' + f1(Math.max(0, h)) + '"' + st(o) + '/>'; }
+  /* slender textbook arrowhead */
+  function Hd(p, dx, dy, c, s) {
+    s = s || 9; var L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, w = s * 0.36;
+    return '<polygon points="' + f1(p.x) + ',' + f1(p.y) + ' ' + f1(p.x - ux * s - uy * w) + ',' + f1(p.y - uy * s + ux * w) + ' ' + f1(p.x - ux * s * 0.78) + ',' + f1(p.y - uy * s * 0.78) + ' ' + f1(p.x - ux * s + uy * w) + ',' + f1(p.y - uy * s - ux * w) + '" fill="' + c + '" stroke="none"/>';
+  }
+  function Ar(a, b, c, w, s) {
+    c = c || COL.ink; w = w || 1.4; s = s || 10;
+    var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy); if (L < 2) return '';
+    var e = { x: b.x - dx / L * s * 0.7, y: b.y - dy / L * s * 0.7 };
+    return Ln(a.x, a.y, e.x, e.y, { stroke: c, w: w, cap: 'butt' }) + Hd(b, dx, dy, c, s);
+  }
+  /* ---- oblique projection in the textbook convention: x toward viewer (down-left), y right, z up ---- */
+  function view(al, s, ox, oy) {
+    var A = -0.85 * Math.cos(al * Math.PI / 180), B = 0.85 * Math.sin(al * Math.PI / 180);
+    return { A: A, B: B, s: s, ox: ox, oy: oy, VW: [1, -A, B], p: function (v) { return { x: ox + s * (A * v[0] + v[1]), y: oy + s * (B * v[0] - v[2]) }; } };
+  }
+  function dot3(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function hull(P) {
+    var p = P.slice().sort(function (a, b) { return a.x - b.x || a.y - b.y; }), lo = [], up = [], i;
+    function cr(o, a, b) { return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x); }
+    for (i = 0; i < p.length; i++) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p[i]) <= 0) lo.pop(); lo.push(p[i]); }
+    for (i = p.length - 1; i >= 0; i--) { while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p[i]) <= 0) up.pop(); up.push(p[i]); }
+    up.pop(); lo.pop(); return lo.concat(up);
+  }
+  /* circle of radius r in the x-z plane at axial position y, centred on (cx, cz) */
+  function ringY(v, cx, cz, r, y, n) { var o = []; n = n || 48; for (var i = 0; i < n; i++) { var t = 2 * Math.PI * i / n; o.push(v.p([cx + r * Math.cos(t), y, cz + r * Math.sin(t)])); } return o; }
+  /* solid cylinder along y; the +y end cap faces the viewer */
+  function cylY(v, cx, cz, r, y0, y1, o) {
+    o = o || {}; var a = ringY(v, cx, cz, r, y0), b = ringY(v, cx, cz, r, y1);
+    return Pg(hull(a.concat(b)), { fill: o.fill || COL.iron, stroke: o.stroke || COL.ink, w: o.w || 1, op: o.op }) + Pg(b, { fill: o.cap || COL.ironL, stroke: o.stroke || COL.ink, w: o.w || 1, op: o.op });
+  }
+  /* helix along y split into front and back parts */
+  function helixY(v, cx, cz, r, y0, y1, turns, n) {
+    n = n || Math.max(60, Math.round(turns * 40)); var front = [], back = [], cur = null, curF = null;
+    for (var i = 0; i <= n; i++) {
+      var t = 2 * Math.PI * turns * i / n, P = [cx + r * Math.cos(t), y0 + (y1 - y0) * i / n, cz + r * Math.sin(t)], fr = Math.cos(t) * v.VW[0] + Math.sin(t) * v.VW[2] > 0, q = v.p(P);
+      if (fr !== curF) { if (cur) { cur.push(q); (curF ? front : back).push(cur); } cur = [q]; curF = fr; } else cur.push(q);
+    }
+    if (cur) (curF ? front : back).push(cur);
+    return { front: front, back: back };
+  }
+  /* axis-aligned box: draws only faces that face the viewer */
+  function box(v, x0, x1, y0, y1, z0, z1, o) {
+    o = o || {}; var s = '', P = function (x, y, z) { return v.p([x, y, z]); }, sw = { stroke: o.stroke || COL.ink, w: o.w || 1, op: o.op };
+    var faces = [
+      [[1, 0, 0], [P(x1, y0, z0), P(x1, y1, z0), P(x1, y1, z1), P(x1, y0, z1)], o.fx || o.fill],
+      [[-1, 0, 0], [P(x0, y0, z0), P(x0, y1, z0), P(x0, y1, z1), P(x0, y0, z1)], o.fx || o.fill],
+      [[0, 1, 0], [P(x0, y1, z0), P(x1, y1, z0), P(x1, y1, z1), P(x0, y1, z1)], o.fy || o.fill],
+      [[0, -1, 0], [P(x0, y0, z0), P(x1, y0, z0), P(x1, y0, z1), P(x0, y0, z1)], o.fy || o.fill],
+      [[0, 0, 1], [P(x0, y0, z1), P(x1, y0, z1), P(x1, y1, z1), P(x0, y1, z1)], o.fz || o.fill],
+      [[0, 0, -1], [P(x0, y0, z0), P(x1, y0, z0), P(x1, y1, z0), P(x0, y1, z0)], o.fz || o.fill]
+    ];
+    faces.forEach(function (f) { if (dot3(f[0], v.VW) > 0) s += Pg(f[1], { fill: f[2] || '#ddd', stroke: sw.stroke, w: sw.w, op: sw.op, fop: o.fop }); });
+    return s;
+  }
+  /* ---- LaTeX labels via MathJax (paths inlined, so they export cleanly) ---- */
+  var TEXC = {}, HAS_MJ = false;
+  function TEX(src, x, y, o) {
+    o = o || {}; var size = o.size || 17, col = o.color || COL.ink, an = o.an || 'cm', halo = o.halo !== false;
+    if (!HAS_MJ) {
+      var ta = an[0] === 'l' ? 'start' : an[0] === 'r' ? 'end' : 'middle', dy = an[1] === 't' ? size * 0.8 : an[1] === 'b' ? 0 : size * 0.35;
+      var txt = src.replace(/\\text\{([^}]*)\}/g, '$1').replace(/\\mathbf\{([^}]*)\}/g, '$1').replace(/\\,|\;/g, ' ').replace(/[{}\\^_]/g, '');
+      return '<text x="' + f1(x) + '" y="' + f1(y + dy) + '" text-anchor="' + ta + '" font-family="STIX Two Text, Times New Roman, serif" font-style="italic" font-size="' + size + '" fill="' + col + '"' + (halo ? ' stroke="#fff" stroke-width="4" paint-order="stroke"' : '') + '>' + txt + '</text>';
+    }
+    var c = TEXC[src];
+    if (!c) {
+      var node = MathJax.tex2svg(src, { display: false }), sv = node.querySelector('svg');
+      c = { w: parseFloat(sv.getAttribute('width')), h: parseFloat(sv.getAttribute('height')), va: parseFloat((sv.style.verticalAlign || '0').replace('ex', '')) || 0, vb: sv.getAttribute('viewBox'), inner: sv.innerHTML };
+      c.halo = c.inner.replace(/stroke-width="0"/g, 'stroke-width="220"');
+      TEXC[src] = c;
+    }
+    var ex = size * 0.442, W = c.w * ex, H = c.h * ex, X = an[0] === 'l' ? x : an[0] === 'r' ? x - W : x - W / 2;
+    var Y = an[1] === 't' ? y : an[1] === 'b' ? y - (H + c.va * ex) : y - H / 2;
+    return '<svg x="' + f1(X) + '" y="' + f1(Y) + '" width="' + W.toFixed(2) + '" height="' + H.toFixed(2) + '" viewBox="' + c.vb + '" overflow="visible" color="' + col + '">' + (halo ? '<g color="#ffffff">' + c.halo + '</g>' : '') + c.inner + '</svg>';
+  }
+  /* ---- export (SVG / PNG) ---- */
+  var dlP = (window.claude && window.claude.use) ? window.claude.use('downloads').catch(function () { return null; }) : Promise.resolve(null);
+  function svgString(svg) {
+    var c = svg.cloneNode(true), vb = svg.viewBox.baseVal;
+    c.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); c.setAttribute('width', vb.width); c.setAttribute('height', vb.height); c.removeAttribute('style'); c.removeAttribute('class');
+    var bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); bg.setAttribute('x', vb.x); bg.setAttribute('y', vb.y); bg.setAttribute('width', vb.width); bg.setAttribute('height', vb.height); bg.setAttribute('fill', '#ffffff');
+    c.insertBefore(bg, c.firstChild);
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(c);
+  }
+  function saveFile(name, blob, note) {
+    var timeout = new Promise(function (r) { setTimeout(function () { r(null); }, 1500); });
+    Promise.race([dlP, timeout]).then(function (d) {
+      if (d) return d.save({ filename: name, data: blob }).then(function () { note('Saved ' + name); }, function (e) { note(e && e.code === 'declined' ? 'Download cancelled' : 'Download unavailable here'); });
+      var a = document.createElement('a'), u = URL.createObjectURL(blob); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 4000); note('Downloaded ' + name);
+    });
+  }
+  function exportFig(svg, base, kind, note) {
+    var s = svgString(svg);
+    if (kind === 'svg') return saveFile(base + '.svg', new Blob([s], { type: 'image/svg+xml' }), note);
+    var vb = svg.viewBox.baseVal, k = 3, img = new Image();
+    img.onload = function () {
+      var cv = document.createElement('canvas'); cv.width = vb.width * k; cv.height = vb.height * k;
+      var g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(img, 0, 0, cv.width, cv.height);
+      cv.toBlob(function (b) { saveFile(base + '.png', b, note); }, 'image/png');
+    };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+  }
+  function addTools(svgId, base) {
+    var svg = document.getElementById(svgId), bar = document.createElement('div'), msg = document.createElement('div');
+    bar.className = 'tools'; msg.className = 'toast'; msg.setAttribute('aria-live', 'polite');
+    var note = function (t) { msg.textContent = t; setTimeout(function () { if (msg.textContent === t) msg.textContent = ''; }, 3500); };
+    [['svg', 'Export SVG'], ['png', 'Export PNG']].forEach(function (k) { var b = document.createElement('button'); b.type = 'button'; b.textContent = k[1]; b.addEventListener('click', function () { exportFig(svg, base, k[0], note); }); bar.appendChild(b); });
+    svg.parentNode.insertBefore(bar, svg); svg.parentNode.insertBefore(msg, svg.nextSibling);
+  }
+  /* ---- controls ---- */
+  function makeRow(host, id, label, min, max, step, value, onChange, reg) {
+    var row = document.createElement('div'); row.className = 'row';
+    var lab = document.createElement('label'); lab.htmlFor = 'n-' + id; lab.innerHTML = label;
+    var rng = document.createElement('input'); rng.type = 'range'; rng.id = 'r-' + id; rng.setAttribute('aria-label', lab.textContent);
+    var num = document.createElement('input'); num.type = 'number'; num.id = 'n-' + id;
+    [rng, num].forEach(function (e) { e.min = min; e.max = max; e.step = step; e.value = value; });
+    rng.addEventListener('input', function () { num.value = rng.value; onChange(parseFloat(rng.value)); });
+    num.addEventListener('input', function () { var v = parseFloat(num.value); if (isNaN(v)) return; rng.value = v; onChange(v); });
+    row.appendChild(lab); row.appendChild(rng); row.appendChild(num); host.appendChild(row);
+    if (reg) reg[id] = { rng: rng, num: num };
+  }
+  function setRow(reg, id, v) { if (reg[id]) { reg[id].rng.value = v; reg[id].num.value = v; } }
+  function svgPt(svg, ev) { var r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal; return { x: (ev.clientX - r.left) * vb.width / r.width + vb.x, y: (ev.clientY - r.top) * vb.height / r.height + vb.y }; }
+  /* ---- numerics ---- */
+  function ellKE(k) {
+    var a = 1, b = Math.sqrt(Math.max(0, 1 - k * k)), c, sum = 0.5 * k * k, p = 0.5;
+    for (var n = 0; n < 40; n++) { var an = (a + b) / 2, bn = Math.sqrt(a * b); c = (a - b) / 2; p *= 2; sum += p * c * c; a = an; b = bn; if (Math.abs(c) < 1e-15) break; }
+    var K = Math.PI / (2 * a); return { K: K, E: K * (1 - sum) };
+  }
+  /* vector potential A_phi of a circular loop (radius a) per unit current at (rho, z) [m] */
+  function Aphi(a, rho, z) {
+    if (rho < 1e-12) return 0;
+    var d2 = (a + rho) * (a + rho) + z * z, k2 = 4 * a * rho / d2; if (k2 > 0.999999999) k2 = 0.999999999;
+    var e = ellKE(Math.sqrt(k2));
+    return MU0 * a / (Math.PI * Math.sqrt(d2)) * ((2 - k2) * e.K - 2 * e.E) / k2;
+  }
+  function Mloop(a, b, d) { var k = Math.sqrt(4 * a * b / ((a + b) * (a + b) + d * d)), e = ellKE(k); return MU0 * Math.sqrt(a * b) * ((2 / k - k) * e.K - (2 / k) * e.E); }
+  function contour(G, nx, ny, lev) {
+    var segs = [], i, j;
+    function ip(a, b) { return (lev - a) / ((b - a) || 1e-30); }
+    for (j = 0; j < ny - 1; j++) for (i = 0; i < nx - 1; i++) {
+      var a = G[j * nx + i], b = G[j * nx + i + 1], c = G[(j + 1) * nx + i + 1], d = G[(j + 1) * nx + i];
+      if (!isFinite(a + b + c + d)) continue;
+      var k = (a > lev ? 1 : 0) | (b > lev ? 2 : 0) | (c > lev ? 4 : 0) | (d > lev ? 8 : 0);
+      if (k === 0 || k === 15) continue;
+      var e = [];
+      if ((a > lev) !== (b > lev)) e.push([i + ip(a, b), j]);
+      if ((b > lev) !== (c > lev)) e.push([i + 1, j + ip(b, c)]);
+      if ((d > lev) !== (c > lev)) e.push([i + ip(d, c), j + 1]);
+      if ((a > lev) !== (d > lev)) e.push([i, j + ip(a, d)]);
+      if (e.length === 2) segs.push([e[0][0], e[0][1], e[1][0], e[1][1]]);
+      else if (e.length === 4) { segs.push([e[0][0], e[0][1], e[1][0], e[1][1]]); segs.push([e[2][0], e[2][1], e[3][0], e[3][1]]); }
+    }
+    return segs;
+  }
+  function joinSegs(segs) {
+    var key = function (x, y) { return Math.round(x * 1000) + ',' + Math.round(y * 1000); };
+    var map = {}, used = new Array(segs.length), out = [];
+    segs.forEach(function (s, n) { [key(s[0], s[1]), key(s[2], s[3])].forEach(function (k) { (map[k] = map[k] || []).push(n); }); });
+    for (var n = 0; n < segs.length; n++) {
+      if (used[n]) continue; used[n] = true;
+      var pts = [[segs[n][0], segs[n][1]], [segs[n][2], segs[n][3]]];
+      for (var dir = 0; dir < 2; dir++) {
+        var grow = true;
+        while (grow) {
+          grow = false; var end = dir ? pts[0] : pts[pts.length - 1], cand = map[key(end[0], end[1])] || [];
+          for (var c = 0; c < cand.length; c++) {
+            var m = cand[c]; if (used[m]) continue; used[m] = true; var s = segs[m];
+            var nxt = key(s[0], s[1]) === key(end[0], end[1]) ? [s[2], s[3]] : [s[0], s[1]];
+            if (dir) pts.unshift(nxt); else pts.push(nxt); grow = true; break;
+          }
+        }
+      }
+      out.push(pts);
+    }
+    return out;
+  }
+  /* place an arrowhead at fraction u along a polyline */
+  function headAlong(pts, u, c, s, flip) {
+    if (pts.length < 3) return ''; var L = 0, i, seg = [];
+    for (i = 1; i < pts.length; i++) { var d = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); seg.push(d); L += d; }
+    var target = L * u, acc = 0;
+    for (i = 1; i < pts.length; i++) { if (acc + seg[i - 1] >= target) { var t = (target - acc) / (seg[i - 1] || 1), a = pts[i - 1], b = pts[i], p = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }; return flip ? Hd(p, a.x - b.x, a.y - b.y, c, s) : Hd(p, b.x - a.x, b.y - a.y, c, s); } acc += seg[i - 1]; }
+    return '';
+  }
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function boot(init) {
+    var t0 = Date.now();
+    (function wait() {
+      if (window.MathJax && MathJax.startup && MathJax.startup.promise && MathJax.tex2svg) {
+        MathJax.startup.promise.then(function () { HAS_MJ = true; init(); return MathJax.typesetPromise ? MathJax.typesetPromise() : null; }).catch(function () { init(); });
+      } else if (Date.now() - t0 > 6000) init(); else setTimeout(wait, 60);
+    })();
+  }
+
+  /* ---- lighting: per-figure defs, gradients, shading ---- */
+  var FIG = 'f', GID = 0, DEFS = '';
+  function beginFig(id) { FIG = id; GID = 0; DEFS = ''; }
+  function endFig(s) { return '<defs>' + DEFS + '</defs>' + s; }
+  function hx2(h) { h = h.replace('#', ''); return [parseInt(h.substr(0, 2), 16), parseInt(h.substr(2, 2), 16), parseInt(h.substr(4, 2), 16)]; }
+  function rgb(c) { return '#' + c.map(function (x) { x = Math.max(0, Math.min(255, Math.round(x))); return (x < 16 ? '0' : '') + x.toString(16); }).join(''); }
+  function scl(h, k) { var c = hx2(h); if (k <= 1) return rgb(c.map(function (x) { return x * k; })); return rgb(c.map(function (x) { return x + (255 - x) * (k - 1); })); }
+  var LIGHT = (function () { var l = [0.55, -0.5, 0.67], n = Math.hypot(l[0], l[1], l[2]); return [l[0] / n, l[1] / n, l[2] / n]; })();
+  function lum(n) { return 0.5 + 0.62 * Math.max(0, dot3(n, LIGHT)); }
+  function gLin(x1, y1, x2, y2, stops) {
+    var id = FIG + 'g' + (GID++);
+    DEFS += '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="' + f1(x1) + '" y1="' + f1(y1) + '" x2="' + f1(x2) + '" y2="' + f1(y2) + '">' + stops.map(function (s) { return '<stop offset="' + s[0] + '" stop-color="' + s[1] + '"' + (s[2] !== undefined ? ' stop-opacity="' + s[2] + '"' : '') + '/>'; }).join('') + '</linearGradient>';
+    return 'url(#' + id + ')';
+  }
+  function gRad(cx, cy, r, stops, fx, fy) {
+    var id = FIG + 'g' + (GID++);
+    DEFS += '<radialGradient id="' + id + '" gradientUnits="userSpaceOnUse" cx="' + f1(cx) + '" cy="' + f1(cy) + '" r="' + f1(r) + '" fx="' + f1(fx === undefined ? cx : fx) + '" fy="' + f1(fy === undefined ? cy : fy) + '">' + stops.map(function (s) { return '<stop offset="' + s[0] + '" stop-color="' + s[1] + '"' + (s[2] !== undefined ? ' stop-opacity="' + s[2] + '"' : '') + '/>'; }).join('') + '</radialGradient>';
+    return 'url(#' + id + ')';
+  }
+  function softShadow(cx, cy, rx, ry, op) {
+    var id = FIG + 'blur' + (GID++);
+    DEFS += '<filter id="' + id + '" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="' + f1(Math.max(2, ry * 0.45)) + '"/></filter>';
+    return '<ellipse cx="' + f1(cx) + '" cy="' + f1(cy) + '" rx="' + f1(rx) + '" ry="' + f1(ry) + '" fill="#000" opacity="' + (op || 0.18) + '" filter="url(#' + id + ')"/>';
+  }
+  /* shaded box: every visible face gets a Lambert tone and a soft diagonal gradient */
+  function box3(v, x0, x1, y0, y1, z0, z1, base, o) {
+    o = o || {}; var s = '', P = function (x, y, z) { return v.p([x, y, z]); };
+    var faces = [
+      [[1, 0, 0], [P(x1, y0, z1), P(x1, y1, z1), P(x1, y1, z0), P(x1, y0, z0)]],
+      [[-1, 0, 0], [P(x0, y0, z1), P(x0, y1, z1), P(x0, y1, z0), P(x0, y0, z0)]],
+      [[0, 1, 0], [P(x1, y1, z1), P(x0, y1, z1), P(x0, y1, z0), P(x1, y1, z0)]],
+      [[0, -1, 0], [P(x1, y0, z1), P(x0, y0, z1), P(x0, y0, z0), P(x1, y0, z0)]],
+      [[0, 0, 1], [P(x1, y0, z1), P(x1, y1, z1), P(x0, y1, z1), P(x0, y0, z1)]],
+      [[0, 0, -1], [P(x1, y0, z0), P(x1, y1, z0), P(x0, y1, z0), P(x0, y0, z0)]]
+    ];
+    faces.forEach(function (f) {
+      if (dot3(f[0], v.VW) <= 0) return;
+      var k = lum(f[0]), q = f[1], c1 = scl(base, k * 1.12), c2 = scl(base, k * 0.86);
+      var fill = gLin(q[0].x, q[0].y, q[2].x, q[2].y, [[0, c1], [1, c2]]);
+      s += Pg(q, { fill: fill, fop: o.fop, stroke: o.edge || scl(base, 0.45), w: o.w || 0.8 });
+    });
+    return s;
+  }
+  /* shaded solid cylinder along y (screen-horizontal axis) */
+  function cyl3(v, cx, cz, r, y0, y1, base, o) {
+    o = o || {}; var a = ringY(v, cx, cz, r, y0, 56), b = ringY(v, cx, cz, r, y1, 56), H = hull(a.concat(b)), ymin = 1e9, ymax = -1e9;
+    H.forEach(function (p) { ymin = Math.min(ymin, p.y); ymax = Math.max(ymax, p.y); });
+    var mx = (H[0].x + H[Math.floor(H.length / 2)].x) / 2;
+    var body = gLin(mx, ymin, mx, ymax, [[0, scl(base, 0.62)], [0.16, scl(base, 1.32)], [0.32, scl(base, 1.08)], [0.7, scl(base, 0.78)], [1, scl(base, 0.48)]]);
+    var c = v.p([cx, y1, cz]), rr = r * v.s;
+    var cap = gRad(c.x, c.y, rr * 1.2, [[0, scl(base, 1.35)], [1, scl(base, 0.85)]], c.x - rr * 0.35, c.y - rr * 0.4);
+    return Pg(H, { fill: body, stroke: scl(base, 0.4), w: 0.8, op: o.op }) + Pg(b, { fill: cap, stroke: scl(base, 0.4), w: 0.8, op: o.op });
+  }
+  /* copper wire drawn as a lit tube */
+  function tube(pts, w, front) {
+    if (!front) return Pl(pts, { stroke: '#8a5a3a', w: w * 0.75, op: 0.45 });
+    var hl = pts.map(function (p) { return { x: p.x, y: p.y - w * 0.22 }; });
+    return Pl(pts, { stroke: '#4a2309', w: w + 1.3 }) + Pl(pts, { stroke: '#b5651f', w: w }) + Pl(hl, { stroke: '#f2c08f', w: Math.max(0.6, w * 0.32), op: 0.9 });
+  }
+  /* vertical round conductor (axis along z) */
+  function rod3(v, x, y, z0, z1, r, base, op) {
+    var a = v.p([x, y - r, z0]), b = v.p([x, y + r, z0]), c = v.p([x, y + r, z1]), d = v.p([x, y - r, z1]);
+    var fill = gLin(a.x, 0, b.x, 0, [[0, scl(base, 0.55)], [0.3, scl(base, 1.35)], [0.55, scl(base, 1.0)], [1, scl(base, 0.5)]]);
+    return Pg([a, b, c, d], { fill: fill, stroke: scl(base, 0.4), w: 0.7, op: op });
+  }
+  /* ---- standard circuit symbols ---- */
+  function symBattery(x, y, horiz) { /* long plate = positive, drawn first in the direction of travel */
+    if (horiz) return Ln(x - 3, y - 11, x - 3, y + 11, { stroke: COL.ink, w: 1.5 }) + Ln(x + 3, y - 6, x + 3, y + 6, { stroke: COL.ink, w: 3.5, cap: 'butt' }) + TEX('+', x - 10, y - 13, { size: 11, halo: false });
+    return Ln(x - 11, y - 3, x + 11, y - 3, { stroke: COL.ink, w: 1.5 }) + Ln(x - 6, y + 3, x + 6, y + 3, { stroke: COL.ink, w: 3.5, cap: 'butt' }) + TEX('+', x + 15, y - 9, { size: 11, halo: false });
+  }
+  function symAC(x, y, r) { r = r || 11; var d = 'M' + f1(x - r * 0.6) + ' ' + f1(y); for (var i = 1; i <= 20; i++) { var u = i / 20; d += ' L' + f1(x - r * 0.6 + 1.2 * r * u) + ' ' + f1(y - r * 0.38 * Math.sin(2 * Math.PI * u)); } return Ci(x, y, r, { fill: '#fff', stroke: COL.ink, w: 1.4 }) + Pa(d, { stroke: COL.ink, w: 1.2 }); }
+  function symMeter(x, y, L, r) { r = r || 11; return Ci(x, y, r, { fill: '#fff', stroke: COL.ink, w: 1.4 }) + TEX('\\mathrm{' + L + '}', x, y, { size: 14, halo: false }); }
+  function symSwitch(x0, y, x1, closed) { /* horizontal SPST between x0 and x1 */
+    var tip = closed ? { x: x1, y: y } : { x: x1 - 2, y: y - (x1 - x0) * 0.5 };
+    return Ci(x0, y, 2.2, { fill: '#fff', stroke: COL.ink, w: 1.2 }) + Ci(x1, y, 2.2, { fill: '#fff', stroke: COL.ink, w: 1.2 }) + Ln(x0, y, tip.x, tip.y, { stroke: COL.ink, w: 1.5 });
+  }
+  function symRheo(x0, y, x1) { /* IEEE zig-zag resistor with variable arrow */
+    var n = 6, d = 'M' + f1(x0) + ' ' + f1(y), w = (x1 - x0) / n;
+    for (var i = 0; i < n; i++) d += ' L' + f1(x0 + w * (i + 0.5)) + ' ' + f1(y + (i % 2 ? 5 : -5)); d += ' L' + f1(x1) + ' ' + f1(y);
+    return Pa(d, { stroke: COL.ink, w: 1.4 }) + Ar({ x: x0 - 2, y: y + 10 }, { x: x1 + 4, y: y - 11 }, COL.ink, 1.1, 7);
+  }
+  var S = { V: 100, d: 4, h: 6, q: 2, slide: 3 };
+  var P = { x: 0.4, y: 0.8 }, PA = { x: -1.2, y: 1.6 }, PB = { x: 1.3, y: -1.4 }, mov = null;
+  var reg = {}, NS = 60, X0 = 370, Y0 = 240, SC = 40, XW = 8, YW = 5.5;
+  function px(x) { return X0 + SC * x; } function py(y) { return Y0 - SC * y; }
+  var K = 1 / (2 * Math.PI * EPS0), strips = [], sig = [];
+  function Fp(X, u) { var r2 = X * X + u * u; return 0.5 * u * Math.log(r2 || 1e-300) - u + (Math.abs(X) > 1e-15 ? X * Math.atan(u / X) : 0); }
+  function stripV(s, x, y) { var X = x - s.x; return -K * (Fp(X, s.y2 - y) - Fp(X, s.y1 - y)); }
+  function solve() {
+    strips = []; var dm = S.d / 100, hm = S.h / 100, w = hm / NS, k, j;
+    [[-dm / 2, 1], [dm / 2, 0]].forEach(function (pl) { for (k = 0; k < NS; k++) strips.push({ x: pl[0], y1: -hm / 2 + k * w, y2: -hm / 2 + (k + 1) * w, vt: pl[1] - 0.5 }); });
+    var n = strips.length, A = [], b = [];
+    for (j = 0; j < n; j++) { var row = new Float64Array(n), yc = (strips[j].y1 + strips[j].y2) / 2; for (k = 0; k < n; k++) row[k] = stripV(strips[k], strips[j].x, yc); A.push(row); b.push(strips[j].vt); }
+    for (var c = 0; c < n; c++) {
+      var piv = c; for (j = c + 1; j < n; j++) if (Math.abs(A[j][c]) > Math.abs(A[piv][c])) piv = j;
+      var tr = A[c]; A[c] = A[piv]; A[piv] = tr; var tb = b[c]; b[c] = b[piv]; b[piv] = tb;
+      for (j = c + 1; j < n; j++) { var f = A[j][c] / A[c][c]; if (!f) continue; for (k = c; k < n; k++) A[j][k] -= f * A[c][k]; b[j] -= f * b[c]; }
+    }
+    sig = new Float64Array(n);
+    for (j = n - 1; j >= 0; j--) { var sm = b[j]; for (k = j + 1; k < n; k++) sm -= A[j][k] * sig[k]; sig[j] = sm / A[j][j]; }
+  }
+  function Vu(xc, yc) { var x = xc / 100, y = yc / 100, v = 0; for (var k = 0; k < strips.length; k++) v += sig[k] * stripV(strips[k], x, y); return v + 0.5; }
+  function Eu(xc, yc) {
+    var x = xc / 100, y = yc / 100, ex = 0, ey = 0;
+    for (var k = 0; k < strips.length; k++) {
+      var s = strips[k], X = x - s.x, a1 = s.y1 - y, a2 = s.y2 - y, X2 = X * X;
+      var at = Math.abs(X) > 1e-12 ? Math.atan(a2 / X) - Math.atan(a1 / X) : 0;
+      ex += sig[k] * K * at; ey += sig[k] * K * 0.5 * Math.log((X2 + a1 * a1 + 1e-300) / (X2 + a2 * a2 + 1e-300));
+    }
+    return { x: ex, y: ey };
+  }
+  function inPlate(x, y, tol) { return Math.abs(Math.abs(x) - S.d / 2) < tol && Math.abs(y) < S.h / 2 + tol; }
+  var NX = 161, NY = 111, grid = null, eqData = [], flSvg = '', arSvg = '';
+  function rebuild() {
+    solve();
+    grid = new Float64Array(NX * NY);
+    for (var j = 0; j < NY; j++) for (var i = 0; i < NX; i++) grid[j * NX + i] = Vu(-XW + 2 * XW * i / (NX - 1), YW - 2 * YW * j / (NY - 1));
+    eqData = [];
+    var tips = [[px(-S.d / 2), py(-S.h / 2)], [px(S.d / 2), py(-S.h / 2)]];
+    for (var lv = 1; lv <= 9; lv++) {
+      var polys = joinSegs(contour(grid, NX, NY, lv / 10)), best = null, pl = [];
+      polys.forEach(function (p) {
+        var pts = p.map(function (q) { return { x: px(-XW + 2 * XW * q[0] / (NX - 1)), y: py(YW - 2 * YW * q[1] / (NY - 1)) }; }); pl.push(pts);
+        pts.forEach(function (q) { if (tips.some(function (tp) { return Math.hypot(q.x - tp[0], q.y - tp[1]) < 36; })) return; if (q.y < 440 && q.y > 40 && (!best || Math.abs(q.y - 420) < Math.abs(best.y - 420))) best = q; });
+      });
+      eqData.push({ lv: lv, polys: pl, lab: best });
+    }
+    var cont = [], hx = S.d / 2, e = 0.06, hh = S.h / 2 + e, xL = -hx - e, xR = -hx + e, n = 120;
+    function seg(a, b2, nx, ny) { for (var t = 0; t < n; t++) { var u = (t + 0.5) / n, x = a.x + (b2.x - a.x) * u, y = a.y + (b2.y - a.y) * u, E = Eu(x, y), L = Math.hypot(b2.x - a.x, b2.y - a.y) / n; cont.push({ x: x, y: y, f: Math.max(0, E.x * nx + E.y * ny) * L }); } }
+    seg({ x: xR, y: -hh }, { x: xR, y: hh }, 1, 0); seg({ x: xR, y: hh }, { x: xL, y: hh }, 0, 1); seg({ x: xL, y: hh }, { x: xL, y: -hh }, -1, 0); seg({ x: xL, y: -hh }, { x: xR, y: -hh }, 0, -1);
+    var tot = 0; cont.forEach(function (c) { tot += c.f; });
+    var NL = 24, acc = 0, nextT = tot / NL / 2, seeds = [];
+    cont.forEach(function (c) { acc += c.f; while (acc >= nextT && seeds.length < NL) { seeds.push(c); nextT += tot / NL; } });
+    flSvg = '';
+    seeds.forEach(function (s0) {
+      var x = s0.x, y = s0.y, pts = [{ x: px(x), y: py(y) }], ds = 0.03;
+      for (var st = 0; st < 1500; st++) {
+        var E1 = Eu(x, y), m1 = Math.hypot(E1.x, E1.y) || 1, xm = x + 0.5 * ds * E1.x / m1, ym = y + 0.5 * ds * E1.y / m1;
+        var E2 = Eu(xm, ym), m2 = Math.hypot(E2.x, E2.y) || 1; x += ds * E2.x / m2; y += ds * E2.y / m2;
+        pts.push({ x: px(x), y: py(y) });
+        if (Math.abs(x) > XW + 0.3 || Math.abs(y) > YW + 0.3) break;
+        if (Math.abs(x - hx) < 0.035 && Math.abs(y) < S.h / 2 + 0.02) break;
+      }
+      flSvg += Pl(pts, { stroke: COL.ef, w: 1.15 }) + headAlong(pts, 0.5, COL.ef, 9);
+    });
+    arSvg = ''; var Eref = 1 / (S.d / 100);
+    for (var gy = -5; gy <= 5; gy++) for (var gx = -7; gx <= 7; gx++) {
+      var xg = gx, yg = gy * 0.9; if (inPlate(xg, yg, 0.25)) continue;
+      var E = Eu(xg, yg), m = Math.hypot(E.x, E.y), L = Math.min(30, 30 * m / Eref); if (L < 3) continue;
+      arSvg += Ar({ x: px(xg) - E.x / m * L / 2, y: py(yg) + E.y / m * L / 2 }, { x: px(xg) + E.x / m * L / 2, y: py(yg) - E.y / m * L / 2 }, COL.ef, 1.1, 7);
+    }
+  }
+  function frame() {
+    var s = Rc(px(-XW), py(YW), 2 * XW * SC, 2 * YW * SC, { stroke: COL.ink, w: 1 });
+    for (var t = -8; t <= 8; t += 2) s += Ln(px(t), py(-YW), px(t), py(-YW) - 5, { stroke: COL.ink, w: 1 }) + Ln(px(t), py(YW), px(t), py(YW) + 5, { stroke: COL.ink, w: 1 }) + TEX(String(t), px(t), py(-YW) + 13, { size: 12, halo: false });
+    for (t = -4; t <= 4; t += 2) s += Ln(px(-XW), py(t), px(-XW) + 5, py(t), { stroke: COL.ink, w: 1 }) + Ln(px(XW), py(t), px(XW) - 5, py(t), { stroke: COL.ink, w: 1 }) + TEX(String(t), px(-XW) - 8, py(t), { size: 12, an: 'rm', halo: false });
+    s += TEX('x\\ (\\text{cm})', px(XW), py(-YW) + 30, { size: 14, an: 'rm', halo: false }) + TEX('y\\ (\\text{cm})', px(-XW) - 30, py(YW) - 10, { size: 14, an: 'lm', halo: false });
+    return s;
+  }
+  function draw() {
+    var s = '<defs><clipPath id="clp"><rect x="' + px(-XW) + '" y="' + py(YW) + '" width="' + 2 * XW * SC + '" height="' + 2 * YW * SC + '"/></clipPath></defs>', hx = S.d / 2, hh = S.h / 2, inner = '';
+    if (document.getElementById('fAr').checked) inner += arSvg;
+    if (document.getElementById('fFl').checked) inner += flSvg;
+    if (document.getElementById('fEq').checked) eqData.forEach(function (e) { e.polys.forEach(function (p) { inner += Pl(p, { stroke: '#4d4d4d', w: 1, dash: '5 4' }); }); });
+    s += '<g clip-path="url(#clp)">' + inner + '</g>';
+    if (document.getElementById('fEq').checked) eqData.forEach(function (e) { if (e.lab) s += TEX(M(S.V * e.lv / 10, 0) + '\\,\\text{V}', e.lab.x, e.lab.y, { size: 12, color: '#333' }); });
+    s += Rc(px(-hx) - 4, py(hh), 8, SC * S.h, { fill: COL.plate, stroke: COL.ink, w: 1 }) + Rc(px(hx) - 4, py(hh), 8, SC * S.h, { fill: COL.plate, stroke: COL.ink, w: 1 });
+    for (var k = 0; k < 6; k++) {
+      var yy = py(-hh + S.h * (k + 0.5) / 6);
+      s += Ln(px(-hx) - 3, yy, px(-hx) + 3, yy, { stroke: COL.pos, w: 1.4 }) + Ln(px(-hx), yy - 3, px(-hx), yy + 3, { stroke: COL.pos, w: 1.4 }) + Ln(px(hx) - 3, yy, px(hx) + 3, yy, { stroke: COL.neg, w: 1.6 });
+    }
+    s += TEX('V=' + M(S.V, 0) + '\\,\\text{V}', px(-hx), py(hh) - 14, { size: 14 }) + TEX('0\\,\\text{V}', px(hx), py(hh) - 14, { size: 14 });
+    s += TEX('d', px(0), py(-hh) + 16, { size: 15 }) + Ln(px(-hx), py(-hh) + 6, px(hx), py(-hh) + 6, { stroke: COL.ink, w: 0.8 }) + Hd({ x: px(-hx) + 4, y: py(-hh) + 6 }, -1, 0, COL.ink, 6) + Hd({ x: px(hx) - 4, y: py(-hh) + 6 }, 1, 0, COL.ink, 6);
+    s += frame();
+    var q = S.q * 1e-9, Eref = S.V / (S.d / 100), el = function (id) { return document.getElementById(id); };
+    if (S.slide === 3) {
+      var E = Eu(P.x, P.y); E.x *= S.V; E.y *= S.V; var m = Math.hypot(E.x, E.y), Fm = Math.abs(q) * m, L = Math.min(130, 80 * m / Eref), sg = S.q >= 0 ? 1 : -1;
+      if (m > 0 && L > 4 && S.q !== 0) { var tip = { x: px(P.x) + sg * E.x / m * L, y: py(P.y) - sg * E.y / m * L }; s += Ar({ x: px(P.x), y: py(P.y) }, tip, COL.ink, 2.2, 13) + TEX('\\mathbf{F}=q\\mathbf{E}', tip.x + sg * E.x / m * 10, tip.y - sg * E.y / m * 10 - 14, { size: 15 }); }
+      s += Ci(px(P.x), py(P.y), 8, { fill: S.q >= 0 ? COL.pos : COL.neg, stroke: '#fff', w: 1.5 }).replace('<circle', '<circle data-p="P" style="cursor:grab"') + TEX(S.q >= 0 ? '+q' : '-q', px(P.x) - 12, py(P.y) + 14, { size: 14, an: 'rm' });
+      el('o1').innerHTML = '<dt>Test-charge position (<i>x</i>, <i>y</i>)</dt><dd>(' + M(P.x, 2) + ', ' + M(P.y, 2) + ') cm</dd><dt>|<b>E</b>| at that point</dt><dd>' + eng(m, 'V/m') + '</dd><dt>Infinite-plate value <i>V</i>/<i>d</i></dt><dd>' + eng(Eref, 'V/m') + '</dd>';
+      el('o2').innerHTML = '<dt>Test charge <i>q</i></dt><dd>' + M(S.q, 1) + ' nC</dd><dt>|<b>F</b>| = |<i>q</i>||<b>E</b>|</dt><dd>' + eng(Fm, 'N') + '</dd><dt>Direction</dt><dd>' + (S.q === 0 ? '—' : (S.q > 0 ? 'along <b>E</b>' : 'opposite to <b>E</b>')) + '</dd>';
+      el('mean').innerHTML = 'Between the plates the field is nearly uniform with magnitude close to <i>V</i>/<i>d</i>. Drag the charge outside: the field weakens rapidly and bends around the plate edges (fringing). A negative charge is pushed against the field.';
+      el('eqband').innerHTML = '\\( \\mathbf{F}=q\\mathbf{E},\\qquad |\\mathbf{E}|\\approx \\dfrac{V}{d}\\ \\text{(between the plates, away from the edges)} \\)';
+      el('cap').innerHTML = '<b>Figure 1.3</b> Field lines leave the positive plate and end on the negative plate, drawn with equal flux between neighbouring lines so their density shows field strength. Drag the test charge.';
+    } else {
+      var VA = S.V * Vu(PA.x, PA.y), VB = S.V * Vu(PB.x, PB.y), Wf = q * (VA - VB), integ = 0, n = 200, dx = PB.x - PA.x, dy = PB.y - PA.y;
+      for (var i = 0; i <= n; i++) { var u = i / n, Eq = Eu(PA.x + dx * u, PA.y + dy * u), wgt = (i === 0 || i === n) ? 1 : (i % 2 ? 4 : 2); integ += wgt * (Eq.x * dx + Eq.y * dy) / 100; }
+      integ *= S.V / (3 * n);
+      s += Ln(px(PA.x), py(PA.y), px(PB.x), py(PB.y), { stroke: COL.ink, w: 1.2, dash: '2 4' });
+      [[PA, 'A', -14], [PB, 'B', 14]].forEach(function (o) { s += Ci(px(o[0].x), py(o[0].y), 7, { fill: '#fff', stroke: COL.ink, w: 1.8 }).replace('<circle', '<circle data-p="' + o[1] + '" style="cursor:grab"') + TEX(o[1], px(o[0].x) + o[2], py(o[0].y) - 14, { size: 16 }); });
+      var cur = mov ? mov.p : null;
+      if (cur) s += Ci(px(cur.x), py(cur.y), 8, { fill: S.q >= 0 ? COL.pos : COL.neg, stroke: '#fff', w: 1.5 });
+      var Vc = cur ? S.V * Vu(cur.x, cur.y) : VA;
+      el('o1').innerHTML = '<dt>Potential at A, <i>V<sub>A</sub></i></dt><dd>' + M(VA, 2) + ' V</dd><dt>Potential at B, <i>V<sub>B</sub></i></dt><dd>' + M(VB, 2) + ' V</dd><dt>∫<sub>A</sub><sup>B</sup> <b>E</b>·d<b>L</b> along the dotted path (numerical)</dt><dd>' + M(integ, 2) + ' V</dd>';
+      el('o2').innerHTML = '<dt>Work done by the field <i>q</i>(<i>V<sub>A</sub></i> − <i>V<sub>B</sub></i>)</dt><dd>' + eng(Wf, 'J') + '</dd><dt>Work by an external agent (quasi-static)</dt><dd>' + eng(-Wf, 'J') + '</dd><dt>Potential energy <i>U</i> = <i>qV</i> ' + (cur ? '(moving)' : 'at A') + '</dt><dd>' + eng(q * Vc, 'J') + '</dd>';
+      el('mean').innerHTML = Wf > 0 ? 'The field does positive work: the charge loses potential energy, and if released it gains the same amount of kinetic energy.' : (Wf < 0 ? 'The field does negative work: an external agent must push the charge toward B, and that energy is stored as potential energy.' : 'A and B lie on the same equipotential, so no work is needed to move the charge between them.');
+      el('eqband').innerHTML = '\\( V_A-V_B=\\displaystyle\\int_A^B \\mathbf{E}\\cdot d\\mathbf{L},\\qquad W_{\\text{field}}=q\\,(V_A-V_B),\\qquad U=qV \\)';
+      el('cap').innerHTML = '<b>Figure 1.4</b> Dashed lines are equipotentials, normal to the field lines everywhere. Drag A and B and move the charge. The potential difference is independent of path, so the work follows from the end-point potentials alone.';
+    }
+    document.getElementById('fg').innerHTML = s;
+    if (HAS_MJ && MathJax.typesetPromise) { MathJax.typesetClear && MathJax.typesetClear([el('eqband')]); MathJax.typesetPromise([el('eqband')]); }
+  }
+  function build() {
+    var gP = document.getElementById('gP'), gQ = document.getElementById('gQ'), tmr = null;
+    function geo() { clearTimeout(tmr); tmr = setTimeout(function () { rebuild(); draw(); }, 30); }
+    makeRow(gP, 'V', 'Voltage <i>V</i> (V)', 0, 200, 1, S.V, function (v) { S.V = v; draw(); }, reg);
+    makeRow(gP, 'd', 'Spacing <i>d</i> (cm)', 1, 8, 0.1, S.d, function (v) { S.d = v; geo(); }, reg);
+    makeRow(gP, 'h', 'Plate height (cm)', 1, 9, 0.1, S.h, function (v) { S.h = v; geo(); }, reg);
+    makeRow(gQ, 'q', 'Charge <i>q</i> (nC)', -5, 5, 0.1, S.q, function (v) { S.q = v; draw(); }, reg);
+    ['fFl', 'fAr', 'fEq'].forEach(function (id) { document.getElementById(id).addEventListener('change', draw); });
+    function setSlide(n) {
+      S.slide = n; mov = null;
+      document.getElementById('t3').setAttribute('aria-selected', n === 3); document.getElementById('t4').setAttribute('aria-selected', n === 4);
+      document.getElementById('fEq').checked = n === 4; document.getElementById('mvBtns').hidden = n !== 4; draw();
+    }
+    document.getElementById('t3').addEventListener('click', function () { setSlide(3); });
+    document.getElementById('t4').addEventListener('click', function () { setSlide(4); });
+    document.getElementById('btnMove').addEventListener('click', function () {
+      var t0 = null; mov = { p: { x: PA.x, y: PA.y } };
+      function stp(ts) { if (!mov) return; if (t0 === null) t0 = ts; var u = Math.min(1, (ts - t0) / (REDUCED ? 1 : 2200)); mov.p = { x: PA.x + (PB.x - PA.x) * u, y: PA.y + (PB.y - PA.y) * u }; draw(); if (u < 1) requestAnimationFrame(stp); }
+      requestAnimationFrame(stp);
+    });
+    var svg = document.getElementById('fg'), drag = null;
+    svg.addEventListener('pointerdown', function (ev) { var t = ev.target.closest('[data-p]'); if (!t) return; drag = t.getAttribute('data-p'); mov = null; svg.setPointerCapture(ev.pointerId); ev.preventDefault(); });
+    svg.addEventListener('pointermove', function (ev) {
+      if (!drag) return; var p = svgPt(svg, ev), x = Math.max(-XW + 0.2, Math.min(XW - 0.2, (p.x - X0) / SC)), y = Math.max(-YW + 0.2, Math.min(YW - 0.2, (Y0 - p.y) / SC));
+      var o = drag === 'P' ? P : drag === 'A' ? PA : PB; o.x = Math.round(x * 20) / 20; o.y = Math.round(y * 20) / 20; draw();
+    });
+    svg.addEventListener('pointerup', function () { drag = null; }); svg.addEventListener('pointercancel', function () { drag = null; });
+    addTools('fg', 'fig1-3-parallel-plates');
+    rebuild(); setSlide(3);
+  }
+  boot(build);
+})();
+</script>
+
+</body></html>

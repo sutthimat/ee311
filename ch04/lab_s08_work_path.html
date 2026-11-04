@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Work Is Path-Independent</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f6f5f1; --panel:#ffffff; --ink:#16181d; --muted:#4d535e; --line:#d6d2c8;
+  --pos:#c8322c; --neg:#1f5fbf; --acc:#d97000; --grn:#12804a; --vio:#7a3fb3;
+  /* ~18.5px at 1280x720; scales with the iframe/container */
+  font-size: clamp(12px, min(1.45vw, 2.6vh), 30px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.3}
+#app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
+header{padding:.35rem 1rem .3rem;border-bottom:2px solid var(--line);display:flex;align-items:baseline;column-gap:1.2rem;flex-wrap:wrap}
+header h1{font-size:1.3rem;margin:0;font-weight:700;white-space:nowrap}
+.notice{margin:0;font-size:1rem;color:var(--muted)}
+.notice b{color:var(--acc)}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(15rem,23rem);min-height:0}
+#stage{position:relative;min-width:0;min-height:0;overflow:hidden}
+#stage canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+aside{position:relative;border-left:2px solid var(--line);background:var(--panel);padding:.4rem .7rem;overflow-y:auto;overflow-x:hidden;
+  display:flex;flex-direction:column;gap:.35rem;min-height:0}
+aside>*{flex-shrink:0}
+aside h3{font-size:1rem;margin:.1rem 0 0;color:var(--muted);font-weight:700}
+.row{display:grid;grid-template-columns:5.6rem minmax(0,1fr) 5.2rem;align-items:center;gap:.35rem;font-size:1rem}
+.row label{white-space:nowrap}
+.row .val{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--acc);margin:0;height:1.3rem}
+.btns{display:flex;flex-wrap:wrap;gap:.3rem}
+button,select{font:inherit;font-size:1rem;padding:.1rem .55rem;border:1.5px solid #9a968c;border-radius:.4rem;background:#fff;color:var(--ink);cursor:pointer;line-height:1.35}
+button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+button:disabled{opacity:.4;cursor:default}
+.chk{display:inline-flex;align-items:center;gap:.3rem;margin-right:.6rem;white-space:nowrap;cursor:pointer}
+.chk input{width:1.05rem;height:1.05rem;accent-color:var(--acc);margin:0}
+table.ro{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:1rem}
+table.ro td{padding:.03rem .2rem;white-space:nowrap}
+table.ro td:last-child{text-align:right;font-weight:600}
+.formula{background:#f1eee6;border-radius:.4rem;padding:.25rem .5rem;font-size:1rem;overflow-x:auto;overflow-y:hidden}
+.formula .katex-display{margin:.15rem 0}
+.small{font-size:1rem;color:var(--muted)}
+.warn{color:var(--pos);font-weight:600}
+.tex.d{display:block}
+</style>
+
+<style>
+select{width:100%}
+.sw{display:inline-block;width:1.6rem;height:.35rem;border-radius:.2rem;vertical-align:middle;margin-right:.3rem}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <h1>Work in a static E field is path-independent</h1>
+  <p class="notice"><b>Notice:</b> the running totals differ along the way, but every path from A to B ends at the <b>same W = Q(V<sub>B</sub> − V<sub>A</sub>)</b>; around a closed loop W = 0.</p>
+</header>
+<main>
+  <div id="stage"><canvas id="cv"></canvas></div>
+  <aside>
+    <div class="btns"><span class="small" style="align-self:center">Field:</span><button id="fU" class="on">Uniform</button><button id="fP">Point charge</button></div>
+    <div class="row" id="rowE"><label>E₀</label><input type="range" id="e0" min="10" max="500" step="10" value="200"><span class="val" id="e0-v"></span></div>
+    <div class="row" id="rowEa"><label>E₀ angle</label><input type="range" id="ea" min="0" max="355" step="5" value="0"><span class="val" id="ea-v"></span></div>
+    <div class="row" id="rowQs" style="display:none"><label>Q<sub>source</sub></label><input type="range" id="qs" min="-10" max="10" step="0.5" value="5"><span class="val" id="qs-v"></span></div>
+    <div class="row"><label>test Q</label><input type="range" id="qt" min="-5" max="5" step="0.5" value="2"><span class="val" id="qt-v"></span></div>
+    <div class="row"><label><span class="sw" style="background:#d97000"></span>path 1</label><select id="p1"></select><span></span></div>
+    <div class="row"><label><span class="sw" style="background:#7a3fb3"></span>path 2</label><select id="p2"></select><span></span></div>
+    <div class="btns"><button id="bDraw">✎ Draw path 2</button><button id="bPlay">▶ Move test charge</button></div>
+    <label class="chk"><input type="checkbox" id="tLoop">Closed loop: path 1 out, path 2 back</label>
+    <table class="ro" id="tbl"></table>
+    <div class="formula">
+      <span class="tex d">W=-Q\int_A^B\mathbf E\cdot d\mathbf L=Q\,(V_B-V_A)</span>
+      <span class="tex d">\oint\mathbf E\cdot d\mathbf L=0</span>
+      <span class="small">W = work done by an external agent. Integral computed numerically along each drawn path (adaptive Gauss–Legendre). Drag A, B, or the curve handle ●.</span>
+    </div>
+  </aside>
+</main>
+</div>
+
+<!-- ===================== PHYSICS (pure, SI units, no DOM) ===================== -->
+<script id="physics">
+var PHYS = (function () {
+  const EPS0 = 8.854e-12, K = 1 / (4 * Math.PI * EPS0);
+  // field = {type:'uniform', E0, ang} or {type:'point', x, y, Q}
+  function E(f, x, y) {
+    if (f.type === 'uniform') return [f.E0 * Math.cos(f.ang), f.E0 * Math.sin(f.ang)];
+    const dx = x - f.x, dy = y - f.y, r2 = dx * dx + dy * dy, r = Math.sqrt(r2), c = K * f.Q / (r2 * r);
+    return [c * dx, c * dy];
+  }
+  function V(f, x, y) {   // reference: V = 0 at origin (uniform) / at infinity (point)
+    if (f.type === 'uniform') return -(f.E0 * Math.cos(f.ang) * x + f.E0 * Math.sin(f.ang) * y);
+    return K * f.Q / Math.hypot(x - f.x, y - f.y);
+  }
+  // ∫ E·dL along the straight segment p->q, adaptive (5-point Gauss-Legendre, bisect until converged)
+  const GX = [-0.9061798459386640, -0.5384693101056831, 0, 0.5384693101056831, 0.9061798459386640];
+  const GW = [0.2369268850561891, 0.4786286704993665, 0.5688888888888889, 0.4786286704993665, 0.2369268850561891];
+  function segGL(f, p, q) {
+    const dx = q[0] - p[0], dy = q[1] - p[1]; let s = 0;
+    for (let i = 0; i < 5; i++) { const t = 0.5 + 0.5 * GX[i], e = E(f, p[0] + t * dx, p[1] + t * dy); s += GW[i] * (e[0] * dx + e[1] * dy); }
+    return 0.5 * s;
+  }
+  function segInt(f, p, q, whole, depth) {
+    whole = whole == null ? segGL(f, p, q) : whole; depth = depth || 0;
+    const m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], a = segGL(f, p, m), b = segGL(f, m, q);
+    if (depth > 18 || Math.abs(a + b - whole) <= 1e-11 * (Math.abs(a) + Math.abs(b)) + 1e-300) return a + b;
+    return segInt(f, p, m, a, depth + 1) + segInt(f, m, q, b, depth + 1);
+  }
+  // Work W = -Q ∫ E·dL along a polyline; returns cumulative array (W after each vertex) for animation/plotting
+  function workAlong(f, Q, pts) {
+    const cum = [0]; let s = 0;
+    for (let i = 1; i < pts.length; i++) { s += -Q * segInt(f, pts[i - 1], pts[i]); cum.push(s); }
+    return cum;
+  }
+  const workExact = (f, Q, A, B) => Q * (V(f, B[0], B[1]) - V(f, A[0], A[1]));
+  // path generators (polyline vertices), all from A to B
+  function straight(A, B, n) { n = n || 2; const o = []; for (let i = 0; i < n; i++) { const t = i / (n - 1); o.push([A[0] + t * (B[0] - A[0]), A[1] + t * (B[1] - A[1])]); } return o; }
+  function bezier(A, C, B, n) { n = n || 160; const o = []; for (let i = 0; i < n; i++) { const t = i / (n - 1), u = 1 - t; o.push([u * u * A[0] + 2 * u * t * C[0] + t * t * B[0], u * u * A[1] + 2 * u * t * C[1] + t * t * B[1]]); } return o; }
+  function concat(...ps) { const o = []; ps.forEach((p, i) => o.push(...(i ? p.slice(1) : p))); return o; }
+  return { EPS0, K, E, V, segInt, workAlong, workExact, straight, bezier, concat };
+})();
+</script>
+<script id="numerics">
+/* ===== Generic numerics (pure functions, no DOM) ===== */
+var NUM = (function () {
+  // Adaptive Simpson quadrature. tol = absolute tolerance.
+  function adaptSimpson(f, a, b, tol, minDepth, maxDepth) {
+    minDepth = minDepth == null ? 4 : minDepth;
+    maxDepth = maxDepth == null ? 22 : maxDepth;
+    function rec(a, b, fa, fm, fb, whole, tol, depth) {
+      const m = 0.5 * (a + b), lm = 0.5 * (a + m), rm = 0.5 * (m + b);
+      const flm = f(lm), frm = f(rm);
+      const left = (m - a) / 6 * (fa + 4 * flm + fm);
+      const right = (b - m) / 6 * (fm + 4 * frm + fb);
+      const diff = left + right - whole;
+      if (depth >= maxDepth || (depth >= minDepth && Math.abs(diff) <= 15 * tol)) return left + right + diff / 15;
+      const t2 = Math.max(tol / 2, 1e-13 * Math.abs(whole));
+      return rec(a, m, fa, flm, fm, left, t2, depth + 1) + rec(m, b, fm, frm, fb, right, t2, depth + 1);
+    }
+    const fa = f(a), fb = f(b), fm = f(0.5 * (a + b));
+    return rec(a, b, fa, fm, fb, (b - a) / 6 * (fa + 4 * fm + fb), tol, 0);
+  }
+
+  // Gauss-Legendre nodes/weights on [-1,1]
+  const glCache = {};
+  function gaussLegendre(n) {
+    if (glCache[n]) return glCache[n];
+    const x = [], w = [];
+    for (let i = 1; i <= n; i++) {
+      let z = Math.cos(Math.PI * (i - 0.25) / (n + 0.5)), pp = 1;
+      for (let it = 0; it < 100; it++) {
+        let p1 = 1, p2 = 0;
+        for (let j = 1; j <= n; j++) { const p3 = p2; p2 = p1; p1 = ((2 * j - 1) * z * p2 - (j - 1) * p3) / j; }
+        pp = n * (z * p1 - p2) / (z * z - 1);
+        const z1 = z; z = z1 - p1 / pp;
+        if (Math.abs(z - z1) < 1e-15) break;
+      }
+      x.push(z); w.push(2 / ((1 - z * z) * pp * pp));
+    }
+    return (glCache[n] = { x, w });
+  }
+  // composite Gauss-Legendre in 2D over [a,b]x[c,d]
+  function gl2(f, a, b, c, d, n, panels) {
+    const g = gaussLegendre(n); let s = 0;
+    const hu = (b - a) / panels, hv = (d - c) / panels;
+    for (let pu = 0; pu < panels; pu++) for (let pv = 0; pv < panels; pv++) {
+      const u0 = a + (pu + 0.5) * hu, v0 = c + (pv + 0.5) * hv;
+      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++)
+        s += g.w[i] * g.w[j] * f(u0 + 0.5 * hu * g.x[i], v0 + 0.5 * hv * g.x[j]);
+    }
+    return s * 0.25 * hu * hv;
+  }
+
+  // Trace a 2D field line with RK4 along the unit field direction.
+  // opts: h(x,y) -> step length, stop(x,y) -> bool, maxSteps
+  function traceLine(Ef, x, y, sign, opts) {
+    const pts = [[x, y]];
+    function dir(x, y) {
+      const e = Ef(x, y), m = Math.hypot(e[0], e[1]);
+      return (m > 0 && isFinite(m)) ? [sign * e[0] / m, sign * e[1] / m] : null;
+    }
+    for (let i = 0; i < opts.maxSteps; i++) {
+      const h = opts.h(x, y);
+      const k1 = dir(x, y); if (!k1) break;
+      const k2 = dir(x + 0.5 * h * k1[0], y + 0.5 * h * k1[1]); if (!k2) break;
+      const k3 = dir(x + 0.5 * h * k2[0], y + 0.5 * h * k2[1]); if (!k3) break;
+      const k4 = dir(x + h * k3[0], y + h * k3[1]); if (!k4) break;
+      x += h / 6 * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0]);
+      y += h / 6 * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1]);
+      pts.push([x, y]);
+      if (opts.stop(x, y)) break;
+    }
+    return pts;
+  }
+
+  // Marching squares on a grid V[j*nx+i]; returns segments [x1,y1,x2,y2] in grid-index coords.
+  function contour(V, nx, ny, level) {
+    const segs = [];
+    for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+      const v0 = V[j * nx + i], v1 = V[j * nx + i + 1], v2 = V[(j + 1) * nx + i + 1], v3 = V[(j + 1) * nx + i];
+      if (!(isFinite(v0) && isFinite(v1) && isFinite(v2) && isFinite(v3))) continue;
+      const b0 = v0 > level, b1 = v1 > level, b2 = v2 > level, b3 = v3 > level;
+      const c = (b0 ? 1 : 0) | (b1 ? 2 : 0) | (b2 ? 4 : 0) | (b3 ? 8 : 0);
+      if (c === 0 || c === 15) continue;
+      const E = [
+        () => [i + (level - v0) / (v1 - v0), j],       // bottom 0-1
+        () => [i + 1, j + (level - v1) / (v2 - v1)],   // right 1-2
+        () => [i + (level - v3) / (v2 - v3), j + 1],   // top 3-2
+        () => [i, j + (level - v0) / (v3 - v0)]        // left 0-3
+      ];
+      let pairs;
+      if (c === 5 || c === 10) {
+        const centreHigh = (v0 + v1 + v2 + v3) / 4 > level;
+        if (c === 5) pairs = centreHigh ? [[0, 1], [2, 3]] : [[3, 0], [1, 2]];
+        else pairs = centreHigh ? [[3, 0], [1, 2]] : [[0, 1], [2, 3]];
+      } else {
+        const ed = [];
+        if (b0 !== b1) ed.push(0); if (b1 !== b2) ed.push(1); if (b3 !== b2) ed.push(2); if (b0 !== b3) ed.push(3);
+        pairs = [ed];
+      }
+      for (const p of pairs) { const a = E[p[0]](), b = E[p[1]](); segs.push([a[0], a[1], b[0], b[1]]); }
+    }
+    return segs;
+  }
+
+  function logspace(a, b, n) { const out = []; const la = Math.log10(a), lb = Math.log10(b); for (let i = 0; i < n; i++) out.push(Math.pow(10, la + (lb - la) * i / (n - 1))); return out; }
+
+  return { adaptSimpson, gaussLegendre, gl2, traceLine, contour, logspace };
+})();
+</script>
+<script id="ui">
+/* ===== Shared UI helpers (DOM / canvas only, no physics) ===== */
+var UI = (function () {
+  const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
+  const $ = (s) => document.querySelector(s);
+
+  // ---------- KaTeX ----------
+  function renderTex(root) {
+    (root || document).querySelectorAll('.tex').forEach((el) => {
+      if (el.dataset.src == null) el.dataset.src = el.textContent.trim();
+      if (window.katex) {
+        try { katex.render(el.dataset.src, el, { displayMode: el.classList.contains('d'), throwOnError: false }); } catch (e) { el.textContent = el.dataset.src; }
+      }
+    });
+  }
+  function setTex(el, src) {
+    if (typeof el === 'string') el = $(el);
+    if (!el) return;
+    if (el.dataset.src === src && el.dataset.done) return;
+    el.dataset.src = src;
+    if (window.katex) { try { katex.render(src, el, { displayMode: el.classList.contains('d'), throwOnError: false }); el.dataset.done = 1; } catch (e) { el.textContent = src; } }
+    else el.textContent = src;
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => renderTex());
+  else renderTex();
+  window.addEventListener('load', () => renderTex());
+
+  // ---------- number formatting ----------
+  const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+  const sup = (n) => String(n).split('').map((c) => SUP[c] || c).join('');
+  function sci(x, d) {
+    d = d == null ? 3 : d;
+    if (!isFinite(x)) return x > 0 ? '∞' : (x < 0 ? '−∞' : '—');
+    if (x === 0) return '0';
+    const e = Math.floor(Math.log10(Math.abs(x)));
+    if (e >= -2 && e <= 3) return minus(x.toPrecision(d));
+    const m = x / Math.pow(10, e);
+    return minus(m.toFixed(d - 1)) + '×10' + sup(e);
+  }
+  function minus(s) { return String(s).replace(/^-/, '−'); }
+  const PFX = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+  function si(x, unit, d) {
+    d = d == null ? 3 : d;
+    if (!isFinite(x)) return '—';
+    if (Math.abs(x) < 1e-18) return '0 ' + unit;
+    const a = Math.abs(x);
+    for (const [f, p] of PFX) if (a >= f * 0.9995) { const v = x / f; return minus(Math.abs(v) >= Math.pow(10, d) ? v.toFixed(0) : v.toPrecision(d)) + ' ' + p + unit; }
+    return sci(x, d) + ' ' + unit;
+  }
+  function fix(x, n) { return minus((Math.abs(x) < 0.5 * Math.pow(10, -n) ? 0 : x).toFixed(n)); }
+
+  // ---------- canvas ----------
+  function canvas2d(canvas, draw) {
+    const ctx = canvas.getContext('2d');
+    const obj = { ctx, W: 1, H: 1, dpr: 1, redraw };
+    let pending = false;
+    function resize() {
+      const r = canvas.getBoundingClientRect();
+      obj.dpr = window.devicePixelRatio || 1;
+      obj.W = Math.max(1, r.width); obj.H = Math.max(1, r.height);
+      canvas.width = Math.round(obj.W * obj.dpr); canvas.height = Math.round(obj.H * obj.dpr);
+      ctx.setTransform(obj.dpr, 0, 0, obj.dpr, 0, 0);
+      draw(obj);
+    }
+    function redraw() {
+      if (pending) return; pending = true;
+      requestAnimationFrame(() => { pending = false; ctx.setTransform(obj.dpr, 0, 0, obj.dpr, 0, 0); draw(obj); });
+    }
+    new ResizeObserver(resize).observe(canvas);
+    return obj;
+  }
+
+  // world <-> screen mapping that keeps aspect ratio 1:1
+  function View(xmin, xmax, ymin, ymax) { this.box = [xmin, xmax, ymin, ymax]; this.fit(0, 0, 100, 100); }
+  View.prototype.fit = function (px, py, W, H) {
+    const [x0, x1, y0, y1] = this.box;
+    this.s = Math.min(W / (x1 - x0), H / (y1 - y0));
+    this.cx = (x0 + x1) / 2; this.cy = (y0 + y1) / 2;
+    this.ox = px + W / 2; this.oy = py + H / 2;
+    this.rect = [px, py, W, H];
+    this.xmin = this.cx - W / 2 / this.s; this.xmax = this.cx + W / 2 / this.s;
+    this.ymin = this.cy - H / 2 / this.s; this.ymax = this.cy + H / 2 / this.s;
+    return this;
+  };
+  View.prototype.X = function (x) { return this.ox + (x - this.cx) * this.s; };
+  View.prototype.Y = function (y) { return this.oy - (y - this.cy) * this.s; };
+  View.prototype.toW = function (px, py) { return [this.cx + (px - this.ox) / this.s, this.cy - (py - this.oy) / this.s]; };
+
+  function arrow(ctx, x1, y1, x2, y2, color, width, head) {
+    const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy);
+    if (L < 0.5) return;
+    head = Math.min(head == null ? 10 : head, L * 0.6);
+    const ux = dx / L, uy = dy / L;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width || 2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - ux * head * 0.7, y2 - uy * head * 0.7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - ux * head - uy * head * 0.45, y2 - uy * head + ux * head * 0.45);
+    ctx.lineTo(x2 - ux * head + uy * head * 0.45, y2 - uy * head - ux * head * 0.45);
+    ctx.closePath(); ctx.fill();
+  }
+
+  function label(ctx, text, x, y, opt) {
+    opt = opt || {};
+    const fs = (opt.size || 1) * rem();
+    ctx.font = (opt.bold ? '600 ' : '') + fs + 'px ' + (opt.font || 'system-ui, sans-serif');
+    ctx.textAlign = opt.align || 'left'; ctx.textBaseline = opt.base || 'middle';
+    if (opt.bg) {
+      const w = ctx.measureText(text).width, pad = 0.2 * fs;
+      let bx = x - (ctx.textAlign === 'center' ? w / 2 : ctx.textAlign === 'right' ? w : 0);
+      let by = y - (ctx.textBaseline === 'middle' ? fs * 0.6 : ctx.textBaseline === 'bottom' ? fs * 1.15 : 0);
+      ctx.fillStyle = opt.bg; ctx.fillRect(bx - pad, by - pad * 0.3, w + 2 * pad, fs * 1.2 + pad * 0.6);
+    }
+    ctx.fillStyle = opt.color || '#16181d';
+    ctx.fillText(text, x, y);
+  }
+
+  // pointer helper: handlers receive canvas-local px coords
+  function pointer(canvas, h) {
+    let dragging = false;
+    const loc = (e) => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    canvas.addEventListener('pointerdown', (e) => {
+      const [x, y] = loc(e);
+      if (h.down && h.down(x, y, e)) { dragging = true; canvas.setPointerCapture(e.pointerId); e.preventDefault(); }
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      const [x, y] = loc(e);
+      if (dragging) { h.move && h.move(x, y, e); e.preventDefault(); }
+      else if (h.hover) canvas.style.cursor = h.hover(x, y) ? 'grab' : 'default';
+    });
+    const end = (e) => { if (dragging) { dragging = false; h.up && h.up(e); } };
+    canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+  }
+
+  // slider binding: <input type=range id=...> and <span id=...-v>
+  function range(id, fmt, cb, toVal) {
+    const el = document.getElementById(id), out = document.getElementById(id + '-v');
+    toVal = toVal || ((v) => v);
+    const upd = (fire) => { const v = toVal(parseFloat(el.value)); if (out) out.textContent = fmt(v); if (fire) cb(v); return v; };
+    el.addEventListener('input', () => upd(true));
+    upd(false);
+    return { get: () => toVal(parseFloat(el.value)), set: (raw) => { el.value = raw; upd(false); }, el };
+  }
+
+  // ---------- log/linear plot ----------
+  function niceTicks(a, b, n) {
+    const span = b - a, step0 = span / Math.max(1, n), mag = Math.pow(10, Math.floor(Math.log10(step0)));
+    const r = step0 / mag, step = (r < 1.5 ? 1 : r < 3.5 ? 2 : r < 7.5 ? 5 : 10) * mag;
+    const out = []; for (let t = Math.ceil(a / step - 1e-9) * step; t <= b + 1e-9 * span; t += step) out.push(Math.abs(t) < step * 1e-9 ? 0 : t);
+    return out;
+  }
+  function plot(ctx, rect, o) {
+    const R = rem();
+    const [px, py, W, H] = rect;
+    const ml = o.ml != null ? o.ml : 4.2 * R, mb = 2.6 * R, mt = o.mt != null ? o.mt : 0.6 * R, mr = 0.8 * R;
+    const x0 = px + ml, x1 = px + W - mr, y0 = py + mt, y1 = py + H - mb;
+    const lx = !!o.logx, ly = !!o.logy;
+    const tx = (v) => lx ? Math.log10(v) : v, ty = (v) => ly ? Math.log10(v) : v;
+    const [xa, xb] = o.xr.map(tx), [ya, yb] = o.yr.map(ty);
+    const X = (v) => x0 + (tx(v) - xa) / (xb - xa) * (x1 - x0);
+    const Y = (v) => y1 - (ty(v) - ya) / (yb - ya) * (y1 - y0);
+    const invX = (p) => { const t = xa + (p - x0) / (x1 - x0) * (xb - xa); return lx ? Math.pow(10, t) : t; };
+    ctx.save();
+    ctx.fillStyle = '#fff'; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+    if (o.shade) for (const s of o.shade) {
+      const a = Math.max(x0, X(s[0])), b = Math.min(x1, X(s[1]));
+      if (b > a) { ctx.fillStyle = s[2] || 'rgba(18,128,74,0.12)'; ctx.fillRect(a, y0, b - a, y1 - y0); }
+    }
+    // grid + ticks
+    ctx.lineWidth = 1; ctx.font = R + 'px system-ui, sans-serif'; ctx.fillStyle = '#4d535e';
+    const xt = lx ? (() => { const t = []; for (let e = Math.ceil(xa - 1e-9); e <= xb + 1e-9; e++) t.push(e); return t; })() : niceTicks(xa, xb, Math.max(2, Math.floor((x1 - x0) / (5 * R))));
+    const yt = ly ? (() => { const t = []; for (let e = Math.ceil(ya - 1e-9); e <= yb + 1e-9; e++) t.push(e); return t; })() : niceTicks(ya, yb, Math.max(2, Math.floor((y1 - y0) / (2.5 * R))));
+    const xstep = Math.max(1, Math.ceil(xt.length / Math.max(2, (x1 - x0) / (3.6 * R))));
+    const ystep = Math.max(1, Math.ceil(yt.length / Math.max(2, (y1 - y0) / (1.6 * R))));
+    if (lx) { ctx.strokeStyle = '#eeebe4'; for (let e = Math.floor(xa); e < xb; e++) for (let k = 2; k < 10; k++) { const v = e + Math.log10(k); if (v > xa && v < xb) { const p = x0 + (v - xa) / (xb - xa) * (x1 - x0); ctx.beginPath(); ctx.moveTo(p, y0); ctx.lineTo(p, y1); ctx.stroke(); } } }
+    if (ly) { ctx.strokeStyle = '#eeebe4'; for (let e = Math.floor(ya); e < yb; e++) for (let k = 2; k < 10; k++) { const v = e + Math.log10(k); if (v > ya && v < yb) { const p = y1 - (v - ya) / (yb - ya) * (y1 - y0); ctx.beginPath(); ctx.moveTo(x0, p); ctx.lineTo(x1, p); ctx.stroke(); } } }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    xt.forEach((t, i) => {
+      const p = x0 + (t - xa) / (xb - xa) * (x1 - x0);
+      ctx.strokeStyle = '#d9d5cc'; ctx.beginPath(); ctx.moveTo(p, y0); ctx.lineTo(p, y1); ctx.stroke();
+      if (i % xstep === 0) ctx.fillText(lx ? '10' + sup(t) : (o.fmtx ? o.fmtx(t) : minus(+t.toPrecision(6) + '')), p, y1 + 0.25 * R);
+    });
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    yt.forEach((t, i) => {
+      const p = y1 - (t - ya) / (yb - ya) * (y1 - y0);
+      ctx.strokeStyle = '#d9d5cc'; ctx.beginPath(); ctx.moveTo(x0, p); ctx.lineTo(x1, p); ctx.stroke();
+      if (i % ystep === 0) ctx.fillText(ly ? '10' + sup(t) : (o.fmty ? o.fmty(t) : minus(+t.toPrecision(6) + '')), x0 - 0.3 * R, p);
+    });
+    ctx.strokeStyle = '#16181d'; ctx.lineWidth = 1.5; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+    ctx.fillStyle = '#16181d'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    if (o.xlabel) ctx.fillText(o.xlabel, (x0 + x1) / 2, py + H - 0.05 * R);
+    if (o.ylabel) { ctx.save(); ctx.translate(px + 0.1 * R, (y0 + y1) / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'top'; ctx.fillText(o.ylabel, 0, 0); ctx.restore(); }
+    // series
+    ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
+    for (const s of o.series) {
+      ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 3; ctx.setLineDash(s.dash || []);
+      ctx.beginPath(); let pen = false;
+      for (const [x, y] of s.pts) {
+        if (!(isFinite(x) && isFinite(y)) || (lx && x <= 0) || (ly && y <= 0)) { pen = false; continue; }
+        const X_ = X(x), Y_ = Math.max(-1e4, Math.min(1e4, Y(y)));
+        if (pen) ctx.lineTo(X_, Y_); else { ctx.moveTo(X_, Y_); pen = true; }
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    if (o.extra) o.extra({ X, Y, x0, x1, y0, y1 });
+    ctx.restore();
+    // legend
+    if (o.legend !== false) {
+      const items = o.series.filter((s) => s.label);
+      ctx.font = R + 'px system-ui, sans-serif';
+      const lw = Math.max(...items.map((s) => ctx.measureText(s.label).width), 0) + 3.2 * R;
+      const pos = o.legendPos || 'tr';
+      let lxp = pos[1] === 'r' ? x1 - lw - 0.4 * R : x0 + 0.4 * R;
+      let lyp = pos[0] === 't' ? y0 + 0.4 * R : y1 - 0.4 * R - items.length * 1.35 * R - 0.3 * R;
+      if (items.length) {
+        ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.strokeStyle = '#c9c4b9'; ctx.lineWidth = 1;
+        ctx.fillRect(lxp, lyp, lw, items.length * 1.35 * R + 0.3 * R); ctx.strokeRect(lxp, lyp, lw, items.length * 1.35 * R + 0.3 * R);
+        items.forEach((s, i) => {
+          const yy = lyp + 0.15 * R + (i + 0.5) * 1.35 * R;
+          ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 3; ctx.setLineDash(s.dash || []);
+          ctx.beginPath(); ctx.moveTo(lxp + 0.4 * R, yy); ctx.lineTo(lxp + 2.4 * R, yy); ctx.stroke(); ctx.setLineDash([]);
+          ctx.fillStyle = '#16181d'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s.label, lxp + 2.8 * R, yy);
+        });
+      }
+    }
+    return { X, Y, invX, x0, x1, y0, y1 };
+  }
+
+  // log-scaled arrow length: maps |E| in [mlo, mhi] (log) to [Lmin, Lmax]
+  function logLen(m, mlo, mhi, Lmin, Lmax) {
+    if (!(m > 0)) return 0;
+    const t = Math.max(0, Math.min(1, (Math.log10(m) - Math.log10(mlo)) / (Math.log10(mhi) - Math.log10(mlo))));
+    return Lmin + t * (Lmax - Lmin);
+  }
+
+  return { rem, $, renderTex, setTex, sci, si, fix, sup, minus, canvas2d, View, arrow, label, pointer, range, plot, logLen, niceTicks };
+})();
+</script>
+
+<script id="app-js">
+(function () {
+  const P = PHYS, $ = UI.$, nC = 1e-9;
+  const view = new UI.View(-1, 1, -0.7, 0.7);
+  const S = { ftype: 'uniform', A: [-0.6, -0.3], B: [0.55, 0.35], C1: [-0.3, 0.55], C2: [0.4, -0.55], src: [0.1, -0.12], drawn: null, prog: 1 };
+  const PATHS = { straight: 'Straight line', lxy: 'L-shape (x then y)', lyx: 'L-shape (y then x)', curve: 'Curve (drag ●)', zig: 'Zig-zag', drawn: 'Drawn by hand' };
+  for (const id of ['p1', 'p2']) Object.entries(PATHS).forEach(([k, v]) => { const o = document.createElement('option'); o.value = k; o.textContent = v; $('#' + id).appendChild(o); });
+  $('#p1').value = 'straight'; $('#p2').value = 'curve';
+  const rE = UI.range('e0', (v) => v + ' V/m', upd), rEa = UI.range('ea', (v) => v + '°', upd);
+  const rQs = UI.range('qs', (v) => (v > 0 ? '+' : '') + UI.minus(v) + ' nC', upd), rQt = UI.range('qt', (v) => (v > 0 ? '+' : '') + UI.minus(v) + ' nC', upd);
+  ['p1', 'p2'].forEach((id) => $('#' + id).addEventListener('change', upd));
+  $('#tLoop').addEventListener('change', upd);
+  $('#fU').onclick = () => { S.ftype = 'uniform'; $('#fU').classList.add('on'); $('#fP').classList.remove('on'); upd(); };
+  $('#fP').onclick = () => { S.ftype = 'point'; $('#fP').classList.add('on'); $('#fU').classList.remove('on'); upd(); };
+  let drawing = false;
+  $('#bDraw').onclick = () => { drawing = !drawing; $('#bDraw').classList.toggle('on', drawing); };
+  let anim = null;
+  $('#bPlay').onclick = () => {
+    if (anim) cancelAnimationFrame(anim);
+    const t0 = performance.now();
+    const step = (t) => { S.prog = Math.min(1, (t - t0) / 4500); cv.redraw(); anim = S.prog < 1 ? requestAnimationFrame(step) : null; };
+    anim = requestAnimationFrame(step);
+  };
+  const field = () => (S.ftype === 'uniform' ? { type: 'uniform', E0: rE.get(), ang: rEa.get() * Math.PI / 180 } : { type: 'point', x: S.src[0], y: S.src[1], Q: rQs.get() * nC });
+  function upd() {
+    $('#rowE').style.display = $('#rowEa').style.display = S.ftype === 'uniform' ? '' : 'none';
+    $('#rowQs').style.display = S.ftype === 'point' ? '' : 'none';
+    S.prog = 1; cv.redraw();
+  }
+  // subdivide every segment so the running-total plot and animation are smooth
+  function densify(pts, h) {
+    const o = [pts[0]];
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / h));
+      for (let k = 1; k <= n; k++) o.push([a[0] + k / n * (b[0] - a[0]), a[1] + k / n * (b[1] - a[1])]);
+    }
+    return o;
+  }
+  function makePath(kind, C) { return densify(rawPath(kind, C), 0.01); }
+  function rawPath(kind, C) {
+    const A = S.A, B = S.B;
+    switch (kind) {
+      case 'straight': return P.straight(A, B, 2);
+      case 'lxy': return [A, [B[0], A[1]], B];
+      case 'lyx': return [A, [A[0], B[1]], B];
+      case 'curve': return P.bezier(A, C, B, 160);
+      case 'zig': { const o = [A]; for (let i = 1; i < 6; i++) { const t = i / 6, n = [-(B[1] - A[1]), B[0] - A[0]], s = (i % 2 ? 0.25 : -0.25); o.push([A[0] + t * (B[0] - A[0]) + s * n[0], A[1] + t * (B[1] - A[1]) + s * n[1]]); } o.push(B); return o; }
+      case 'drawn': return S.drawn ? [A, ...S.drawn, B] : P.straight(A, B, 2);
+    }
+  }
+  // arc-length parametrisation for animation
+  function arcLen(pts) { const L = [0]; for (let i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); return L; }
+  function at(pts, L, cum, frac) {   // position and W at fraction of arc length (W interpolated on the last segment by integrating exactly)
+    const s = frac * L[L.length - 1]; let i = 1; while (i < L.length - 1 && L[i] < s) i++;
+    const t = L[i] > L[i - 1] ? (s - L[i - 1]) / (L[i] - L[i - 1]) : 0;
+    const p = [pts[i - 1][0] + t * (pts[i][0] - pts[i - 1][0]), pts[i - 1][1] + t * (pts[i][1] - pts[i - 1][1])];
+    const w = cum[i - 1] + (t > 0 ? -rQt.get() * nC * P.segInt(field(), pts[i - 1], p) : 0);
+    return { p, w, i };
+  }
+
+  const cv = UI.canvas2d($('#cv'), draw);
+  let plotRect = null;
+  function draw(o) {
+    const { ctx, W, H } = o, R = UI.rem();
+    const plotH = Math.min(H * 0.33, 12 * R);
+    view.fit(0, 0, W, H - plotH);
+    ctx.fillStyle = '#f6f5f1'; ctx.fillRect(0, 0, W, H);
+    const f = field(), Q = rQt.get() * nC;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H - plotH); ctx.clip();
+    // background: faint field arrows + equipotential hint
+    const step = Math.max(2.4 * R, Math.min(W, H - plotH) / 14), smp = [];
+    for (let py = step / 2; py < H - plotH; py += step) for (let px = step / 2; px < W; px += step) { const [x, y] = view.toW(px, py), e = P.E(f, x, y); smp.push([px, py, e, Math.hypot(e[0], e[1])]); }
+    const ms = smp.map((s) => s[3]).filter(isFinite).sort((a, b) => a - b), lo = ms[Math.floor(ms.length * 0.05)] || 1, hi = ms[Math.floor(ms.length * 0.95)] || 1;
+    for (const [px, py, e, m] of smp) {
+      if (!(m > 0) || !isFinite(m)) continue; if (f.type === 'point' && Math.hypot(px - view.X(f.x), py - view.Y(f.y)) < R) continue;
+      const L = hi > lo * 1.01 ? UI.logLen(m, lo, hi, 0.3 * step, 0.8 * step) : 0.7 * step;
+      UI.arrow(ctx, px - e[0] / m * L / 2, py + e[1] / m * L / 2, px + e[0] / m * L / 2, py - e[1] / m * L / 2, '#b9b4a9', 1.5, 0.3 * R);
+    }
+    if (f.type === 'point') {
+      ctx.fillStyle = f.Q >= 0 ? '#c8322c' : '#1f5fbf'; ctx.beginPath(); ctx.arc(view.X(f.x), view.Y(f.y), 0.8 * R, 0, 7); ctx.fill();
+      UI.label(ctx, f.Q >= 0 ? '+' : '−', view.X(f.x), view.Y(f.y) + 1, { align: 'center', color: '#fff', bold: true, size: 1.2 });
+    }
+    // paths
+    const loop = $('#tLoop').checked;
+    const k1 = $('#p1').value, k2 = $('#p2').value;
+    const p1 = makePath(k1, S.C1), p2 = makePath(k2, S.C2);
+    const paths = [{ pts: p1, col: '#d97000', name: 'path 1' }, { pts: p2, col: '#7a3fb3', name: 'path 2' }];
+    if (loop) paths.push({ pts: P.concat(p1, p2.slice().reverse()), col: '#12804a', name: 'loop', loop: true });
+    paths.forEach((pp) => { pp.cum = P.workAlong(f, Q, pp.pts); pp.L = arcLen(pp.pts); });
+    for (const pp of paths.slice(0, 2)) {
+      ctx.strokeStyle = pp.col; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.beginPath();
+      pp.pts.forEach((p, i) => (i ? ctx.lineTo(view.X(p[0]), view.Y(p[1])) : ctx.moveTo(view.X(p[0]), view.Y(p[1])))); ctx.stroke();
+      const mid = at(pp.pts, pp.L, pp.cum, 0.55), nx = at(pp.pts, pp.L, pp.cum, 0.57);
+      const ang = Math.atan2(-(nx.p[1] - mid.p[1]), nx.p[0] - mid.p[0]);
+      ctx.save(); ctx.translate(view.X(mid.p[0]), view.Y(mid.p[1])); ctx.rotate(ang); ctx.fillStyle = pp.col;
+      ctx.beginPath(); ctx.moveTo(0.6 * R, 0); ctx.lineTo(-0.5 * R, 0.5 * R); ctx.lineTo(-0.5 * R, -0.5 * R); ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    // curve handles
+    for (const [k, C, col] of [[k1, S.C1, '#d97000'], [k2, S.C2, '#7a3fb3']]) if (k === 'curve') {
+      ctx.setLineDash([3, 4]); ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(view.X(S.A[0]), view.Y(S.A[1])); ctx.lineTo(view.X(C[0]), view.Y(C[1])); ctx.lineTo(view.X(S.B[0]), view.Y(S.B[1])); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = col; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(view.X(C[0]), view.Y(C[1]), 0.5 * R, 0, 7); ctx.fill(); ctx.stroke();
+    }
+    // A, B
+    for (const [n, p] of [['A', S.A], ['B', S.B]]) {
+      ctx.fillStyle = '#16181d'; ctx.beginPath(); ctx.arc(view.X(p[0]), view.Y(p[1]), 0.65 * R, 0, 7); ctx.fill();
+      UI.label(ctx, n, view.X(p[0]), view.Y(p[1]) + 1, { align: 'center', color: '#fff', bold: true, size: 0.95 });
+    }
+    // moving test charges
+    const cur = paths.map((pp) => at(pp.pts, pp.L, pp.cum, S.prog));
+    paths.forEach((pp, i) => {
+      if (S.prog >= 1 && !pp.loop) return;
+      const c = cur[i]; ctx.fillStyle = pp.col; ctx.strokeStyle = '#16181d'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(view.X(c.p[0]), view.Y(c.p[1]), 0.45 * R, 0, 7); ctx.fill(); ctx.stroke();
+    });
+    if (drawing) UI.label(ctx, 'Drag on the field to draw path 2 (it is joined to A and B automatically)', W / 2, 0.9 * R, { align: 'center', bold: true, color: '#7a3fb3', bg: 'rgba(246,245,241,.9)' });
+    ctx.restore();
+    // plot W vs fraction of path
+    const series = paths.map((pp) => ({ pts: pp.pts.map((_, i) => [pp.L[i] / pp.L[pp.L.length - 1], pp.cum[i]]), color: pp.col, width: pp.loop ? 2.5 : 3.5, dash: pp.loop ? [8, 5] : [], label: pp.name }));
+    const exact = P.workExact(f, Q, S.A, S.B);
+    let ys = [].concat(...series.map((s) => s.pts.map((p) => p[1]))).concat([0, exact]).filter(isFinite);
+    let ya = Math.min(...ys), yb = Math.max(...ys); const pad = 0.12 * (yb - ya || 1e-9); ya -= pad; yb += pad;
+    const unit = Math.max(Math.abs(ya), Math.abs(yb)) < 1e-6 ? 1e-9 : 1e-6, un = unit === 1e-9 ? 'nJ' : 'µJ';
+    series.forEach((s) => (s.pts = s.pts.map(([x, y]) => [x, y / unit])));
+    series.push({ pts: [[0, exact / unit], [1, exact / unit]], color: '#16181d', width: 1.5, dash: [4, 4], label: 'Q(V_B − V_A)' });
+    plotRect = UI.plot(ctx, [0, H - plotH, W, plotH], {
+      xr: [0, 1], yr: [ya / unit, yb / unit], xlabel: 'fraction of path length travelled', ylabel: 'W (' + un + ')', ml: 4.6 * R, mt: 0.8 * R, legendPos: 'tl', series,
+      fmtx: (v) => v.toFixed(1),
+      extra: ({ X, Y, y0, y1 }) => {
+        if (S.prog >= 1) return;
+        ctx.strokeStyle = '#16181d'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X(S.prog), y0); ctx.lineTo(X(S.prog), y1); ctx.stroke();
+        cur.forEach((c, i) => { ctx.fillStyle = paths[i].col; ctx.beginPath(); ctx.arc(X(S.prog), Y(c.w / unit), 0.35 * R, 0, 7); ctx.fill(); });
+      }
+    });
+    const fmtW = (w) => UI.si(w, 'J', 4);
+    const rows = [['V<sub>A</sub>, V<sub>B</sub>', UI.si(P.V(f, ...S.A), 'V') + ', ' + UI.si(P.V(f, ...S.B), 'V')]];
+    paths.forEach((pp, i) => rows.push(['<span class="sw" style="background:' + pp.col + '"></span>W ' + pp.name + (S.prog < 1 ? ' (so far)' : ''), fmtW(S.prog < 1 ? cur[i].w : pp.cum[pp.cum.length - 1])]));
+    rows.push(['Q(V<sub>B</sub> − V<sub>A</sub>)', fmtW(exact)]);
+    $('#tbl').innerHTML = rows.map((r) => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('');
+  }
+  // interaction
+  const R_ = () => UI.rem();
+  function hit(px, py) {
+    const cand = [['A', S.A], ['B', S.B]];
+    if ($('#p1').value === 'curve') cand.push(['C1', S.C1]);
+    if ($('#p2').value === 'curve') cand.push(['C2', S.C2]);
+    if (S.ftype === 'point') cand.push(['src', S.src]);
+    for (const [k, p] of cand) if (Math.hypot(px - view.X(p[0]), py - view.Y(p[1])) < 1.0 * R_()) return k;
+    return null;
+  }
+  let drag = null, stroke = null;
+  const cl = ([x, y]) => [Math.max(view.xmin + 0.03, Math.min(view.xmax - 0.03, x)), Math.max(view.ymin + 0.03, Math.min(view.ymax - 0.03, y))];
+  UI.pointer($('#cv'), {
+    hover: (x, y) => drawing || hit(x, y) !== null,
+    down: (px, py) => {
+      if (py > view.rect[3]) return false;
+      if (drawing) { stroke = [cl(view.toW(px, py))]; return true; }
+      drag = hit(px, py); return !!drag;
+    },
+    move: (px, py) => {
+      const p = cl(view.toW(px, py));
+      if (stroke) { const l = stroke[stroke.length - 1]; if (Math.hypot(p[0] - l[0], p[1] - l[1]) > 0.01) stroke.push(p); S.drawn = stroke.slice(); $('#p2').value = 'drawn'; S.prog = 1; cv.redraw(); return; }
+      if (drag === 'src') S.src = p; else S[drag] = p;
+      S.prog = 1; cv.redraw();
+    },
+    up: () => { if (stroke) { drawing = false; $('#bDraw').classList.remove('on'); stroke = null; cv.redraw(); } drag = null; }
+  });
+  upd();
+  window.__ready = true;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,624 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Magnetic Field and Inductance</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Academic figure pages: white paper, serif type, textbook-style line art. White background is fixed by request. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff; --ink: #1a1a1a; --muted: #5f6368; --line: #d9dce0; --soft: #f5f6f7; --accent: #1f4e8c;
+  --serif: 'STIX Two Text', 'Times New Roman', Times, serif;
+  --sans: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
+}
+html, body { background: #ffffff; color: var(--ink); }
+body { font-family: var(--serif); font-size: 17px; line-height: 1.55; }
+.wrap { max-width: 1220px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 26px 56px; }
+.kicker { font-family: var(--sans); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+h1 { font-size: clamp(1.6rem, 3.2vw, 2.15rem); font-weight: 600; line-height: 1.2; margin: 0 0 8px; text-wrap: balance; }
+h2 { font-family: var(--sans); font-size: .76rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+h3 { font-size: 1.08rem; font-weight: 600; margin: 0 0 4px; }
+.lede { margin: 0 0 18px; max-width: 80ch; color: #333; }
+.rule { border: 0; border-top: 1.5px solid var(--ink); margin: 0 0 18px; }
+.fig { margin: 0; min-width: 0; }
+.fig > svg { display: block; width: 100%; height: auto; background: #fff; touch-action: none; }
+.fig figcaption { font-size: .93rem; line-height: 1.5; padding: 8px 2px 0; color: #222; }
+.fig figcaption b { font-weight: 700; }
+.figbox { border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px 12px; background: #fff; min-width: 0; }
+.tools { display: flex; gap: 6px; justify-content: flex-end; margin: -2px 0 4px; }
+.tools button { font-family: var(--sans); font-size: .74rem; letter-spacing: .03em; padding: 3px 9px; border: 1px solid var(--line); border-radius: 3px; background: #fff; color: var(--muted); cursor: pointer; }
+.tools button:hover { color: var(--ink); border-color: #9aa0a6; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; margin: 14px 0; }
+@media (max-width: 960px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.tri { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 14px 0; }
+@media (max-width: 1120px) { .tri { grid-template-columns: minmax(0, 1fr); max-width: 680px; } }
+.duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 14px 0; }
+@media (max-width: 1000px) { .duo { grid-template-columns: minmax(0, 1fr); } }
+.panel { display: grid; gap: 12px; min-width: 0; font-family: var(--sans); }
+.grp { border: 1px solid var(--line); border-radius: 4px; padding: 10px 14px 12px; min-width: 0; }
+.ctl { font-family: var(--sans); margin-top: 8px; }
+.row { display: grid; grid-template-columns: 7.2rem minmax(0, 1fr) 4.6rem; align-items: center; gap: 10px; padding-block: 2px; font-size: .86rem; line-height: 1.4; }
+.row label i, .kv i { font-family: var(--serif); font-size: 1.08em; }
+.row input[type="range"] { width: 100%; min-width: 0; accent-color: var(--accent); }
+.row input[type="number"] { width: 100%; min-width: 0; font: inherit; font-variant-numeric: tabular-nums; text-align: right; padding: 3px 6px; border: 1px solid var(--line); border-radius: 3px; background: #fff; color: var(--ink); }
+.chk { display: flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: .86rem; padding-block: 2px; }
+.chk input { accent-color: var(--accent); width: 15px; height: 15px; }
+.btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-family: var(--sans); }
+.btns button, .tabs button { font: inherit; font-family: var(--sans); font-size: .84rem; padding: 5px 12px; border: 1px solid #b9bec4; border-radius: 3px; background: #fff; color: var(--ink); cursor: pointer; }
+.btns button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tabs { display: flex; flex-wrap: wrap; gap: 0; margin: 0 0 6px; border-bottom: 1px solid var(--line); }
+.tabs button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 7px 14px; color: var(--muted); }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card { border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px 16px; min-width: 0; }
+.out { display: grid; gap: 14px 30px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.kv { display: grid; grid-template-columns: auto 1fr; column-gap: 16px; row-gap: 3px; margin: 0; font-family: var(--sans); font-size: .88rem; font-variant-numeric: tabular-nums; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; text-align: right; color: var(--ink); }
+.eqn { margin: 10px 0 0; padding: 8px 12px; background: var(--soft); overflow-x: auto; font-size: 1rem; }
+.note { font-family: var(--sans); font-size: .8rem; color: var(--muted); margin: 8px 0 0; line-height: 1.5; }
+.warn { font-family: var(--sans); font-size: .84rem; color: #a3261b; margin: 8px 0 0; }
+.q { margin: 10px 0 0; padding: 4px 0 4px 12px; border-left: 2px solid var(--ink); font-style: italic; }
+.map { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.map th, .map td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.map thead th { font-family: var(--sans); font-size: .76rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1.5px solid var(--ink); }
+.tablewrap { overflow-x: auto; }
+.split { display: flex; height: 14px; border: 1px solid var(--line); margin-top: 4px; }
+.split span { display: block; height: 100%; }
+.toast { font-family: var(--sans); font-size: .78rem; color: var(--muted); min-height: 1em; text-align: right; }
+[hidden] { display: none !important; }
+mjx-container { font-size: 100% !important; }
+
+</style>
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, svg: { fontCache: 'none' }, startup: { typeset: false } };</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js"></script>
+
+<main class="wrap">
+  <p class="kicker">Electromagnetic Fields · Introduction · Topic 4 · Slides 5–6</p>
+  <h1>Magnetic Field, Force and Inductance</h1>
+  <hr class="rule">
+  <p class="lede">A current in a wire sets up a magnetic field that circles the wire, and compass needles turn to follow it. Wound as a coil on an iron core, the field becomes flux in a magnetic circuit, which produces both a pulling force and an inductance controlled by the air gap.</p>
+
+  <div class="tabs" role="tablist" aria-label="Slide">
+    <button type="button" role="tab" id="t5" aria-selected="true">Slide 5 · Wire and compasses</button>
+    <button type="button" role="tab" id="t6" aria-selected="false">Slide 6 · Coil, core and air gap</button>
+  </div>
+
+  <div class="layout">
+    <div class="figbox">
+      <figure class="fig"><svg id="fg" viewBox="0 0 700 440" role="img" aria-label="Magnetic field of a straight wire with compasses, and a magnetic circuit with an air gap"></svg>
+        <figcaption id="cap"></figcaption></figure>
+    </div>
+    <aside class="panel">
+      <section class="grp" id="g5v"><h2>View</h2>
+        <div class="btns" style="margin-top:0"><button type="button" id="v3d" class="on">3D</button><button type="button" id="vtop">Top view</button></div></section>
+      <section class="grp" id="g5a"><h2>Wire 1</h2></section>
+      <section class="grp" id="g5b">
+        <h2>Wire 2 and the Earth’s field</h2>
+        <label class="chk"><input type="checkbox" id="fW2"> Add a second wire</label>
+        <div id="g5b2" hidden></div>
+        <label class="chk"><input type="checkbox" id="fEarth" checked> Include the Earth’s field (40 µT, northward)</label>
+      </section>
+      <section class="grp" id="g6a" hidden><h2>Coil and core</h2></section>
+      <section class="grp" id="g6b" hidden><h2>Air gap</h2>
+        <div class="btns" id="g6btn"><button type="button" id="btnClose">Release armature</button><button type="button" id="btnOpen">Reset to 1 mm</button></div></section>
+    </aside>
+  </div>
+
+  <section class="card">
+    <h2>Computed values</h2>
+    <div class="out"><dl class="kv" id="o1"></dl><dl class="kv" id="o2"></dl></div>
+    <div id="rbar" hidden>
+      <p class="note" style="margin-top:12px">Share of the total reluctance (and of the stored energy) in the iron and in the air gaps</p>
+      <div class="split"><span id="sbC" style="background:#9ca2a9"></span><span id="sbG" style="background:#8c2d19"></span></div>
+      <p class="note" id="sbT"></p>
+    </div>
+    <p class="warn" id="warn" hidden></p>
+    <p class="q" id="mean" style="font-style:normal"></p>
+    <div class="eqn" id="eqband"></div>
+    <p class="note" id="assume"></p>
+  </section>
+</main>
+
+<script>
+(function () {
+  var MU0 = 4e-7 * Math.PI, EPS0 = 8.854187817e-12;
+  var COL = { ink: '#1a1a1a', gray: '#7a7f85', lgray: '#b5b9be', ef: '#1f4e8c', ef2: '#9db7d8', bf: '#4b2c91', bf2: '#b9a8de', pos: '#c0392b', neg: '#1f4e8c',
+    cu: '#9a5326', cuB: '#d8b49a', iron: '#c3c7cc', ironD: '#959ba2', ironL: '#e2e4e7', plate: '#b4b9bf', plateT: '#dde0e4', plateS: '#9ca2a9', diel: '#d7e6f4', shade: '#e3eef8', glow: '#f6d365' };
+  function f1(n) { return (Math.round(n * 10) / 10).toString(); }
+  function M(n, d) { var s = Math.abs(n).toFixed(d); var neg = n < 0 && parseFloat(s) !== 0; return (neg ? '−' : '') + s; }
+  function eng(v, unit, sig) {
+    sig = sig || 3; if (v === 0 || !isFinite(v)) return '0 ' + unit;
+    var P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p']], a = Math.abs(v), i;
+    for (i = 0; i < P.length; i++) if (a >= P[i][0] * 0.9995) break;
+    if (i === P.length) i = P.length - 1;
+    var x = v / P[i][0], dg = Math.max(0, sig - 1 - Math.floor(Math.log10(Math.abs(x) * 1.0000001)));
+    return M(x, dg) + ' ' + P[i][1] + unit;
+  }
+  /* ---- primitives with inline attributes (so exported SVG is self-contained) ---- */
+  function at(o) { var s = ''; for (var k in o) if (o[k] !== undefined && o[k] !== null) s += ' ' + k + '="' + o[k] + '"'; return s; }
+  function st(o) { o = o || {}; return at({ stroke: o.stroke || 'none', 'stroke-width': o.w, fill: o.fill || 'none', 'stroke-dasharray': o.dash, opacity: o.op, 'fill-opacity': o.fop, 'stroke-linecap': o.cap || 'round', 'stroke-linejoin': 'round' }); }
+  function Ln(x1, y1, x2, y2, o) { return '<line x1="' + f1(x1) + '" y1="' + f1(y1) + '" x2="' + f1(x2) + '" y2="' + f1(y2) + '"' + st(o) + '/>'; }
+  function ptsS(p) { return p.map(function (q) { return f1(q.x) + ',' + f1(q.y); }).join(' '); }
+  function Pl(p, o) { return '<polyline points="' + ptsS(p) + '"' + st(o) + '/>'; }
+  function Pg(p, o) { return '<polygon points="' + ptsS(p) + '"' + st(o) + '/>'; }
+  function Ci(x, y, r, o) { return '<circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="' + f1(r) + '"' + st(o) + '/>'; }
+  function Pa(d, o) { return '<path d="' + d + '"' + st(o) + '/>'; }
+  function Rc(x, y, w, h, o) { return '<rect x="' + f1(x) + '" y="' + f1(y) + '" width="' + f1(Math.max(0, w)) + '" height="' + f1(Math.max(0, h)) + '"' + st(o) + '/>'; }
+  /* slender textbook arrowhead */
+  function Hd(p, dx, dy, c, s) {
+    s = s || 9; var L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, w = s * 0.36;
+    return '<polygon points="' + f1(p.x) + ',' + f1(p.y) + ' ' + f1(p.x - ux * s - uy * w) + ',' + f1(p.y - uy * s + ux * w) + ' ' + f1(p.x - ux * s * 0.78) + ',' + f1(p.y - uy * s * 0.78) + ' ' + f1(p.x - ux * s + uy * w) + ',' + f1(p.y - uy * s - ux * w) + '" fill="' + c + '" stroke="none"/>';
+  }
+  function Ar(a, b, c, w, s) {
+    c = c || COL.ink; w = w || 1.4; s = s || 10;
+    var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy); if (L < 2) return '';
+    var e = { x: b.x - dx / L * s * 0.7, y: b.y - dy / L * s * 0.7 };
+    return Ln(a.x, a.y, e.x, e.y, { stroke: c, w: w, cap: 'butt' }) + Hd(b, dx, dy, c, s);
+  }
+  /* ---- oblique projection in the textbook convention: x toward viewer (down-left), y right, z up ---- */
+  /* oblique projection in the textbook convention: x toward viewer (down-left), y right, z up.
+     Circles in the y-z plane are drawn as true circles. */
+  function view(al, s, ox, oy) {
+    var A = -0.85 * Math.cos(al * Math.PI / 180), B = 0.85 * Math.sin(al * Math.PI / 180);
+    return { A: A, B: B, s: s, ox: ox, oy: oy, VW: [1, -A, B], p: function (v) { return { x: ox + s * (A * v[0] + v[1]), y: oy + s * (B * v[0] - v[2]) }; } };
+  }
+  function sdir(v, P, d) { var a = v.p(P), b = v.p([P[0] + d[0] * 1e-3, P[1] + d[1] * 1e-3, P[2] + d[2] * 1e-3]); return { x: b.x - a.x, y: b.y - a.y }; }
+  /* devices whose axis runs along u, with world x = -u (u increases toward the back, up-right on screen) */
+  function axW(v) { var L = Math.hypot(v.A, v.B); return [0, -v.B / L, -v.A / L]; } /* in-plane direction of the meridian plane facing the viewer */
+  function ringU(v, u, cy, cz, r, n) { var o = []; n = n || 64; for (var i = 0; i < n; i++) { var t = 2 * Math.PI * i / n; o.push(v.p([-u, cy + r * Math.cos(t), cz + r * Math.sin(t)])); } return o; }
+  function helixU(v, cy, cz, r, u0, u1, turns, n, t0) {
+    n = n || Math.max(80, Math.round(turns * 48)); t0 = t0 === undefined ? Math.PI / 2 : t0; var front = [], back = [], cur = null, curF = null;
+    for (var i = 0; i <= n; i++) {
+      var t = t0 + 2 * Math.PI * turns * i / n, P = [-(u0 + (u1 - u0) * i / n), cy + r * Math.cos(t), cz + r * Math.sin(t)];
+      var fr = Math.cos(t) * v.VW[1] + Math.sin(t) * v.VW[2] > 0, q = v.p(P);
+      if (fr !== curF) { if (cur) { cur.push(q); (curF ? front : back).push(cur); } cur = [q]; curF = fr; } else cur.push(q);
+    }
+    if (cur) (curF ? front : back).push(cur);
+    return { front: front, back: back, start: v.p([-u0, cy + r * Math.cos(t0), cz + r * Math.sin(t0)]), end: v.p([-u1, cy + r * Math.cos(t0 + 2 * Math.PI * turns), cz + r * Math.sin(t0 + 2 * Math.PI * turns)]) };
+  }
+  function cylU(v, cy, cz, r, u0, u1, base, o) {
+    o = o || {}; var a = ringU(v, u0, cy, cz, r), b = ringU(v, u1, cy, cz, r), H = hull(a.concat(b));
+    var p0 = v.p([-u0, cy, cz]), p1 = v.p([-u1, cy, cz]), ax = p1.x - p0.x, ay = p1.y - p0.y, L = Math.hypot(ax, ay) || 1, nx = -ay / L, ny = ax / L;
+    if (ny > 0) { nx = -nx; ny = -ny; }
+    var lo = 1e9, hi = -1e9; H.forEach(function (q) { var d = (q.x - p0.x) * nx + (q.y - p0.y) * ny; lo = Math.min(lo, d); hi = Math.max(hi, d); });
+    var mx = (p0.x + p1.x) / 2, my = (p0.y + p1.y) / 2;
+    var body = gLin(mx + nx * hi, my + ny * hi, mx + nx * lo, my + ny * lo, [[0, scl(base, 0.62)], [0.16, scl(base, 1.32)], [0.32, scl(base, 1.08)], [0.7, scl(base, 0.78)], [1, scl(base, 0.48)]]);
+    var rr = r * v.s, cap = gRad(p0.x, p0.y, rr * 1.2, [[0, scl(base, 1.35)], [1, scl(base, 0.85)]], p0.x - rr * 0.35, p0.y - rr * 0.4);
+    return Pg(H, { fill: body, stroke: scl(base, 0.4), w: 0.8, op: o.op }) + (o.noCap ? '' : Pg(a, { fill: cap, stroke: scl(base, 0.4), w: 0.8, op: o.op }));
+  }
+  function dot3(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function hull(P) {
+    var p = P.slice().sort(function (a, b) { return a.x - b.x || a.y - b.y; }), lo = [], up = [], i;
+    function cr(o, a, b) { return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x); }
+    for (i = 0; i < p.length; i++) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p[i]) <= 0) lo.pop(); lo.push(p[i]); }
+    for (i = p.length - 1; i >= 0; i--) { while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p[i]) <= 0) up.pop(); up.push(p[i]); }
+    up.pop(); lo.pop(); return lo.concat(up);
+  }
+  /* circle of radius r in the x-z plane at axial position y, centred on (cx, cz) */
+  function ringY(v, cx, cz, r, y, n) { var o = []; n = n || 48; for (var i = 0; i < n; i++) { var t = 2 * Math.PI * i / n; o.push(v.p([cx + r * Math.cos(t), y, cz + r * Math.sin(t)])); } return o; }
+  /* solid cylinder along y; the +y end cap faces the viewer */
+  function cylY(v, cx, cz, r, y0, y1, o) {
+    o = o || {}; var a = ringY(v, cx, cz, r, y0), b = ringY(v, cx, cz, r, y1);
+    return Pg(hull(a.concat(b)), { fill: o.fill || COL.iron, stroke: o.stroke || COL.ink, w: o.w || 1, op: o.op }) + Pg(b, { fill: o.cap || COL.ironL, stroke: o.stroke || COL.ink, w: o.w || 1, op: o.op });
+  }
+  /* helix along y split into front and back parts */
+  function helixY(v, cx, cz, r, y0, y1, turns, n) {
+    n = n || Math.max(60, Math.round(turns * 40)); var front = [], back = [], cur = null, curF = null;
+    for (var i = 0; i <= n; i++) {
+      var t = 2 * Math.PI * turns * i / n, P = [cx + r * Math.cos(t), y0 + (y1 - y0) * i / n, cz + r * Math.sin(t)], fr = Math.cos(t) * v.VW[0] + Math.sin(t) * v.VW[2] > 0, q = v.p(P);
+      if (fr !== curF) { if (cur) { cur.push(q); (curF ? front : back).push(cur); } cur = [q]; curF = fr; } else cur.push(q);
+    }
+    if (cur) (curF ? front : back).push(cur);
+    return { front: front, back: back };
+  }
+  /* axis-aligned box: draws only faces that face the viewer */
+  function box(v, x0, x1, y0, y1, z0, z1, o) {
+    o = o || {}; var s = '', P = function (x, y, z) { return v.p([x, y, z]); }, sw = { stroke: o.stroke || COL.ink, w: o.w || 1, op: o.op };
+    var faces = [
+      [[1, 0, 0], [P(x1, y0, z0), P(x1, y1, z0), P(x1, y1, z1), P(x1, y0, z1)], o.fx || o.fill],
+      [[-1, 0, 0], [P(x0, y0, z0), P(x0, y1, z0), P(x0, y1, z1), P(x0, y0, z1)], o.fx || o.fill],
+      [[0, 1, 0], [P(x0, y1, z0), P(x1, y1, z0), P(x1, y1, z1), P(x0, y1, z1)], o.fy || o.fill],
+      [[0, -1, 0], [P(x0, y0, z0), P(x1, y0, z0), P(x1, y0, z1), P(x0, y0, z1)], o.fy || o.fill],
+      [[0, 0, 1], [P(x0, y0, z1), P(x1, y0, z1), P(x1, y1, z1), P(x0, y1, z1)], o.fz || o.fill],
+      [[0, 0, -1], [P(x0, y0, z0), P(x1, y0, z0), P(x1, y1, z0), P(x0, y1, z0)], o.fz || o.fill]
+    ];
+    faces.forEach(function (f) { if (dot3(f[0], v.VW) > 0) s += Pg(f[1], { fill: f[2] || '#ddd', stroke: sw.stroke, w: sw.w, op: sw.op, fop: o.fop }); });
+    return s;
+  }
+  /* ---- LaTeX labels via MathJax (paths inlined, so they export cleanly) ---- */
+  var TEXC = {}, HAS_MJ = false;
+  function TEX(src, x, y, o) {
+    o = o || {}; var size = o.size || 17, col = o.color || COL.ink, an = o.an || 'cm', halo = o.halo !== false;
+    if (!HAS_MJ) {
+      var ta = an[0] === 'l' ? 'start' : an[0] === 'r' ? 'end' : 'middle', dy = an[1] === 't' ? size * 0.8 : an[1] === 'b' ? 0 : size * 0.35;
+      var txt = src.replace(/\\text\{([^}]*)\}/g, '$1').replace(/\\mathbf\{([^}]*)\}/g, '$1').replace(/\\,|\;/g, ' ').replace(/[{}\\^_]/g, '');
+      return '<text x="' + f1(x) + '" y="' + f1(y + dy) + '" text-anchor="' + ta + '" font-family="STIX Two Text, Times New Roman, serif" font-style="italic" font-size="' + size + '" fill="' + col + '"' + (halo ? ' stroke="#fff" stroke-width="4" paint-order="stroke"' : '') + '>' + txt + '</text>';
+    }
+    var c = TEXC[src];
+    if (!c) {
+      var node = MathJax.tex2svg(src, { display: false }), sv = node.querySelector('svg');
+      c = { w: parseFloat(sv.getAttribute('width')), h: parseFloat(sv.getAttribute('height')), va: parseFloat((sv.style.verticalAlign || '0').replace('ex', '')) || 0, vb: sv.getAttribute('viewBox'), inner: sv.innerHTML };
+      c.halo = c.inner.replace(/stroke-width="0"/g, 'stroke-width="220"');
+      TEXC[src] = c;
+    }
+    var ex = size * 0.442, W = c.w * ex, H = c.h * ex, X = an[0] === 'l' ? x : an[0] === 'r' ? x - W : x - W / 2;
+    var Y = an[1] === 't' ? y : an[1] === 'b' ? y - (H + c.va * ex) : y - H / 2;
+    return '<svg x="' + f1(X) + '" y="' + f1(Y) + '" width="' + W.toFixed(2) + '" height="' + H.toFixed(2) + '" viewBox="' + c.vb + '" overflow="visible" color="' + col + '">' + (halo ? '<g color="#ffffff">' + c.halo + '</g>' : '') + c.inner + '</svg>';
+  }
+  /* ---- export (SVG / PNG) ---- */
+  var dlP = (window.claude && window.claude.use) ? window.claude.use('downloads').catch(function () { return null; }) : Promise.resolve(null);
+  function svgString(svg) {
+    var c = svg.cloneNode(true), vb = svg.viewBox.baseVal;
+    c.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); c.setAttribute('width', vb.width); c.setAttribute('height', vb.height); c.removeAttribute('style'); c.removeAttribute('class');
+    var bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); bg.setAttribute('x', vb.x); bg.setAttribute('y', vb.y); bg.setAttribute('width', vb.width); bg.setAttribute('height', vb.height); bg.setAttribute('fill', '#ffffff');
+    c.insertBefore(bg, c.firstChild);
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(c);
+  }
+  function saveFile(name, blob, note) {
+    var timeout = new Promise(function (r) { setTimeout(function () { r(null); }, 1500); });
+    Promise.race([dlP, timeout]).then(function (d) {
+      if (d) return d.save({ filename: name, data: blob }).then(function () { note('Saved ' + name); }, function (e) { note(e && e.code === 'declined' ? 'Download cancelled' : 'Download unavailable here'); });
+      var a = document.createElement('a'), u = URL.createObjectURL(blob); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 4000); note('Downloaded ' + name);
+    });
+  }
+  function exportFig(svg, base, kind, note) {
+    var s = svgString(svg);
+    if (kind === 'svg') return saveFile(base + '.svg', new Blob([s], { type: 'image/svg+xml' }), note);
+    var vb = svg.viewBox.baseVal, k = 3, img = new Image();
+    img.onload = function () {
+      var cv = document.createElement('canvas'); cv.width = vb.width * k; cv.height = vb.height * k;
+      var g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(img, 0, 0, cv.width, cv.height);
+      cv.toBlob(function (b) { saveFile(base + '.png', b, note); }, 'image/png');
+    };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+  }
+  function addTools(svgId, base) {
+    var svg = document.getElementById(svgId), bar = document.createElement('div'), msg = document.createElement('div');
+    bar.className = 'tools'; msg.className = 'toast'; msg.setAttribute('aria-live', 'polite');
+    var note = function (t) { msg.textContent = t; setTimeout(function () { if (msg.textContent === t) msg.textContent = ''; }, 3500); };
+    [['svg', 'Export SVG'], ['png', 'Export PNG']].forEach(function (k) { var b = document.createElement('button'); b.type = 'button'; b.textContent = k[1]; b.addEventListener('click', function () { exportFig(svg, base, k[0], note); }); bar.appendChild(b); });
+    svg.parentNode.insertBefore(bar, svg); svg.parentNode.insertBefore(msg, svg.nextSibling);
+  }
+  /* ---- controls ---- */
+  function makeRow(host, id, label, min, max, step, value, onChange, reg) {
+    var row = document.createElement('div'); row.className = 'row';
+    var lab = document.createElement('label'); lab.htmlFor = 'n-' + id; lab.innerHTML = label;
+    var rng = document.createElement('input'); rng.type = 'range'; rng.id = 'r-' + id; rng.setAttribute('aria-label', lab.textContent);
+    var num = document.createElement('input'); num.type = 'number'; num.id = 'n-' + id;
+    [rng, num].forEach(function (e) { e.min = min; e.max = max; e.step = step; e.value = value; });
+    rng.addEventListener('input', function () { num.value = rng.value; onChange(parseFloat(rng.value)); });
+    num.addEventListener('input', function () { var v = parseFloat(num.value); if (isNaN(v)) return; rng.value = v; onChange(v); });
+    row.appendChild(lab); row.appendChild(rng); row.appendChild(num); host.appendChild(row);
+    if (reg) reg[id] = { rng: rng, num: num };
+  }
+  function setRow(reg, id, v) { if (reg[id]) { reg[id].rng.value = v; reg[id].num.value = v; } }
+  function svgPt(svg, ev) { var r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal; return { x: (ev.clientX - r.left) * vb.width / r.width + vb.x, y: (ev.clientY - r.top) * vb.height / r.height + vb.y }; }
+  /* ---- numerics ---- */
+  function ellKE(k) {
+    var a = 1, b = Math.sqrt(Math.max(0, 1 - k * k)), c, sum = 0.5 * k * k, p = 0.5;
+    for (var n = 0; n < 40; n++) { var an = (a + b) / 2, bn = Math.sqrt(a * b); c = (a - b) / 2; p *= 2; sum += p * c * c; a = an; b = bn; if (Math.abs(c) < 1e-15) break; }
+    var K = Math.PI / (2 * a); return { K: K, E: K * (1 - sum) };
+  }
+  /* vector potential A_phi of a circular loop (radius a) per unit current at (rho, z) [m] */
+  function Aphi(a, rho, z) {
+    if (rho < 1e-12) return 0;
+    var d2 = (a + rho) * (a + rho) + z * z, k2 = 4 * a * rho / d2; if (k2 > 0.999999999) k2 = 0.999999999;
+    var e = ellKE(Math.sqrt(k2));
+    return MU0 * a / (Math.PI * Math.sqrt(d2)) * ((2 - k2) * e.K - 2 * e.E) / k2;
+  }
+  function Mloop(a, b, d) { var k = Math.sqrt(4 * a * b / ((a + b) * (a + b) + d * d)), e = ellKE(k); return MU0 * Math.sqrt(a * b) * ((2 / k - k) * e.K - (2 / k) * e.E); }
+  function contour(G, nx, ny, lev) {
+    var segs = [], i, j;
+    function ip(a, b) { return (lev - a) / ((b - a) || 1e-30); }
+    for (j = 0; j < ny - 1; j++) for (i = 0; i < nx - 1; i++) {
+      var a = G[j * nx + i], b = G[j * nx + i + 1], c = G[(j + 1) * nx + i + 1], d = G[(j + 1) * nx + i];
+      if (!isFinite(a + b + c + d)) continue;
+      var k = (a > lev ? 1 : 0) | (b > lev ? 2 : 0) | (c > lev ? 4 : 0) | (d > lev ? 8 : 0);
+      if (k === 0 || k === 15) continue;
+      var e = [];
+      if ((a > lev) !== (b > lev)) e.push([i + ip(a, b), j]);
+      if ((b > lev) !== (c > lev)) e.push([i + 1, j + ip(b, c)]);
+      if ((d > lev) !== (c > lev)) e.push([i + ip(d, c), j + 1]);
+      if ((a > lev) !== (d > lev)) e.push([i, j + ip(a, d)]);
+      if (e.length === 2) segs.push([e[0][0], e[0][1], e[1][0], e[1][1]]);
+      else if (e.length === 4) { segs.push([e[0][0], e[0][1], e[1][0], e[1][1]]); segs.push([e[2][0], e[2][1], e[3][0], e[3][1]]); }
+    }
+    return segs;
+  }
+  function joinSegs(segs) {
+    var key = function (x, y) { return Math.round(x * 1000) + ',' + Math.round(y * 1000); };
+    var map = {}, used = new Array(segs.length), out = [];
+    segs.forEach(function (s, n) { [key(s[0], s[1]), key(s[2], s[3])].forEach(function (k) { (map[k] = map[k] || []).push(n); }); });
+    for (var n = 0; n < segs.length; n++) {
+      if (used[n]) continue; used[n] = true;
+      var pts = [[segs[n][0], segs[n][1]], [segs[n][2], segs[n][3]]];
+      for (var dir = 0; dir < 2; dir++) {
+        var grow = true;
+        while (grow) {
+          grow = false; var end = dir ? pts[0] : pts[pts.length - 1], cand = map[key(end[0], end[1])] || [];
+          for (var c = 0; c < cand.length; c++) {
+            var m = cand[c]; if (used[m]) continue; used[m] = true; var s = segs[m];
+            var nxt = key(s[0], s[1]) === key(end[0], end[1]) ? [s[2], s[3]] : [s[0], s[1]];
+            if (dir) pts.unshift(nxt); else pts.push(nxt); grow = true; break;
+          }
+        }
+      }
+      out.push(pts);
+    }
+    return out;
+  }
+  /* place an arrowhead at fraction u along a polyline */
+  function headAlong(pts, u, c, s, flip) {
+    if (pts.length < 3) return ''; var L = 0, i, seg = [];
+    for (i = 1; i < pts.length; i++) { var d = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); seg.push(d); L += d; }
+    var target = L * u, acc = 0;
+    for (i = 1; i < pts.length; i++) { if (acc + seg[i - 1] >= target) { var t = (target - acc) / (seg[i - 1] || 1), a = pts[i - 1], b = pts[i], p = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }; return flip ? Hd(p, a.x - b.x, a.y - b.y, c, s) : Hd(p, b.x - a.x, b.y - a.y, c, s); } acc += seg[i - 1]; }
+    return '';
+  }
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function boot(init) {
+    var t0 = Date.now();
+    (function wait() {
+      if (window.MathJax && MathJax.startup && MathJax.startup.promise && MathJax.tex2svg) {
+        MathJax.startup.promise.then(function () { HAS_MJ = true; init(); return MathJax.typesetPromise ? MathJax.typesetPromise() : null; }).catch(function () { init(); });
+      } else if (Date.now() - t0 > 6000) init(); else setTimeout(wait, 60);
+    })();
+  }
+
+  /* ---- lighting: per-figure defs, gradients, shading ---- */
+  var FIG = 'f', GID = 0, DEFS = '';
+  function beginFig(id) { FIG = id; GID = 0; DEFS = ''; }
+  function endFig(s) { return '<defs>' + DEFS + '</defs>' + s; }
+  function hx2(h) { h = h.replace('#', ''); return [parseInt(h.substr(0, 2), 16), parseInt(h.substr(2, 2), 16), parseInt(h.substr(4, 2), 16)]; }
+  function rgb(c) { return '#' + c.map(function (x) { x = Math.max(0, Math.min(255, Math.round(x))); return (x < 16 ? '0' : '') + x.toString(16); }).join(''); }
+  function scl(h, k) { var c = hx2(h); if (k <= 1) return rgb(c.map(function (x) { return x * k; })); return rgb(c.map(function (x) { return x + (255 - x) * (k - 1); })); }
+  var LIGHT = (function () { var l = [0.55, -0.5, 0.67], n = Math.hypot(l[0], l[1], l[2]); return [l[0] / n, l[1] / n, l[2] / n]; })();
+  function lum(n) { return 0.5 + 0.62 * Math.max(0, dot3(n, LIGHT)); }
+  function gLin(x1, y1, x2, y2, stops) {
+    var id = FIG + 'g' + (GID++);
+    DEFS += '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="' + f1(x1) + '" y1="' + f1(y1) + '" x2="' + f1(x2) + '" y2="' + f1(y2) + '">' + stops.map(function (s) { return '<stop offset="' + s[0] + '" stop-color="' + s[1] + '"' + (s[2] !== undefined ? ' stop-opacity="' + s[2] + '"' : '') + '/>'; }).join('') + '</linearGradient>';
+    return 'url(#' + id + ')';
+  }
+  function gRad(cx, cy, r, stops, fx, fy) {
+    var id = FIG + 'g' + (GID++);
+    DEFS += '<radialGradient id="' + id + '" gradientUnits="userSpaceOnUse" cx="' + f1(cx) + '" cy="' + f1(cy) + '" r="' + f1(r) + '" fx="' + f1(fx === undefined ? cx : fx) + '" fy="' + f1(fy === undefined ? cy : fy) + '">' + stops.map(function (s) { return '<stop offset="' + s[0] + '" stop-color="' + s[1] + '"' + (s[2] !== undefined ? ' stop-opacity="' + s[2] + '"' : '') + '/>'; }).join('') + '</radialGradient>';
+    return 'url(#' + id + ')';
+  }
+  function softShadow(cx, cy, rx, ry, op) {
+    var id = FIG + 'blur' + (GID++);
+    DEFS += '<filter id="' + id + '" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="' + f1(Math.max(2, ry * 0.45)) + '"/></filter>';
+    return '<ellipse cx="' + f1(cx) + '" cy="' + f1(cy) + '" rx="' + f1(rx) + '" ry="' + f1(ry) + '" fill="#000" opacity="' + (op || 0.18) + '" filter="url(#' + id + ')"/>';
+  }
+  /* shaded box: every visible face gets a Lambert tone and a soft diagonal gradient */
+  function box3(v, x0, x1, y0, y1, z0, z1, base, o) {
+    o = o || {}; var s = '', P = function (x, y, z) { return v.p([x, y, z]); };
+    var faces = [
+      [[1, 0, 0], [P(x1, y0, z1), P(x1, y1, z1), P(x1, y1, z0), P(x1, y0, z0)]],
+      [[-1, 0, 0], [P(x0, y0, z1), P(x0, y1, z1), P(x0, y1, z0), P(x0, y0, z0)]],
+      [[0, 1, 0], [P(x1, y1, z1), P(x0, y1, z1), P(x0, y1, z0), P(x1, y1, z0)]],
+      [[0, -1, 0], [P(x1, y0, z1), P(x0, y0, z1), P(x0, y0, z0), P(x1, y0, z0)]],
+      [[0, 0, 1], [P(x1, y0, z1), P(x1, y1, z1), P(x0, y1, z1), P(x0, y0, z1)]],
+      [[0, 0, -1], [P(x1, y0, z0), P(x1, y1, z0), P(x0, y1, z0), P(x0, y0, z0)]]
+    ];
+    faces.forEach(function (f) {
+      if (dot3(f[0], v.VW) <= 0) return;
+      var k = lum(f[0]), q = f[1], c1 = scl(base, k * 1.12), c2 = scl(base, k * 0.86);
+      var fill = gLin(q[0].x, q[0].y, q[2].x, q[2].y, [[0, c1], [1, c2]]);
+      s += Pg(q, { fill: fill, fop: o.fop, stroke: o.edge || scl(base, 0.45), w: o.w || 0.8 });
+    });
+    return s;
+  }
+  /* shaded solid cylinder along y (screen-horizontal axis) */
+  function cyl3(v, cx, cz, r, y0, y1, base, o) {
+    o = o || {}; var a = ringY(v, cx, cz, r, y0, 64), b = ringY(v, cx, cz, r, y1, 64), H = hull(a.concat(b));
+    var p0 = v.p([cx, y0, cz]), p1 = v.p([cx, y1, cz]), ax = p1.x - p0.x, ay = p1.y - p0.y, L = Math.hypot(ax, ay) || 1, nx = -ay / L, ny = ax / L;
+    if (ny > 0) { nx = -nx; ny = -ny; }
+    var lo = 1e9, hi = -1e9; H.forEach(function (q) { var d = (q.x - p0.x) * nx + (q.y - p0.y) * ny; lo = Math.min(lo, d); hi = Math.max(hi, d); });
+    var mx = (p0.x + p1.x) / 2, my = (p0.y + p1.y) / 2;
+    var body = gLin(mx + nx * hi, my + ny * hi, mx + nx * lo, my + ny * lo, [[0, scl(base, 0.62)], [0.16, scl(base, 1.32)], [0.32, scl(base, 1.08)], [0.7, scl(base, 0.78)], [1, scl(base, 0.48)]]);
+    var capEnd = dot3([0, 1, 0], v.VW) > 0 ? b : a, ce = dot3([0, 1, 0], v.VW) > 0 ? p1 : p0, rr = r * v.s;
+    var cap = gRad(ce.x, ce.y, rr * 1.2, [[0, scl(base, 1.35)], [1, scl(base, 0.85)]], ce.x - rr * 0.35, ce.y - rr * 0.4);
+    return Pg(H, { fill: body, stroke: scl(base, 0.4), w: 0.8, op: o.op }) + Pg(capEnd, { fill: cap, stroke: scl(base, 0.4), w: 0.8, op: o.op });
+  }
+  /* copper wire drawn as a lit tube */
+  function tube(pts, w, front) {
+    if (!front) return Pl(pts, { stroke: '#c9a487', w: w, op: 0.85 });
+    var hl = pts.map(function (p) { return { x: p.x, y: p.y - w * 0.22 }; });
+    return Pl(pts, { stroke: '#4a2309', w: w + 1.3 }) + Pl(pts, { stroke: '#b5651f', w: w }) + Pl(hl, { stroke: '#f2c08f', w: Math.max(0.6, w * 0.32), op: 0.9 });
+  }
+  /* vertical round conductor (axis along z) */
+  function rod3(v, x, y, z0, z1, r, base, op) {
+    var A0 = v.p([x, y, z0]), A1 = v.p([x, y, z1]), w = r * v.s;
+    var P = [{ x: A0.x - w, y: A0.y }, { x: A0.x + w, y: A0.y }, { x: A1.x + w, y: A1.y }, { x: A1.x - w, y: A1.y }];
+    var fill = gLin(A0.x - w, 0, A0.x + w, 0, [[0, scl(base, 0.55)], [0.3, scl(base, 1.35)], [0.55, scl(base, 1.0)], [1, scl(base, 0.5)]]);
+    return Pg(P, { fill: fill, stroke: scl(base, 0.4), w: 0.7, op: op });
+  }
+  /* ---- standard circuit symbols ---- */
+  function symBattery(x, y, horiz) { /* long plate = positive, drawn first in the direction of travel */
+    if (horiz) return Ln(x - 3, y - 11, x - 3, y + 11, { stroke: COL.ink, w: 1.5 }) + Ln(x + 3, y - 6, x + 3, y + 6, { stroke: COL.ink, w: 3.5, cap: 'butt' }) + TEX('+', x - 10, y - 13, { size: 11, halo: false });
+    return Ln(x - 11, y - 3, x + 11, y - 3, { stroke: COL.ink, w: 1.5 }) + Ln(x - 6, y + 3, x + 6, y + 3, { stroke: COL.ink, w: 3.5, cap: 'butt' }) + TEX('+', x + 15, y - 9, { size: 11, halo: false });
+  }
+  function symAC(x, y, r) { r = r || 11; var d = 'M' + f1(x - r * 0.6) + ' ' + f1(y); for (var i = 1; i <= 20; i++) { var u = i / 20; d += ' L' + f1(x - r * 0.6 + 1.2 * r * u) + ' ' + f1(y - r * 0.38 * Math.sin(2 * Math.PI * u)); } return Ci(x, y, r, { fill: '#fff', stroke: COL.ink, w: 1.4 }) + Pa(d, { stroke: COL.ink, w: 1.2 }); }
+  function symMeter(x, y, L, r) { r = r || 11; return Ci(x, y, r, { fill: '#fff', stroke: COL.ink, w: 1.4 }) + TEX('\\mathrm{' + L + '}', x, y, { size: 14, halo: false }); }
+  function symSwitch(x0, y, x1, closed) { /* horizontal SPST between x0 and x1 */
+    var tip = closed ? { x: x1, y: y } : { x: x1 - 2, y: y - (x1 - x0) * 0.5 };
+    return Ci(x0, y, 2.2, { fill: '#fff', stroke: COL.ink, w: 1.2 }) + Ci(x1, y, 2.2, { fill: '#fff', stroke: COL.ink, w: 1.2 }) + Ln(x0, y, tip.x, tip.y, { stroke: COL.ink, w: 1.5 });
+  }
+  function symRheo(x0, y, x1) { /* IEEE zig-zag resistor with variable arrow */
+    var n = 6, d = 'M' + f1(x0) + ' ' + f1(y), w = (x1 - x0) / n;
+    for (var i = 0; i < n; i++) d += ' L' + f1(x0 + w * (i + 0.5)) + ' ' + f1(y + (i % 2 ? 5 : -5)); d += ' L' + f1(x1) + ' ' + f1(y);
+    return Pa(d, { stroke: COL.ink, w: 1.4 }) + Ar({ x: x0 - 2, y: y + 10 }, { x: x1 + 4, y: y - 11 }, COL.ink, 1.1, 7);
+  }
+  var S = { slide: 5, I1: 10, I2: 10, s: 4, w2: false, earth: true, d3: true, N: 500, I: 1, g: 1, mu: 2000 };
+  var BE = 40e-6, reg = {}, XW = 8, YW = 5.5, probe = { e: 3.6, n: 2.4 }, Ac = 4e-4, lc = 0.2, anim = null;
+  var V3 = view(40, 27, 350, 252);
+  function map(e, n) { return S.d3 ? V3.p([-n, e, 0]) : { x: 350 + 38 * e, y: 225 - 38 * n }; }
+  function unmap(x, y) { if (S.d3) { var o = V3.p([0, 0, 0]), pe = V3.p([0, 1, 0]), pn = V3.p([-1, 0, 0]), a = pe.x - o.x, b = pn.x - o.x, c = pe.y - o.y, d = pn.y - o.y, det = a * d - b * c, X = x - o.x, Y = y - o.y; return { e: (d * X - b * Y) / det, n: (-c * X + a * Y) / det }; } return { e: (x - 350) / 38, n: (225 - y) / 38 }; }
+  function wires() { return S.w2 ? [{ e: -S.s / 2, n: 0, I: S.I1 }, { e: S.s / 2, n: 0, I: S.I2 }] : [{ e: 0, n: 0, I: S.I1 }]; }
+  function Bat(e, n, W, earth) {
+    var bx = 0, by = earth ? BE : 0;
+    W.forEach(function (w) { var dx = (e - w.e) / 100, dy = (n - w.n) / 100, r2 = dx * dx + dy * dy || 1e-12, k = MU0 * w.I / (2 * Math.PI * r2); bx += -k * dy; by += k * dx; });
+    return { x: bx, y: by };
+  }
+  function Az(e, n, W) {
+    var a = S.earth ? -BE * e / 100 : 0;
+    for (var i = 0; i < W.length; i++) { var r = Math.hypot(e - W[i].e, n - W[i].n) / 100; if (r < 0.0035) return NaN; a += -MU0 * W[i].I / (2 * Math.PI) * Math.log(r); }
+    return a;
+  }
+  function compass(e, n, W, big) {
+    var R = big ? 0.72 : 0.52, ring = [], k, s = '';
+    for (k = 0; k < 40; k++) { var t = 2 * Math.PI * k / 40; ring.push(map(e + R * Math.cos(t), n + R * Math.sin(t))); }
+    var cc0 = map(e, n); s += Pg(ring, { fill: gRad(cc0.x, cc0.y, (big ? 24 : 17), [[0, '#ffffff'], [0.75, '#f4f5f6'], [1, '#c9cdd2']], cc0.x - 4, cc0.y - 4), stroke: big ? COL.ink : '#6b7076', w: big ? 1.8 : 1.2 });
+    var B = Bat(e, n, W, S.earth), m = Math.hypot(B.x, B.y), L = R * 0.82, w = R * 0.2;
+    if (m < 1e-10) return s;
+    var ux = B.x / m, uy = B.y / m, px_ = -uy, py_ = ux;
+    var tipN = map(e + ux * L, n + uy * L), tipS = map(e - ux * L, n - uy * L), sa = map(e + px_ * w, n + py_ * w), sb = map(e - px_ * w, n - py_ * w);
+    s += Pg([tipN, sa, sb], { fill: COL.pos, stroke: COL.pos, w: 0.5 }) + Pg([tipS, sa, sb], { fill: '#ffffff', stroke: COL.ink, w: 0.8 });
+    var c = map(e, n); return s + Ci(c.x, c.y, 1.6, { fill: COL.ink });
+  }
+  function draw5() {
+    beginFig('fg'); var W = wires(), NX = 161, NY = 111, G = new Float64Array(NX * NY), i, j, s = '';
+    for (j = 0; j < NY; j++) for (i = 0; i < NX; i++) G[j * NX + i] = Az(-XW + 2 * XW * i / (NX - 1), YW - 2 * YW * j / (NY - 1), W);
+    var lo = Infinity, hi = -Infinity; G.forEach(function (v) { if (isFinite(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v); } });
+    var dA = MU0 / (2 * Math.PI) * 10 * 0.3, k0 = Math.ceil(lo / dA), k1 = Math.floor(hi / dA);
+    var corners = [map(-XW, -YW), map(XW, -YW), map(XW, YW), map(-XW, YW)], top = 4.6, bot = -3.4;
+    function wireSeg(w, z0, z1, op) { var o = rod3(V3, -w.n, w.e, z0, z1, 0.15, '#b5651f', op); if (z1 > 0) { var c = V3.p([-w.n, w.e, z1]); o += '<ellipse cx="' + f1(c.x) + '" cy="' + f1(c.y) + '" rx="' + f1(0.15 * V3.s) + '" ry="' + f1(0.15 * V3.s * 0.45) + '" fill="#e7a56a" stroke="#5a2d0c" stroke-width="0.7"/>'; } return o; }
+    if (S.d3) W.forEach(function (w) { s += wireSeg(w, bot, 0, 0.45); });
+    s += Pg(corners, { fill: S.d3 ? gLin(0, corners[2].y, 0, corners[0].y, [[0, '#e3e9f1'], [1, '#f9fbfd']]) : '#ffffff', fop: S.d3 ? 0.9 : 1, stroke: COL.lgray, w: 1 });
+    var g = '', cnt = 0;
+    for (var kk = k0; kk <= k1 && cnt < 90; kk++, cnt++) {
+      joinSegs(contour(G, NX, NY, kk * dA)).forEach(function (p) {
+        if (p.length < 3) return;
+        var wp = p.map(function (q) { return [-XW + 2 * XW * q[0] / (NX - 1), YW - 2 * YW * q[1] / (NY - 1)]; }), pts = wp.map(function (q) { return map(q[0], q[1]); });
+        g += Pl(pts, { stroke: COL.bf, w: 1.05, op: 0.9 });
+        if (pts.length > 10) { var mi = Math.floor(pts.length * (kk % 2 ? 0.3 : 0.7)), q = wp[mi], B = Bat(q[0], q[1], W, S.earth), m = Math.hypot(B.x, B.y) || 1, a = map(q[0], q[1]), b = map(q[0] + 0.1 * B.x / m, q[1] + 0.1 * B.y / m); g += Hd(a, b.x - a.x, b.y - a.y, COL.bf, 7); }
+      });
+    }
+    s += g;
+    var c1 = W[0];
+    for (i = 0; i < 8; i++) { var an = i * Math.PI / 4 + Math.PI / 8; s += compass(c1.e + 2.4 * Math.cos(an), c1.n + 2.4 * Math.sin(an), W); }
+    [[-6.2, 3.8], [6.2, 3.8], [-6.2, -3.8], [6.2, -3.8], [0, 4.4], [0, -4.4]].forEach(function (p) { if (!S.w2 || Math.abs(p[0]) > 1) s += compass(p[0], p[1], W); });
+    s += compass(probe.e, probe.n, W, true).replace('<polygon', '<polygon data-p="P" style="cursor:grab"');
+    var pl = map(probe.e, probe.n + 1.0); s += TEX('\\text{drag}', pl.x, pl.y - 4, { size: 12, color: COL.gray });
+    /* wires */
+    W.forEach(function (w, n) {
+      var lab = 'I_' + (n + 1) + '=' + M(w.I, 0) + '\\,\\text{A}';
+      if (S.d3) {
+        s += wireSeg(w, 0, top, 1);
+        var a = V3.p([-w.n, w.e, top - 2.2]), b = V3.p([-w.n, w.e, top - 0.6]);
+        if (w.I) s += Ar(w.I > 0 ? a : b, w.I > 0 ? b : a, COL.ink, 1.6, 11);
+        var t = V3.p([-w.n, w.e, top]); s += TEX(lab, t.x + 10, t.y + 6, { size: 15, an: 'lm' });
+      } else {
+        var c = map(w.e, w.n); s += Ci(c.x, c.y, 10, { fill: COL.cu, stroke: COL.ink, w: 1.2 });
+        if (w.I > 0) s += Ci(c.x, c.y, 2.6, { fill: COL.ink }); else if (w.I < 0) s += Ln(c.x - 5, c.y - 5, c.x + 5, c.y + 5, { stroke: COL.ink, w: 1.6 }) + Ln(c.x + 5, c.y - 5, c.x - 5, c.y + 5, { stroke: COL.ink, w: 1.6 });
+        s += TEX(lab, c.x, c.y + 26, { size: 15 });
+      }
+    });
+    if (S.w2 && S.I1 && S.I2) {
+      var att = S.I1 * S.I2 > 0, sgn = att ? 1 : -1, a1 = map(W[0].e, 0), b1 = map(W[0].e + sgn * 1.4, 0), a2 = map(W[1].e, 0), b2 = map(W[1].e - sgn * 1.4, 0), off = S.d3 ? 0 : -26;
+      if (!S.d3) { a1.y += off; b1.y += off; a2.y += off; b2.y += off; }
+      s += Ar(a1, b1, COL.ink, 2.2, 12) + Ar(a2, b2, COL.ink, 2.2, 12);
+      var mid = map(0, S.d3 ? -0.9 : 0); s += TEX(att ? '\\text{attract}' : '\\text{repel}', mid.x, mid.y + (S.d3 ? 4 : -44), { size: 14 });
+    }
+    var na = map(7.1, 2.4), nb = map(7.1, 4.6); s += Ar(na, nb, COL.ink, 1.3, 10) + TEX('N', nb.x + 10, nb.y, { size: 15, an: 'lm' });
+    document.getElementById('fg').innerHTML = endFig(s);
+    var B = Bat(probe.e, probe.n, W, S.earth), Bw = Bat(probe.e, probe.n, W, false), m = Math.hypot(B.x, B.y), ang = Math.atan2(B.x, B.y) * 180 / Math.PI;
+    var el = function (id) { return document.getElementById(id); }, r1 = Math.hypot(probe.e - W[0].e, probe.n - W[0].n);
+    el('o1').innerHTML = '<dt>|<b>B</b>| at the large compass</dt><dd>' + eng(m, 'T') + '</dd><dt>from the current(s) alone</dt><dd>' + eng(Math.hypot(Bw.x, Bw.y), 'T') + '</dd><dt>Needle bearing from north</dt><dd>' + M(Math.abs(ang), 1) + '° ' + (ang > 0.05 ? 'E' : ang < -0.05 ? 'W' : '') + '</dd>';
+    var o2 = '<dt>Distance from wire 1, <i>ρ</i></dt><dd>' + M(r1, 2) + ' cm</dd><dt><i>μ</i><sub>0</sub>|<i>I</i><sub>1</sub>|/(2π<i>ρ</i>)</dt><dd>' + eng(MU0 * Math.abs(S.I1) / (2 * Math.PI * r1 / 100), 'T') + '</dd>';
+    if (S.w2) { var F = MU0 * S.I1 * S.I2 / (2 * Math.PI * S.s / 100); o2 += '<dt>Force per unit length <i>F</i>/<i>l</i></dt><dd>' + eng(Math.abs(F), 'N/m') + (F > 0 ? ', attractive' : F < 0 ? ', repulsive' : '') + '</dd>'; }
+    el('o2').innerHTML = o2;
+    el('mean').innerHTML = 'With no current every needle points north. As the current rises, needles near the wire turn to circle it first; distant needles still point north because the wire’s field falls as 1/<i>ρ</i> while the Earth’s field is uniform. Reversing the current reverses the circulation (right-hand rule). Parallel currents attract; antiparallel currents repel.';
+    el('eqband').innerHTML = '\\( \\mathbf{B}=\\dfrac{\\mu_0 I}{2\\pi\\rho}\\,\\mathbf{a}_\\phi,\\qquad \\dfrac{F}{l}=\\dfrac{\\mu_0 I_1 I_2}{2\\pi d} \\)';
+    el('cap').innerHTML = '<b>Figure 1.5</b> Long straight wire' + (S.w2 ? 's' : '') + ' passing through a horizontal plane. Field lines are drawn at equal steps of the vector potential, so their spacing shows field strength. The red end of each needle points along the total field.';
+    el('assume').innerHTML = 'Infinitely long straight wires normal to the plane; horizontal component of the Earth’s field taken as 40 µT.';
+    typeset();
+  }
+  /* ---------- slide 6 ---------- */
+  function mag() {
+    var Rc = lc / (MU0 * S.mu * Ac), Rg = 2 * (S.g / 1000) / (MU0 * Ac), R = Rc + Rg, Phi = S.N * S.I / R, B = Phi / Ac;
+    return { Rc: Rc, Rg: Rg, R: R, Phi: Phi, B: B, L: S.N * S.N / R, F: B * B * Ac / MU0, L0: S.N * S.N / Rc };
+  }
+  function rpath(x1, y1, x2, y2, r) {
+    return 'M' + f1(x1 + r) + ' ' + f1(y1) + ' L' + f1(x2 - r) + ' ' + f1(y1) + ' Q' + f1(x2) + ' ' + f1(y1) + ' ' + f1(x2) + ' ' + f1(y1 + r) + ' L' + f1(x2) + ' ' + f1(y2 - r) + ' Q' + f1(x2) + ' ' + f1(y2) + ' ' + f1(x2 - r) + ' ' + f1(y2) + ' L' + f1(x1 + r) + ' ' + f1(y2) + ' Q' + f1(x1) + ' ' + f1(y2) + ' ' + f1(x1) + ' ' + f1(y2 - r) + ' L' + f1(x1) + ' ' + f1(y1 + r) + ' Q' + f1(x1) + ' ' + f1(y1) + ' ' + f1(x1 + r) + ' ' + f1(y1) + ' Z';
+  }
+  function draw6() {
+    beginFig('fg'); var m = mag(), gp = 8 + S.g * 16, yT = 210, aB = yT - gp, aT = aB - 46, s = '', on = S.I !== 0, sg = S.I >= 0 ? 1 : -1, X = 50;
+    s += Pg([{ x: X + 180, y: 210 }, { x: X + 230, y: 210 }, { x: X + 230, y: 350 }, { x: X + 410, y: 350 }, { x: X + 410, y: 210 }, { x: X + 460, y: 210 }, { x: X + 460, y: 400 }, { x: X + 180, y: 400 }], { fill: gLin(X + 180, 210, X + 460, 400, [[0, '#d9dde1'], [1, '#a3aab1']]), stroke: COL.ink, w: 1.2 });
+    s += Rc(X + 170, aT, 300, 46, { fill: gLin(0, aT, 0, aT + 46, [[0, '#dfe3e7'], [1, '#a8afb6']]), stroke: COL.ink, w: 1.2 });
+    if (on) {
+      var nl = Math.max(1, Math.min(5, Math.round(5 * Math.sqrt(Math.min(1, Math.abs(m.B) / 1.2))))), offs = [];
+      for (var k = 0; k < nl; k++) offs.push(nl === 1 ? 0 : -16 + 32 * k / (nl - 1));
+      offs.forEach(function (o) {
+        var x1 = X + 205 - o, x2 = X + 435 + o, y1 = (aT + aB) / 2 - o * 0.7, y2 = 375 + o * 0.7;
+        s += Pa(rpath(x1, y1, x2, y2, 16), { stroke: COL.bf, w: 1.4 }) + Hd({ x: x1, y: 290 }, 0, -sg, COL.bf, 9) + Hd({ x: x2, y: 290 }, 0, sg, COL.bf, 9) + Hd({ x: X + 320, y: y1 }, sg, 0, COL.bf, 9) + Hd({ x: X + 320, y: y2 }, -sg, 0, COL.bf, 9);
+      });
+      if (S.g > 0.25) [[X + 180, -1], [X + 230, 1], [X + 410, -1], [X + 460, 1]].forEach(function (e) { var b = Math.min(16, gp * 0.45) * e[1]; s += Pa('M' + e[0] + ' ' + f1(yT - 2) + ' C' + f1(e[0] + b) + ' ' + f1(yT - 2) + ' ' + f1(e[0] + b) + ' ' + f1(aB + 2) + ' ' + e[0] + ' ' + f1(aB + 2), { stroke: COL.bf, w: 1, op: 0.7 }); });
+    }
+    for (var r = 0; r < 8; r++) for (var c = 0; c < 2; c++) {
+      var yy = 230 + r * 14, xl = X + 152 + c * 14, xr = X + 242 + c * 14;
+      s += Ci(xl, yy, 6.3, { fill: gRad(xl, yy, 7, [[0, '#f6d2b0'], [1, '#b5651f']], xl - 2, yy - 2), stroke: '#5a2d0c', w: 0.8 }) + Ci(xr, yy, 6.3, { fill: gRad(xr, yy, 7, [[0, '#f6d2b0'], [1, '#b5651f']], xr - 2, yy - 2), stroke: '#5a2d0c', w: 0.8 });
+      if (on) [[xl, sg > 0], [xr, sg < 0]].forEach(function (p) { if (p[1]) s += Ci(p[0], yy, 1.7, { fill: COL.ink }); else s += Ln(p[0] - 2.6, yy - 2.6, p[0] + 2.6, yy + 2.6, { stroke: COL.ink, w: 1.1 }) + Ln(p[0] + 2.6, yy - 2.6, p[0] - 2.6, yy + 2.6, { stroke: COL.ink, w: 1.1 }); });
+    }
+    s += TEX('N\\ \\text{turns},\\ I', X + 205, 360, { size: 14, an: 'rt' });
+    s += TEX('\\text{iron core},\\ \\mu_r', X + 320, 386, { size: 14 }) + TEX('\\text{armature}', X + 320, aT - 12, { size: 14 });
+    s += Ln(X + 482, aB, X + 482, yT, { stroke: COL.ink, w: 0.9 }) + Ln(X + 476, aB, X + 488, aB, { stroke: COL.ink, w: 0.9 }) + Ln(X + 476, yT, X + 488, yT, { stroke: COL.ink, w: 0.9 }) + TEX('g=' + M(S.g, 2) + '\\,\\text{mm}', X + 494, (aB + yT) / 2, { size: 15, an: 'lm' });
+    s += TEX('\\text{area } A', X + 435, 300, { size: 13, color: COL.gray, an: 'lm' }) ;
+    if (false) {} if (on && m.F > 0) { var Lp = Math.min(70, 14 + 16 * Math.log10(1 + m.F)); s += Ar({ x: X + 320, y: aT - 34 - Lp }, { x: X + 320, y: aT - 26 }, COL.ink, 2.2, 13) + TEX('\\mathbf{F}', X + 332, aT - 30 - Lp / 2, { an: 'lm' }); }
+    document.getElementById('fg').innerHTML = endFig(s);
+    var el = function (id) { return document.getElementById(id); };
+    el('o1').innerHTML = '<dt>Iron reluctance ℛ<sub>c</sub></dt><dd>' + eng(m.Rc, 'A/Wb') + '</dd><dt>Reluctance of both gaps ℛ<sub>g</sub></dt><dd>' + eng(m.Rg, 'A/Wb') + '</dd><dt>Flux <i>Φ</i> = <i>NI</i>/ℛ</dt><dd>' + eng(m.Phi, 'Wb') + '</dd><dt>Flux density <i>B</i></dt><dd>' + eng(m.B, 'T') + '</dd>';
+    el('o2').innerHTML = '<dt>Inductance <i>L</i> = <i>N</i>²/ℛ</dt><dd>' + eng(m.L, 'H') + '</dd><dt><i>L</i> with the gaps closed</dt><dd>' + eng(m.L0, 'H') + '</dd><dt>Stored energy ½<i>LI</i>²</dt><dd>' + eng(0.5 * m.L * S.I * S.I, 'J') + '</dd><dt>Force on the armature <i>F</i></dt><dd>' + eng(m.F, 'N') + '</dd>';
+    var pc = 100 * m.Rc / m.R; el('sbC').style.width = pc + '%'; el('sbG').style.width = (100 - pc) + '%';
+    el('sbT').innerHTML = 'Iron ' + M(pc, 1) + ' % · air gaps ' + M(100 - pc, 1) + ' %, although the gaps total only ' + M(2 * S.g, 1) + ' mm against a ' + (lc * 1000) + ' mm iron path.';
+    var wn = el('warn'); wn.hidden = Math.abs(m.B) <= 1.6; wn.textContent = 'B exceeds 1.6 T: the iron saturates, so the real flux, inductance and force are lower than this linear model predicts.';
+    el('mean').innerHTML = 'The thin air gap has far more reluctance than the whole iron path, so it sets the inductance and stores most of the energy. As the armature closes, the gap shrinks and <i>L</i> rises; the force always acts in the direction that increases <i>L</i>.';
+    el('eqband').innerHTML = '\\( \\mathcal{R}=\\dfrac{l}{\\mu A},\\quad \\Phi=\\dfrac{NI}{\\mathcal{R}_c+\\mathcal{R}_g},\\quad L=\\dfrac{N^2}{\\mathcal{R}},\\quad F=\\tfrac12 I^2\\left|\\dfrac{dL}{dg}\\right|=\\dfrac{B^2A}{\\mu_0}\\ (\\text{two gaps}) \\)';
+    el('cap').innerHTML = '<b>Figure 1.6</b> Cross-section of a relay-type actuator. The flux path runs through the core, across two air gaps and through the armature. The gap width is drawn enlarged.';
+    el('assume').innerHTML = 'Cross-section <i>A</i> = 4 cm², iron path 20 cm, constant <i>μ</i><sub>r</sub>; leakage and gap fringing neglected.';
+    typeset();
+  }
+  var lastEq = '';
+  function typeset() { var e = document.getElementById('eqband'); if (HAS_MJ && e.innerHTML !== lastEq) { MathJax.typesetPromise([e]).then(function () { lastEq = e.innerHTML; }); } }
+  function render() { if (S.slide === 5) draw5(); else draw6(); }
+  function build() {
+    var g5a = document.getElementById('g5a'), g5b2 = document.getElementById('g5b2'), g6a = document.getElementById('g6a'), g6b = document.getElementById('g6b');
+    makeRow(g5a, 'I1', 'Current <i>I</i><sub>1</sub> (A)', -20, 20, 0.5, S.I1, function (v) { S.I1 = v; render(); }, reg);
+    makeRow(g5b2, 'I2', 'Current <i>I</i><sub>2</sub> (A)', -20, 20, 0.5, S.I2, function (v) { S.I2 = v; render(); }, reg);
+    makeRow(g5b2, 's', 'Spacing <i>d</i> (cm)', 1, 9, 0.1, S.s, function (v) { S.s = v; render(); }, reg);
+    makeRow(g6a, 'N', 'Turns <i>N</i>', 50, 2000, 10, S.N, function (v) { S.N = v; render(); }, reg);
+    makeRow(g6a, 'I', 'Current <i>I</i> (A)', -3, 3, 0.05, S.I, function (v) { S.I = v; render(); }, reg);
+    makeRow(g6a, 'mu', 'Core <i>μ</i><sub>r</sub>', 100, 5000, 50, S.mu, function (v) { S.mu = v; render(); }, reg);
+    makeRow(g6b, 'g', 'Gap <i>g</i> (mm)', 0.05, 5, 0.05, S.g, function (v) { S.g = v; anim = null; render(); }, reg);
+    g6b.appendChild(document.getElementById('g6btn'));
+    document.getElementById('fW2').addEventListener('change', function (e) { S.w2 = e.target.checked; g5b2.hidden = !S.w2; render(); });
+    document.getElementById('fEarth').addEventListener('change', function (e) { S.earth = e.target.checked; render(); });
+    document.getElementById('v3d').addEventListener('click', function () { S.d3 = true; this.classList.add('on'); document.getElementById('vtop').classList.remove('on'); render(); });
+    document.getElementById('vtop').addEventListener('click', function () { S.d3 = false; this.classList.add('on'); document.getElementById('v3d').classList.remove('on'); render(); });
+    function animG(target) {
+      var g0 = S.g, t0 = null, id = {}; anim = id;
+      function st(ts) { if (anim !== id) return; if (t0 === null) t0 = ts; var u = Math.min(1, (ts - t0) / (REDUCED ? 1 : 900)); S.g = g0 + (target - g0) * u * u; setRow(reg, 'g', S.g.toFixed(2)); render(); if (u < 1) requestAnimationFrame(st); }
+      requestAnimationFrame(st);
+    }
+    document.getElementById('btnClose').addEventListener('click', function () { animG(0.05); });
+    document.getElementById('btnOpen').addEventListener('click', function () { animG(1); });
+    function setSlide(n) {
+      S.slide = n;
+      document.getElementById('t5').setAttribute('aria-selected', n === 5); document.getElementById('t6').setAttribute('aria-selected', n === 6);
+      ['g5v', 'g5a', 'g5b'].forEach(function (id) { document.getElementById(id).hidden = n !== 5; });
+      ['g6a', 'g6b', 'rbar'].forEach(function (id) { document.getElementById(id).hidden = n !== 6; });
+      if (n === 5) document.getElementById('warn').hidden = true;
+      render();
+    }
+    document.getElementById('t5').addEventListener('click', function () { setSlide(5); });
+    document.getElementById('t6').addEventListener('click', function () { setSlide(6); });
+    var svg = document.getElementById('fg'), drag = false;
+    svg.addEventListener('pointerdown', function (ev) { if (S.slide !== 5 || !ev.target.closest('[data-p]')) return; drag = true; svg.setPointerCapture(ev.pointerId); ev.preventDefault(); });
+    svg.addEventListener('pointermove', function (ev) { if (!drag) return; var p = svgPt(svg, ev), w = unmap(p.x, p.y); probe.e = Math.max(-XW + 0.8, Math.min(XW - 0.8, w.e)); probe.n = Math.max(-YW + 0.8, Math.min(YW - 0.8, w.n)); render(); });
+    svg.addEventListener('pointerup', function () { drag = false; }); svg.addEventListener('pointercancel', function () { drag = false; });
+    addTools('fg', 'fig1-5-magnetic');
+    setSlide(5);
+  }
+  boot(build);
+})();
+</script>
+
+</body></html>
