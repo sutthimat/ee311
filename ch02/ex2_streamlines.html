@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Streamlines (Hayt §2.6, slides 23–25), on pagekit, as a plan view: x to the right, y up (azimuth −90°, elevation
+/* Streamlines (Hayt §2.6, slides 28–30), on pagekit, as a plan view: x to the right, y up (azimuth −90°, elevation
    90°, fixed). Blue (c1): streamlines; ink: E at P; orange (c2) / green (c3): its components E_x, E_y. */
 .src-c { fill: var(--paper); stroke: var(--ink); stroke-width: 1.6; }
 .src-p { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
@@ -1780,10 +1780,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     return f;
   }
   var FLD = {
-    /* slide 24: a line charge rho_L = 2 pi eps0 on the z axis, E = a_rho / rho = (x a_x + y a_y)/(x² + y²) */
+    /* slide 29: a line charge rho_L = 2 pi eps0 on the z axis, E = a_rho / rho = (x a_x + y a_y)/(x² + y²) */
     line: lineField({ id: 'line', x0: 0, y0: 0, a: 1, box: [-6, 6, -3, 10], P0: [-2, 7, 10], srcLabel: '*ρ*_{L} = 2π*ε*_{0}',
       btn: 'Line charge on the <i>z</i> axis',
-      note: 'A line charge <i>ρ<sub>L</sub></i> = 2π<i>ε</i><sub class="u">0</sub> C/m on the <i>z</i> axis (slide 24): <b class="v">E</b> = <b class="v">a</b><sub class="u"><i>ρ</i></sub>/<i>ρ</i>. Its streamlines are straight lines through the line charge.',
+      note: 'A line charge <i>ρ<sub>L</sub></i> = 2π<i>ε</i><sub class="u">0</sub> C/m on the <i>z</i> axis (slide 29): <b class="v">E</b> = <b class="v">a</b><sub class="u"><i>ρ</i></sub>/<i>ρ</i>. Its streamlines are straight lines through the line charge.',
       Etext: '**E** = (*x* **a**_{x} + *y* **a**_{y})/(*x*² + *y*²) V/m',
       famEq: '*ρ*_{L} = 2π*ε*_{0} on the *z* axis: **E** = **a**_{ρ}/*ρ* = (*x* **a**_{x} + *y* **a**_{y})/(*x*² + *y*²);  d*y*/d*x* = *E*_{y}/*E*_{x} = *y*/*x*, so *y* = *C* *x*' }),
     /* D2.7 (a): E = −(8x/y) a_x + (4x²/y²) a_y, streamlines x² + 2y² = C (not defined on y = 0, zero on x = 0) */
@@ -1811,7 +1811,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   /* ======================= the slide's worked problems (numbers computed, not typed) ======================= */
   var e5 = Math.exp(5), Cb = 16 - 0.4 + 0.08 * Math.log(6);
   var EXS = {
-    ln: { btn: 'Line charge (slide 24)', title: 'Slide 24: the streamline of a line charge', fid: 'line', P: [-2, 7, 10], rv: { E: 1, slope: 2, fam: 3, curve: 4 },
+    ln: { btn: 'Line charge (slide 29)', title: 'Slide 29: the streamline of a line charge', fid: 'line', P: [-2, 7, 10], rv: { E: 1, slope: 2, fam: 3, curve: 4 },
       q: 'Find the streamline through *P*(−2, 7, 10) in the field of a line charge *ρ*_{L} = 2π*ε*_{0} C/m on the *z* axis, **E** = (*x* **a**_{x} + *y* **a**_{y})/(*x*² + *y*²) V/m.',
       steps: [
         'At *P*: *x*² + *y*² = 4 + 49 = 53, so *E*_{x} = −2/53 = ' + fmt.x(-2 / 53) + ' V/m and *E*_{y} = 7/53 = ' + fmt.x(7 / 53) + ' V/m',

@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Cylindrical conversions (Hayt §1.8, lecture slides 20–26), on pagekit. Colours: rho blue (c1), phi orange (c2),
+/* Cylindrical conversions (Hayt §1.8, lecture slides 27–33), on pagekit. Colours: rho blue (c1), phi orange (c2),
    z green (c3), for the variables, their component vectors and the rectangular x, y, z components alike (each labelled).
    The calculator angle tan^-1(y/x) is muted, dashed, with a hollow head (the wrong direction when x < 0). */
 .eqs { display: grid; gap: 2px 28px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); font-family: var(--serif); font-size: 1.06rem; line-height: 1.9; overflow-x: auto; }
@@ -257,7 +257,7 @@ table.ft td.m, table.ft th.m { font-family: var(--serif); }
         </tbody>
       </table>
     </div>
-    <p class="note">The calculator gives −90° &lt; <i>α</i> &lt; 90°, the right answer only when <i>x</i> &gt; 0. Angles that differ by 360° name the same direction (slide 23: −53.1° or 306.9°).</p>
+    <p class="note">The calculator gives −90° &lt; <i>α</i> &lt; 90°, the right answer only when <i>x</i> &gt; 0. Angles that differ by 360° name the same direction (slide 30: −53.1° or 306.9°).</p>
 
     <h2>Converting a vector (slide equations (12)–(14) and Table 1.1)</h2>
     <div class="eqs">
@@ -1708,12 +1708,12 @@ table.ft td.m, table.ft th.m { font-family: var(--serif); }
   var Pa = [10, -8, 6], ca = cyl(Pa), Ca = toCyl(Pa, ca.ph);
   var Pc = [5, 2, -1], cc = cyl(Pc), Hc = [20, -10, 3], Hr = fromCyl(Hc, cc.ph), co = Math.cos(cc.ph * D2R), si = Math.sin(cc.ph * D2R);
   var EX = {
-    q1: { title: 'Slide 23: the point (−3, 4)', q: 'Find *ρ* and *φ* for *x* = −3, *y* = 4 (2nd quadrant).', given: 'Given *x* = −3, *y* = 4 (slide 23): find *ρ* and *φ*',
+    q1: { title: 'Slide 30: the point (−3, 4)', q: 'Find *ρ* and *φ* for *x* = −3, *y* = 4 (2nd quadrant).', given: 'Given *x* = −3, *y* = 4 (slide 30): find *ρ* and *φ*',
       steps: ['*ρ* = √(*x*² + *y*²) = √(9 + 16) = 5',
         'Calculator: tan⁻¹(*y*/*x*) = tan⁻¹(4/(−3)) = −53.1°, a direction in quadrant IV (dashed), not where *P* is',
         '*x* < 0, *y* > 0: quadrant II, so add 180°: *φ* = −53.1° + 180° = 126.9°',
         'Check: *ρ* cos *φ* = 5 cos 126.9° = −3 = *x*,  *ρ* sin *φ* = 5 sin 126.9° = 4 = *y*'] },
-    q2: { title: 'Slide 23: the point (3, −4)', q: 'Find *ρ* and *φ* for *x* = 3, *y* = −4.', given: 'Given *x* = 3, *y* = −4 (slide 23): find *ρ* and *φ*',
+    q2: { title: 'Slide 30: the point (3, −4)', q: 'Find *ρ* and *φ* for *x* = 3, *y* = −4.', given: 'Given *x* = 3, *y* = −4 (slide 30): find *ρ* and *φ*',
       steps: ['*ρ* = √(*x*² + *y*²) = √(9 + 16) = 5',
         'Calculator: tan⁻¹(*y*/*x*) = tan⁻¹(−4/3) = −53.1°',
         '*x* > 0, *y* < 0: quadrant IV, the calculator angle is already right: *φ* = −53.1°',

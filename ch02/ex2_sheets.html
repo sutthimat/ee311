@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Fields of sheets of charge (Hayt §2.5, slides 20–22), on pagekit. Sheets parallel to the xy-plane: positive sheets
+/* Fields of sheets of charge (Hayt §2.5, slides 23–26), on pagekit. Sheets parallel to the xy-plane: positive sheets
    orange (sh2 tone, solid edge), negative sheets blue (sh tone, dashed edge). The figure's drawing area is split:
    the 3D stack on the left, the plot of E_z(z) on the right (z upward in both). */
 .eqs { display: grid; gap: 4px 28px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); font-family: var(--serif); font-size: 1.06rem; line-height: 1.9; overflow-x: auto; }
@@ -233,10 +233,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       <section class="grp" id="g-mode"><h2>Mode</h2></section>
       <section class="grp" id="g-sheets"><h2>Sheets (<i>ρ</i><sub class="u"><i>S</i></sub> in nC/m², <i>z</i> in m)</h2></section>
       <section class="grp" id="g-probe"><h2>Probe <i>P</i></h2></section>
-      <section class="grp" id="g-cap"><h2>Capacitor (slide 21)</h2>
+      <section class="grp" id="g-cap"><h2>Capacitor (slide 25)</h2>
         <p class="stmt">Two sheets: +<i>ρ</i><sub class="u"><i>S</i></sub> at <i>z</i> = 0 and −<i>ρ</i><sub class="u"><i>S</i></sub> at <i>z</i> = <i>a</i> (the slide's <i>x</i> = 0 and <i>x</i> = <i>a</i>, turned to <i>z</i>). Find <b class="v">E</b> below, between and above them. The slide gives symbols only; the numbers here are <i>ρ</i><sub class="u"><i>S</i></sub> = 1 nC/m², <i>a</i> = 2 m.</p>
       </section>
-      <section class="grp" id="g-d26"><h2>Drill D2.6 (slide 22)</h2>
+      <section class="grp" id="g-d26"><h2>Drill D2.6 (slide 26)</h2>
         <p class="stmt">Three infinite uniform sheets in free space: 3 nC/m² at <i>z</i> = −4, 6 nC/m² at <i>z</i> = 1 and −8 nC/m² at <i>z</i> = 4. Find <b class="v">E</b> at (a) <i>P<sub>A</sub></i>(2, 5, −5); (b) <i>P<sub>B</sub></i>(4, 2, −3); (c) <i>P<sub>C</sub></i>(−1, −5, 2); (d) <i>P<sub>D</sub></i>(−2, 4, 5).</p>
       </section>
       <section class="grp" id="g-drill"><h2>Drill: the field of sheets at a point</h2></section>
@@ -1679,7 +1679,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var D26_STEPS = [STEP1, ptStep(D26, 0, 'a', ' (below all)'), ptStep(D26, 1, 'b', ' (slide: 283, with *ε*_{0} = 10⁻⁹/36π)'),
     ptStep(D26, 2, 'c', ' (slide: 961, with *ε*_{0} = 10⁻⁹/36π)'), ptStep(D26, 3, 'd', ' (above all)')];
 
-  /* ---------- state: Explore opens on the capacitor pair of slide 21 (+1 nC/m² at z = 0, −1 nC/m² at z = 2) ---------- */
+  /* ---------- state: Explore opens on the capacitor pair of slide 25 (+1 nC/m² at z = 0, −1 nC/m² at z = 2) ---------- */
   var DEF = { n: 2, r: [1, -1, 3], z: [0, 2, 4], zP: 1 };
   var DEFF = { fld: true, each: true, lb: true };
   var S = JSON.parse(JSON.stringify(DEF)), show = Object.assign({}, DEFF);
@@ -1842,7 +1842,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       if (Math.abs(l) < MINR) { l = MINR * sgn(l); valLab.push({ p: [cols[0][0], cols[0][1], zm], E: r.E }); }
       cols.forEach(function (q) { F.arrow([q[0], q[1], zm - l / 2], [q[0], q[1], zm + l / 2], { color: 'fld', w: 'fld', head: 'field', role: 'soft' }); });
     });
-    /* step 1 of a worked example: the unit normal a_N on both sides of each sheet, directed away from it (slide 21) */
+    /* step 1 of a worked example: the unit normal a_N on both sides of each sheet, directed away from it (slide 25) */
     var aN = [];
     if (sc.k === 1) {
       var gaps = [sc.zs[0] - zr[0], zr[1] - sc.zs[sc.zs.length - 1]];
@@ -2015,7 +2015,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   function changed() { F.interact(); F.render(); renderCard(); }
   var mb = PK.ui.buttons('#g-mode', [
     { id: 'm-exp', label: 'Explore', pressed: true, onClick: function () { setMode('exp'); } },
-    { id: 'm-cap', label: 'Capacitor (slide 21)', pressed: false, onClick: function () { setMode('cap'); } },
+    { id: 'm-cap', label: 'Capacitor (slide 25)', pressed: false, onClick: function () { setMode('cap'); } },
     { id: 'm-d26', label: 'D2.6', pressed: false, onClick: function () { setMode('d26'); } },
     { id: 'm-drill', label: 'Drill', pressed: false, onClick: function () { setMode('drill'); } }
   ]);

@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Vector algebra (Hayt §1.2, lecture slide 4), on pagekit. A plan view of the xy-plane (x to the right, y up) by
+/* Vector algebra (Hayt §1.2, lecture slide 6), on pagekit. A plan view of the xy-plane (x to the right, y up) by
    default, as Hayt Fig. 1.1 is two-dimensional; '3-D view' tilts it. A blue (c1), B green (c3), A + B orange (c2,
    heavy), A − B violet (own token c4, heavy), kA ink (heavy); −B and kA with k < 0 dashed with a hollow head. Every
    vector is labelled, so the figure reads in black and white. */
@@ -1695,7 +1695,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     return s;
   }
 
-  /* ---------- the worked cases (slide 4 has Fig. 1.1 without numbers: small integers chosen here) ---------- */
+  /* ---------- the worked cases (slide 6 has Fig. 1.1 without numbers: small integers chosen here) ---------- */
   var EA = [1, 2, 0], EB = [3, 1, 0], GIVEN = 'Given:  **A** = ' + vs(EA) + ',  **B** = ' + vs(EB);
   var EX = {};
   (function () {
@@ -1977,7 +1977,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
         ['*k***A** with *k* = ' + fx(S.k), vs(kA)], ['|*k***A**| = |*k*| |**A**|', magS(kA)]]);
     } else if (EX[mode]) {
       el('c-h').innerHTML = EX[mode].h + ': results';
-      body.innerHTML = kvHtml(EX[mode].rows()) + '<p class="note">Slide 4 shows Fig. 1.1 without numbers; these small integers make each step easy to check on the grid. ' + (mode === 'mul' ? 'This case uses its own <b class="v">A</b> = 2<b class="v">a</b><sub class="u"><i>x</i></sub> + <b class="v">a</b><sub class="u"><i>y</i></sub>, whose multiples spread sideways and fit a landscape slide; <i>k</i><b class="v">A</b> with <i>k</i> &gt; 0 lies on the line of <b class="v">A</b>, so it is drawn a few pixels beside it. ' : '') + 'Step through the solution with the buttons in the panel (in a slide: the ‹ k / n › bar).</p>';
+      body.innerHTML = kvHtml(EX[mode].rows()) + '<p class="note">Slide 6 shows Fig. 1.1 without numbers; these small integers make each step easy to check on the grid. ' + (mode === 'mul' ? 'This case uses its own <b class="v">A</b> = 2<b class="v">a</b><sub class="u"><i>x</i></sub> + <b class="v">a</b><sub class="u"><i>y</i></sub>, whose multiples spread sideways and fit a landscape slide; <i>k</i><b class="v">A</b> with <i>k</i> &gt; 0 lies on the line of <b class="v">A</b>, so it is drawn a few pixels beside it. ' : '') + 'Step through the solution with the buttons in the panel (in a slide: the ‹ k / n › bar).</p>';
     } else {
       el('c-h').textContent = 'Drill';
       body.innerHTML = '<p class="note">Type the answers in the panel and press Check: components within 0.01, the magnitude within 1 %. Show solution draws each step on the figure (in the 3-D view; turn it by dragging). The problem number fixes the problem, so the whole class can work on the same one.</p>';

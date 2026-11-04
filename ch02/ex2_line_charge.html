@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Field of an infinite line charge (Hayt §2.4, slides 16–19), on pagekit. The line charge is orange (c2) and heavier
+/* Field of an infinite line charge (Hayt §2.4, slides 18–21), on pagekit. The line charge is orange (c2) and heavier
    where its elements are summed; the field E is the heavy ink arrow (the teaching object); the fields dE_1, dE_2 of a
    pair of elements (and E_1 of line 1) are blue, E_2 of line 2 violet (own token --c4); distance vectors R are thin
    green arrows with small heads. Every field arrow uses a length scale stated in the figure. */
@@ -1698,7 +1698,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var S = Object.assign({}, DEF), mode = 'ex', lab = true;
 
   /* ---------- the slide's examples ---------- */
-  /* slide 18: the line parallel to z at x = 6, y = 8. The slide gives only the formula, so rho_L = 5 nC/m and
+  /* slide 20: the line parallel to z at x = 6, y = 8. The slide gives only the formula, so rho_L = 5 nC/m and
      P(2, 11, 4) are chosen (a 3-4-5 triangle, with R across the default view, not along it) to put numbers in it. */
   var X18 = (function () {
     var rl = 5, F0 = [6, 8, 0], P = [2, 11, 4], L = lineE(rl, F0, AZ, P), k = rl * K2;
@@ -1715,7 +1715,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       ]
     };
   })();
-  /* D2.5 (slide 19): 5 nC/m on the x and y axes; E at PA(0, 0, 4) and PB(0, 3, 4) */
+  /* D2.5 (slide 21): 5 nC/m on the x and y axes; E at PA(0, 0, 4) and PB(0, 3, 4) */
   var X25 = (function () {
     var rl = 5, k = rl * K2, PA = [0, 0, 4], PB = [0, 3, 4], O = [0, 0, 0];
     var A1 = lineE(rl, O, [1, 0, 0], PA), A2 = lineE(rl, O, [0, 1, 0], PA), B1 = lineE(rl, O, [1, 0, 0], PB), B2 = lineE(rl, O, [0, 1, 0], PB);
@@ -1981,7 +1981,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     if (S.rl && Math.abs(g.Erun) / g.s * F.cam.s > 8) F.labelArrow(P, Tr, '**E**', { c: 't-ink', kind: 'owned', pri: 0, ts: [0.75, 0.9, 0.55], away: [0, 0, S.zp - 2], id: 'E' });
   }
 
-  /* slide 18: the line parallel to z at x = 6, y = 8 */
+  /* slide 20: the line parallel to z at x = 6, y = 8 */
   function drawS18(F, sc) {
     var X = X18, k = steps.get(), P = X.P, Ft = X.L.F, P0 = [P[0], P[1], 0], F0 = X.F0;
     guide(F, F0, [F0[0], 0, 0]); guide(F, F0, [0, F0[1], 0]);
@@ -2117,7 +2117,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   /* ---------- controls ---------- */
   var rows = {}, tg = {};
   function changed() { F.interact(); F.render(); renderCard(); }
-  var MODES = [['ex', 'Explore'], ['s18', 'Slide 18'], ['d25', 'D2.5'], ['dr', 'Drill']];
+  var MODES = [['ex', 'Explore'], ['s18', 'Slide 20'], ['d25', 'D2.5'], ['dr', 'Drill']];
   var mb = PK.ui.buttons('#g-mode', MODES.map(function (m) { return { id: 'm-' + m[0], label: m[1], pressed: m[0] === mode, onClick: function () { setMode(m[0]); } }; }));
   var mnote = document.createElement('p'); mnote.className = 'note'; document.getElementById('g-mode').appendChild(mnote);
   var gEx = document.getElementById('g-ex');
@@ -2140,8 +2140,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   function syncRows() { ['rl', 'rho', 'phi', 'zp', 'Z'].forEach(function (k) { rows[k].set(S[k]); }); tg.all.set(S.all); PK.ui.show(zWrap, !S.all); }
   var MN = {
     ex: 'The line lies on the <i>z</i> axis. Add the field of the elements pair by pair: set how far from <i>P</i> the sum reaches, or take the whole line.',
-    s18: 'Slide 18: the line moved to <i>x</i> = 6, <i>y</i> = 8. Step through the solution (in a slide: ‹ › at the bottom right).',
-    d25: 'Drill D2.5 (slide 19): two lines on the <i>x</i> and <i>y</i> axes; the fields add. Step through the solution. This mode opens at azimuth 30°, elevation 20°, so <i>y</i> runs across the screen (Default view returns there).',
+    s18: 'Slide 20: the line moved to <i>x</i> = 6, <i>y</i> = 8. Step through the solution (in a slide: ‹ › at the bottom right).',
+    d25: 'Drill D2.5 (slide 21): two lines on the <i>x</i> and <i>y</i> axes; the fields add. Step through the solution. This mode opens at azimuth 30°, elevation 20°, so <i>y</i> runs across the screen (Default view returns there).',
     dr: 'A random problem of the same kind; its number gives the same problem to everyone.'
   };
   function setMode(m) {
@@ -2150,7 +2150,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     mnote.innerHTML = MN[m];
     PK.ui.show(gEx, m === 'ex'); PK.ui.show('#g-st', m === 's18' || m === 'd25'); PK.ui.show('#g-drill', m === 'dr');
     if (EXS[m]) {
-      document.getElementById('st-h').innerHTML = m === 's18' ? 'Slide 18: line parallel to <i>z</i> at <i>x</i> = 6, <i>y</i> = 8' : 'Drill D2.5: lines on the <i>x</i> and <i>y</i> axes';
+      document.getElementById('st-h').innerHTML = m === 's18' ? 'Slide 20: line parallel to <i>z</i> at <i>x</i> = 6, <i>y</i> = 8' : 'Drill D2.5: lines on the <i>x</i> and <i>y</i> axes';
       document.getElementById('st-q').innerHTML = T.html(EXS[m].q);
       steps.setSteps(EXS[m].steps);
     }

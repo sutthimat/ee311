@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Field of several point charges (Hayt §2.2, slides 7–11), on pagekit. Own token: --c4 (the 4th charge, violet).
+/* Field of several point charges (Hayt §2.2, slides 8–12), on pagekit. Own token: --c4 (the 4th charge, violet).
    Charge k has colour c1..c4; a positive charge is a filled disc with a '+', a negative one a hollow disc with a '−'
    (reads in black and white). The total field E is the heavy ink arrow; each E_k is a thin arrow in its charge's colour. */
 :root { --c4: #5a43c8; }
@@ -253,7 +253,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   </div>
 
   <section class="card">
-    <h2>Equations used (slides 8–9)</h2>
+    <h2>Equations used (slides 9–10)</h2>
     <div class="eqs">
       <div class="nw"><b class="v">E</b>(<b class="v">r</b>) = <i>Q</i>(<b class="v">r</b> − <b class="v">r</b>′) / (4π<i>ε</i><sub>0</sub>|<b class="v">r</b> − <b class="v">r</b>′|³) &nbsp; (10)</div>
       <div class="nw"><b class="v">E</b>(<b class="v">r</b>) = Σ<sub><i>m</i>=1…<i>n</i></sub> <i>Q<sub>m</sub></i> <b class="v">a</b><sub class="u"><i>m</i></sub> / (4π<i>ε</i><sub>0</sub>|<b class="v">r</b> − <b class="v">r</b><sub class="u"><i>m</i></sub>|²) &nbsp; (11)</div>
@@ -262,7 +262,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     <h2>Computed values</h2>
     <div class="tablewrap"><table class="ft"><thead><tr><th>charge</th><th><i>Q</i></th><th>at</th><th><b class="v">R</b><sub class="u"><i>k</i></sub> = <b class="v">r</b> − <b class="v">r</b><sub class="u"><i>k</i></sub> (m)</th><th>|<b class="v">R</b><sub class="u"><i>k</i></sub>| (m)</th><th id="o-eh"><b class="v">E</b><sub class="u"><i>k</i></sub></th></tr></thead><tbody id="o-tab"></tbody></table></div>
     <p class="note" id="o-note"></p>
-    <p class="note"><b class="v">E</b> = <b class="v">F</b><sub class="u"><i>t</i></sub>/<i>Q<sub>t</sub></i> is the force per unit positive test charge at <i>P</i>, due to all the other charges (slide 7's Eq. (6) prints <b class="v">F</b><sub class="u"><i>t</i></sub>/<i>Q</i><sub>1</sub> in the middle; Hayt has <b class="v">F</b><sub class="u"><i>t</i></sub>/<i>Q<sub>t</sub></i>). A positive charge pushes the test charge away, so its <b class="v">E</b><sub class="u"><i>k</i></sub> points along <b class="v">R</b><sub class="u"><i>k</i></sub>; a negative charge pulls it, so <b class="v">E</b><sub class="u"><i>k</i></sub> points back toward the charge.</p>
+    <p class="note"><b class="v">E</b> = <b class="v">F</b><sub class="u"><i>t</i></sub>/<i>Q<sub>t</sub></i> is the force per unit positive test charge at <i>P</i>, due to all the other charges (slide 8's Eq. (6) prints <b class="v">F</b><sub class="u"><i>t</i></sub>/<i>Q</i><sub>1</sub> in the middle; Hayt has <b class="v">F</b><sub class="u"><i>t</i></sub>/<i>Q<sub>t</sub></i>). A positive charge pushes the test charge away, so its <b class="v">E</b><sub class="u"><i>k</i></sub> points along <b class="v">R</b><sub class="u"><i>k</i></sub>; a negative charge pulls it, so <b class="v">E</b><sub class="u"><i>k</i></sub> points back toward the charge.</p>
   </section>
 </main>
 
@@ -1657,9 +1657,9 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   /* units per problem: world coordinates are the problem's own length unit (m, or cm in D2.2) */
   var UM = { L: 'm', sL: 1, Qu: 'nC', sQ: 1e-9, Eu: 'V/m', sE: 1, g: 1 };
   var UC = { L: 'cm', sL: 0.01, Qu: 'μC', sQ: 1e-6, Eu: 'kV/m', sE: 1e3, g: 10 };
-  /* Example 2.2 (slide 10): four 3-nC charges at P1(1, 1, 0), P2(−1, 1, 0), P3(−1, −1, 0), P4(1, −1, 0); E at P(1, 1, 1) */
+  /* Example 2.2 (slide 11): four 3-nC charges at P1(1, 1, 0), P2(−1, 1, 0), P3(−1, −1, 0), P4(1, −1, 0); E at P(1, 1, 1) */
   var EX22 = { id: 'ex22', names: ['1', '2', '3', '4'], Q: [3, 3, 3, 3], pos: [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]], P: [1, 1, 1], U: UM };
-  /* Drill D2.2 (slide 11): −0.3 μC at A(25, −30, 15) cm, 0.5 μC at B(−10, 8, 12) cm; E at (a) the origin, (b) P(15, 20, 50) cm */
+  /* Drill D2.2 (slide 12): −0.3 μC at A(25, −30, 15) cm, 0.5 μC at B(−10, 8, 12) cm; E at (a) the origin, (b) P(15, 20, 50) cm */
   function d22(part) { return { id: 'd22' + part, names: ['A', 'B'], Q: [-0.3, 0.5], pos: [[25, -30, 15], [-10, 8, 12]], P: part === 'a' ? [0, 0, 0] : [15, 20, 50], U: UC, part: part }; }
   var DEF = { n: 4, Q: [3, 3, 3, 3], pos: [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]], P: [1, 1, 1], sel: 0 };
   var EXVIEW = { az: -100, el: 28 };
@@ -1956,8 +1956,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   function setPart(p) { part = p; homeView(); PK.ui.pressed(pbtn['pt-a'], p === 'a'); PK.ui.pressed(pbtn['pt-b'], p === 'b'); syncEx(); st.setSteps(stepsGen(d22(p), true)); renderCard(); }
   function syncEx() {
     var q = document.getElementById('ex-q'), hh = document.getElementById('ex-h');
-    if (mode === 'ex22') { hh.textContent = 'Example 2.2 (slide 10)'; q.innerHTML = 'Find <b class="v">E</b> at <i>P</i>(1, 1, 1) caused by four identical 3-nC point charges at <i>P</i><sub>1</sub>(1, 1, 0), <i>P</i><sub>2</sub>(−1, 1, 0), <i>P</i><sub>3</sub>(−1, −1, 0) and <i>P</i><sub>4</sub>(1, −1, 0) (m). Each step adds one charge.'; }
-    else { hh.textContent = 'Drill D2.2 (slide 11)'; q.innerHTML = 'A charge of −0.3 μC is at <i>A</i>(25, −30, 15) cm and a second charge of 0.5 μC at <i>B</i>(−10, 8, 12) cm. Find <b class="v">E</b> at ' + (part === 'a' ? '(a) the origin.' : '(b) <i>P</i>(15, 20, 50) cm.') + ' Answers: (a) 92.3<b class="v">a</b><sub class="u"><i>x</i></sub> − 77.6<b class="v">a</b><sub class="u"><i>y</i></sub> − 94.2<b class="v">a</b><sub class="u"><i>z</i></sub>; (b) 11.9<b class="v">a</b><sub class="u"><i>x</i></sub> − 0.519<b class="v">a</b><sub class="u"><i>y</i></sub> + 12.4<b class="v">a</b><sub class="u"><i>z</i></sub> kV/m.'; }
+    if (mode === 'ex22') { hh.textContent = 'Example 2.2 (slide 11)'; q.innerHTML = 'Find <b class="v">E</b> at <i>P</i>(1, 1, 1) caused by four identical 3-nC point charges at <i>P</i><sub>1</sub>(1, 1, 0), <i>P</i><sub>2</sub>(−1, 1, 0), <i>P</i><sub>3</sub>(−1, −1, 0) and <i>P</i><sub>4</sub>(1, −1, 0) (m). Each step adds one charge.'; }
+    else { hh.textContent = 'Drill D2.2 (slide 12)'; q.innerHTML = 'A charge of −0.3 μC is at <i>A</i>(25, −30, 15) cm and a second charge of 0.5 μC at <i>B</i>(−10, 8, 12) cm. Find <b class="v">E</b> at ' + (part === 'a' ? '(a) the origin.' : '(b) <i>P</i>(15, 20, 50) cm.') + ' Answers: (a) 92.3<b class="v">a</b><sub class="u"><i>x</i></sub> − 77.6<b class="v">a</b><sub class="u"><i>y</i></sub> − 94.2<b class="v">a</b><sub class="u"><i>z</i></sub>; (b) 11.9<b class="v">a</b><sub class="u"><i>x</i></sub> − 0.519<b class="v">a</b><sub class="u"><i>y</i></sub> + 12.4<b class="v">a</b><sub class="u"><i>z</i></sub> kV/m.'; }
     PK.ui.show('#ex-part', mode === 'd22');
   }
   /* Explore: number of charges, the charge being edited, its Q and position; the field point P */

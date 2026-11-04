@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* The cross product (Hayt §1.7, lecture slides 17–19), on pagekit. A blue (c1), B green (c3), A × B orange (c2,
+/* The cross product (Hayt §1.7, lecture slides 23–25), on pagekit. A blue (c1), B green (c3), A × B orange (c2,
    heaviest, the teaching object); each also labelled, so the figure reads in black and white. */
 .eqs { display: grid; gap: 4px 28px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); font-family: var(--serif); font-size: 1.06rem; line-height: 1.9; overflow-x: auto; }
 .det { display: inline-grid; grid-template-columns: repeat(3, auto); gap: 0 16px; padding: 0 9px; margin: 2px 4px; vertical-align: middle; text-align: center; line-height: 1.55;
@@ -231,7 +231,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     <aside class="panel" id="panel">
       <section class="grp" id="g-mode"><h2>Mode</h2></section>
       <section class="grp" id="g-ab"><h2>Vectors <b class="v">A</b> and <b class="v">B</b> (components)</h2></section>
-      <section class="grp" id="g-s18"><h2>Example (slide 18)</h2><p class="pk-q given">Find <b class="v">A</b> × <b class="v">B</b> for <b class="v">A</b> = 2<b class="v">a</b><sub class="u"><i>x</i></sub> − 3<b class="v">a</b><sub class="u"><i>y</i></sub> + <b class="v">a</b><sub class="u"><i>z</i></sub> and <b class="v">B</b> = −4<b class="v">a</b><sub class="u"><i>x</i></sub> − 2<b class="v">a</b><sub class="u"><i>y</i></sub> + 5<b class="v">a</b><sub class="u"><i>z</i></sub>.</p></section>
+      <section class="grp" id="g-s18"><h2>Example (slide 24)</h2><p class="pk-q given">Find <b class="v">A</b> × <b class="v">B</b> for <b class="v">A</b> = 2<b class="v">a</b><sub class="u"><i>x</i></sub> − 3<b class="v">a</b><sub class="u"><i>y</i></sub> + <b class="v">a</b><sub class="u"><i>z</i></sub> and <b class="v">B</b> = −4<b class="v">a</b><sub class="u"><i>x</i></sub> − 2<b class="v">a</b><sub class="u"><i>y</i></sub> + 5<b class="v">a</b><sub class="u"><i>z</i></sub>.</p></section>
       <section class="grp" id="g-d14"><h2>Drill D1.4</h2><p class="pk-q given">The three vertices of a triangle are located at <i>A</i>(6, −1, 2), <i>B</i>(−2, 3, −4) and <i>C</i>(−3, 1, 5). Find (a) <b class="v">R</b><sub class="u"><i>AB</i></sub> × <b class="v">R</b><sub class="u"><i>AC</i></sub>; (b) the area of the triangle; (c) a unit vector perpendicular to the plane in which the triangle is located.</p></section>
       <section class="grp" id="g-drill"><h2>Drill: the cross product</h2></section>
       <section class="grp" id="g-disp"><h2>Display</h2></section>
@@ -1644,7 +1644,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 <script>
 (function () {
   var V = PK.v, fmt = PK.fmt, T = PK.text, D2R = PK.D2R || Math.PI / 180;
-  /* ---------- state: Explore opens on the slide 18 example A = (2, −3, 1), B = (−4, −2, 5) ---------- */
+  /* ---------- state: Explore opens on the slide 24 example A = (2, −3, 1), B = (−4, −2, 5) ---------- */
   var EXA = [2, -3, 1], EXB = [-4, -2, 5], PA = [6, -1, 2], PB = [-2, 3, -4], PC = [-3, 1, 5];
   var DEF = { Ax: 2, Ay: -3, Az: 1, Bx: -4, By: -2, Bz: 5 };
   var DEFF = { par: true, arc: true, cm: false, sw: false, zd: false, lb: true };
@@ -1971,7 +1971,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     if (g.tri) kv.push(['area of the triangle ½ |' + g.nP + '|', fmt.n(g.area / 2)]);
     else kv.push(['area of the parallelogram', fmt.n(g.area)]);
     el('o-kv').innerHTML = kv.map(function (r) { return '<dt>' + h(r[0]) + '</dt><dd>' + h(r[1]) + '</dd>'; }).join('');
-    el('o-h').innerHTML = 'Computed values (' + { explore: 'Explore', s18: 'Example, slide 18', d14: 'Drill D1.4', drill: 'Drill, problem ' + drill.no() }[mode] + ')';
+    el('o-h').innerHTML = 'Computed values (' + { explore: 'Explore', s18: 'Example, slide 24', d14: 'Drill D1.4', drill: 'Drill, problem ' + drill.no() }[mode] + ')';
     el('o-note').innerHTML = g.tri ? 'The triangle is half of the parallelogram with sides ' + h('**R**_{AB}') + ' and ' + h('**R**_{AC}') + ', so its area is half the magnitude of the cross product. ' + h('−**a**_{N}') + ' is an equally valid unit normal.'
       : 'Swapping the order turns the arc the other way, so the screw and the product point the other way: ' + h('**B** × **A** = −(**A** × **B**)') + '; the area is the same. ' + h('**A**') + ' and ' + h('**B**') + ' parallel (' + h('*θ*') + ' = 0° or 180°) give 0.';
   }
@@ -1983,14 +1983,14 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var MODES = { 'm-ex': 'explore', 'm-s18': 's18', 'm-d14': 'd14', 'm-dr': 'drill' };
   var mb = PK.ui.buttons('#g-mode', [
     { id: 'm-ex', label: 'Explore', pressed: true, onClick: function () { setMode('explore'); } },
-    { id: 'm-s18', label: 'Example (slide 18)', pressed: false, onClick: function () { setMode('s18'); } },
+    { id: 'm-s18', label: 'Example (slide 24)', pressed: false, onClick: function () { setMode('s18'); } },
     { id: 'm-d14', label: 'D1.4', pressed: false, onClick: function () { setMode('d14'); } },
     { id: 'm-dr', label: 'Drill', pressed: false, onClick: function () { setMode('drill'); } }
   ]);
   var mnote = document.createElement('p'); mnote.className = 'note'; document.getElementById('g-mode').appendChild(mnote);
   var NOTES = {
     explore: 'Drag the tips of <b class="v">A</b> and <b class="v">B</b> or set their components; turn on Swap order for <b class="v">B</b> × <b class="v">A</b>.',
-    s18: 'The slide 18 example, one step at a time (Next step, or ‹ › on the slide).',
+    s18: 'The slide 24 example, one step at a time (Next step, or ‹ › on the slide).',
     d14: 'Drill D1.4, one step at a time: the triangle, its two sides from <i>A</i>, their cross product, the areas and the unit normal.',
     drill: 'A new pair of vectors for each problem number; type the answers and press Check.'
   };
@@ -2006,7 +2006,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     tg[r[0]] = PK.ui.toggle('#g-disp', { id: 'f-' + r[0], label: r[1], checked: show[r[0]], onChange: function (b) { show[r[0]] = b; changed(); } });
   });
   PK.ui.buttons('#g-disp', [{ id: 'btn-reset', label: 'Reset all', onClick: function () { reset(); } }]);
-  /* Example (slide 18): the slide's determinant expansion, then the magnitude (the slide's 'Applications': area) */
+  /* Example (slide 24): the slide's determinant expansion, then the magnitude (the slide's 'Applications': area) */
   S18 = [
     '**a**_{x}: [(−3)(5) − (1)(−2)] = −13',
     '**a**_{y}: −[(2)(5) − (1)(−4)] = −14',

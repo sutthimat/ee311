@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Spherical conversions (Hayt §1.9, slides 27–31), on pagekit. Own token: --c4 (violet), the vector A at P, so it is
+/* Spherical conversions (Hayt §1.9, slides 35–39), on pagekit. Own token: --c4 (violet), the vector A at P, so it is
    apart from the ink unit vectors a_r, a_θ, a_φ and from its blue / orange / green components along them. */
 :root { --c4: #5a43c8; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c4: #a99bff; } }
@@ -243,7 +243,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   </div>
 
   <section class="card">
-    <h2>Rectangular ↔ spherical (slide 29)</h2>
+    <h2>Rectangular ↔ spherical (slide 37)</h2>
     <div class="eqs">
       <div class="nw"><i>x</i> = <i>r</i> sin <i>θ</i> cos <i>φ</i>, &nbsp;<i>y</i> = <i>r</i> sin <i>θ</i> sin <i>φ</i>, &nbsp;<i>z</i> = <i>r</i> cos <i>θ</i></div>
       <div class="nw"><i>r</i> = √(<i>x</i>² + <i>y</i>² + <i>z</i>²), &nbsp;<i>θ</i> = cos⁻¹(<i>z</i>/<i>r</i>), &nbsp;<i>φ</i> = tan⁻¹(<i>y</i>/<i>x</i>)</div>

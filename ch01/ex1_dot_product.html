@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* The dot product and projection (Hayt §1.6, slides 13–16), on pagekit. Own token: --c4 (the unit vector a_A, violet).
+/* The dot product and projection (Hayt §1.6, slides 18–21), on pagekit. Own token: --c4 (the unit vector a_A, violet).
    Colours: the direction vector (A, a_N, R_AC) blue c1, the projected vector (B, G, R_AB) green c3, the projection
    orange c2 (the teaching object; dashed with a hollow head when the scalar component is negative). */
 :root { --c4: #5a43c8; }
@@ -1934,7 +1934,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     var sgn = !g.u || isNaN(g.th) ? '' : Math.abs(g.d) < 1e-9 ? 'The two vectors are perpendicular, so the dot product and the projection are zero.' :
       g.d > 0 ? 'The angle is under 90°, so the scalar component is positive and the projection points along the direction vector.' :
         'The angle is over 90°, so the scalar component is negative and the projection (dashed, hollow head) points opposite to the direction vector.';
-    el('o-note').innerHTML = sgn + (mode === 'e12' ? ' Slide 15 prints the vector component to 4 figures (−1.333, −0.667, 1.333); here 3 significant figures.' : mode === 'd13' ? ' The slide prints (d) as −5.94 <b class="v">a</b><sub class="u"><i>x</i></sub> + 1.319 <b class="v">a</b><sub class="u"><i>y</i></sub> + 1.979 <b class="v">a</b><sub class="u"><i>z</i></sub>; here 3 significant figures.' : '');
+    el('o-note').innerHTML = sgn + (mode === 'e12' ? ' Slide 20 prints the vector component to 4 figures (−1.333, −0.667, 1.333); here 3 significant figures.' : mode === 'd13' ? ' The slide prints (d) as −5.94 <b class="v">a</b><sub class="u"><i>x</i></sub> + 1.319 <b class="v">a</b><sub class="u"><i>y</i></sub> + 1.979 <b class="v">a</b><sub class="u"><i>z</i></sub>; here 3 significant figures.' : '');
   }
 
   /* ---------- controls ---------- */

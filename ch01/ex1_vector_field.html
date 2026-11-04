@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Evaluating a vector field (Hayt §1.5, slides 11–12), on pagekit. Own tokens: --c4 (the unit vector, violet, as in
+/* Evaluating a vector field (Hayt §1.5, slides 15–17), on pagekit. Own tokens: --c4 (the unit vector, violet, as in
    ex1_unit_vectors), --wat / --wat2 (the water panel and the water surface of the ocean example). */
 :root { --c4: #5a43c8; --wat: #e3f1f9; --wat2: #cde6f4; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c4: #a99bff; --wat: #1b2a35; --wat2: #213b4e; } }
@@ -1659,14 +1659,14 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     return 10 * e;
   }
 
-  /* ================= the ocean current v = 2 e^{z/100} a_x m/s (slide 11) ================= */
+  /* ================= the ocean current v = 2 e^{z/100} a_x m/s (slide 15) ================= */
   var U = 80, YC = 40, ZB = -212, ZC = [0, -50, -100, -150, -200], YS = [100];   /* U: metres of arrow per 1 m/s */
   var SX = [-20, 195], SY = [-35, 115];   /* the water surface z = 0 */
   var OQ = 0.1, FQ = 0.1;   /* drawing scale of the ocean and of the zoomed-out sphere (see scaled()) */
   function spd(z) { return 2 * Math.exp(z / 100); }
   function ocBounds() { return [[SX[0], SY[0], 0], [SX[1], SY[0], 0], [SX[1], SY[1], 0], [SX[0], SY[1], 0], [0, 0, 40], [-10, YC, ZB - 6], [U * 2 + 15, YC, ZB - 6]].map(function (p) { return V.mul(p, OQ); }); }
   var OC = {
-    btn: 'Ocean current', h: 'Slide 11: the ocean current',
+    btn: 'Ocean current', h: 'Slide 15: the ocean current',
     q: 'In the ocean (*x* north, *y* west, *z* up, origin at the surface), the current is **v** = 2 exp(*z*/100) **a**_{x} m/s. Find the velocity at the depths *z* = 0, −50, −100, −150 and −200 m.',
     given: eq('**v** = 2 exp(*z*/100) **a**_{x} m/s;') + ' ' + eq('*x* north, *y* west, *z* up'),
     find: 'Find **v** at ' + eq('*z* = 0, −50, −100, −150, −200 m'),
@@ -1675,7 +1675,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     }).concat(['Only |**v**| changes ' + eq('(×1/*e* = 0.368 per 100 m);') + ' **v** points along **a**_{x} (north) everywhere'])
   };
 
-  /* ================= the radial field S = k R / |R|^2 about a centre C (D1.2, slide 12) ================= */
+  /* ================= the radial field S = k R / |R|^2 about a centre C (D1.2, slide 17) ================= */
   /* field samples on two spheres about C: radius 3 along the 8 diagonals, radius 6 along the 6 axes and the 12 edge
      directions (different rays, so no arrow runs into another); the outer arrows are half as long (1/|R| fall-off) */
   var FD = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]].concat([[1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1], [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]].map(V.unit));

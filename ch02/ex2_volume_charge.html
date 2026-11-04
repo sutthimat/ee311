@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Charge in a volume (Hayt §2.3, slides 12–15), on pagekit. The charged volume carries a neutral grey sequential map
+/* Charge in a volume (Hayt §2.3, slides 14–17), on pagekit. The charged volume carries a neutral grey sequential map
    of |rho_v| (own tokens --m0..--m3: light = small, dark = large in light mode, the reverse in dark mode; lightness
    runs one way only), so orange and blue stay for signs (D2.4 (a)) and for the element dv; its edges are --m3.
    The element dv, its ring and its shell are blue (sh tone, c1 edges). D2.4 (a) colours its cubes by sign (diverging
@@ -1767,7 +1767,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   DB.Q = DB.r * DB.p * DB.z;
   var EX = {
     e23: {
-      h: 'Example 2.3: charge in an electron beam (slide 13)',
+      h: 'Example 2.3: charge in an electron beam (slide 15)',
       q: 'Find the total charge in a 2-cm length of an electron beam of radius 1 cm (2 ≤ *z* ≤ 4 cm), with *ρ*_{v} = −5 × 10⁻⁶ exp(−10⁵*ρz*) C/m³ (*ρ* and *z* in m). Here *ρ* is the cylindrical radius, not a charge density.',
       given: '*ρ* ≤ 1 cm, 2 ≤ *z* ≤ 4 cm;  *ρ*_{v} = −5 exp(−10⁵*ρz*) μC/m³',
       steps: [
@@ -1787,7 +1787,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       }
     },
     da: {
-      h: 'Drill D2.4 (a): eight cubes (slide 15)',
+      h: 'Drill D2.4 (a): eight cubes (slide 17)',
       q: 'D2.4 (a): Find the total charge within 0.1 ≤ |*x*|, |*y*|, |*z*| ≤ 0.2 m if *ρ*_{v} = 1/(*x*³*y*³*z*³) C/m³. Answer: 0.',
       given: '0.1 ≤ |*x*|, |*y*|, |*z*| ≤ 0.2 m;  *ρ*_{v} = 1/(*x*³*y*³*z*³) C/m³',
       steps: [
@@ -1799,7 +1799,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       so: function (k) { return k >= 4 ? 'one cube: ±5.27 × 10⁴ C' : ''; }
     },
     db: {
-      h: 'Drill D2.4 (b): half cylinder (slide 15)',
+      h: 'Drill D2.4 (b): half cylinder (slide 17)',
       q: 'D2.4 (b): Find the total charge within 0 ≤ *ρ* ≤ 0.1 m, 0 ≤ *φ* ≤ π (180°), 2 ≤ *z* ≤ 4 m if *ρ*_{v} = *ρ*²*z*² sin 0.6*φ* C/m³. Answer: 1.018 mC.',
       given: '*ρ* ≤ 0.1 m (radius drawn 10 × larger), 0 ≤ *φ* ≤ 180°, 2 ≤ *z* ≤ 4 m;  *ρ*_{v} = *ρ*²*z*² sin 0.6*φ* C/m³',
       steps: [
@@ -1818,7 +1818,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       }
     },
     dc: {
-      h: 'Drill D2.4 (c): all space (slide 15)',
+      h: 'Drill D2.4 (c): all space (slide 17)',
       q: 'D2.4 (c): Find the total charge in the universe (all space) if *ρ*_{v} = exp(−2*r*)/*r*² C/m³. Answer: 6.28 C.',
       given: 'All space (the universe);  *ρ*_{v} = exp(−2*r*)/*r*² C/m³',
       steps: [
@@ -2680,10 +2680,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   function syncRows() { ['a', 'z1', 'z2', 'r1'].forEach(function (k) { rows[k].set(S[k]); }); tg.dv.set(S.dv); }
   var MN = {
     ex: 'The electron beam of Example 2.3, cut open: change its size and sum the charge out from the axis.',
-    e23: 'Example 2.3 (slide 13), step by step (in a slide: ‹ › at the bottom right).',
-    da: 'Drill D2.4 (a) (slide 15): symmetry makes the total zero. This mode opens at azimuth 30°, elevation 20°, where the eight cubes overlap least (Default view returns there).',
-    db: 'Drill D2.4 (b) (slide 15): the integral splits into three factors.',
-    dc: 'Drill D2.4 (c) (slide 15): spherical shells out to infinity.',
+    e23: 'Example 2.3 (slide 15), step by step (in a slide: ‹ › at the bottom right).',
+    da: 'Drill D2.4 (a) (slide 17): symmetry makes the total zero. This mode opens at azimuth 30°, elevation 20°, where the eight cubes overlap least (Default view returns there).',
+    db: 'Drill D2.4 (b) (slide 17): the integral splits into three factors.',
+    dc: 'Drill D2.4 (c) (slide 17): spherical shells out to infinity.',
     dr: 'A random problem of the same kind; its number gives the same problem to everyone.'
   };
   function setMode(m) {

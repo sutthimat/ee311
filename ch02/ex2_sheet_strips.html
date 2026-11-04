@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* An infinite sheet of charge as line-charge strips (Hayt §2.5, Fig. 2.8, slide 20), on pagekit. The sheet lies in
+/* An infinite sheet of charge as line-charge strips (Hayt §2.5, Fig. 2.8, slide 23), on pagekit. The sheet lies in
    the yz-plane (orange tone, positive; blue with a dashed edge, negative); the strips summed so far are a deeper tone.
    A strip is a line charge rho_L = rho_S dy' (orange, heavier); the strip-to-P vectors R are thin green arrows with
    small heads; the fields dE of a pair of strips are blue; the field E at P is the heavy ink arrow (the teaching
@@ -1692,12 +1692,12 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var DEF = { rs: 1, x: 1, Y: 2, all: false };
   var S = Object.assign({}, DEF), mode = 'ex', lab = true;
 
-  /* ---------- the slide's derivation (slide 20) and Move P ---------- */
+  /* ---------- the slide's derivation (slide 23) and Move P ---------- */
   var X1 = (function () {
     var rs = 1, x = 1, yp = 1, p = pairOf(rs, x, yp), E1 = Eb(rs, x, 1), E10 = Eb(rs, x, 10);
     return {
       rs: rs, x: x, yp: yp, p: p, E1: E1, E10: E10, sd: 2.5,
-      q: 'An infinite sheet of uniform charge *ρ*_{S} = 1 nC/m² lies in the *yz*-plane. Divide it into strips of width d*y*′, each a line charge *ρ*_{L} = *ρ*_{S} d*y*′, and find **E** at *P*(1, 0, 0). (Slide 20 gives symbols only; *ρ*_{S} = 1 nC/m², *x* = 1 m and the strip at *y*′ = 1 m with d*y*′ = 0.2 m are chosen to put numbers in it.)',
+      q: 'An infinite sheet of uniform charge *ρ*_{S} = 1 nC/m² lies in the *yz*-plane. Divide it into strips of width d*y*′, each a line charge *ρ*_{L} = *ρ*_{S} d*y*′, and find **E** at *P*(1, 0, 0). (Slide 23 gives symbols only; *ρ*_{S} = 1 nC/m², *x* = 1 m and the strip at *y*′ = 1 m with d*y*′ = 0.2 m are chosen to put numbers in it.)',
       given: '*ρ*_{S} = 1 nC/m² (*yz*-plane);  *P*(1, 0, 0) m;  d*y*′ = 0.2 m',
       steps: [
         'Strip at *y*′ = 1 m: *ρ*_{L} = *ρ*_{S} d*y*′ = 0.2 nC/m;  *R* = √(1² + 1²) = 1.41 m, *θ* = 45°;  d*E* = *ρ*_{L}/(2π*ε*_{0}*R*) = ' + fmt.q(p.dE, 'V/m') + ' along **R**',
@@ -2268,11 +2268,11 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   function syncRows() { ['rs', 'x', 'Y'].forEach(function (k) { rows[k].set(S[k]); }); tg.all.set(S.all); PK.ui.show(yWrap, !S.all); }
   var MN = {
     ex: 'Sum the strips pair by pair: set how far the sum reaches (±<i>Y</i>), or take the whole sheet. Move <i>P</i> along <i>x</i>.',
-    s1: 'Slide 20: one strip, its mirror strip, the cancelling <i>y</i> parts, the integral. Step through the solution (in a slide: ‹ › at the bottom right).',
+    s1: 'Slide 23: one strip, its mirror strip, the cancelling <i>y</i> parts, the integral. Step through the solution (in a slide: ‹ › at the bottom right).',
     mv: '<i>P</i> at <i>x</i> = 0.5, 1 and 2 m: the band that gives half the field, and the same total field. Step through (in a slide: ‹ › at the bottom right).',
     dr: 'A random problem of the same kind; its number gives the same problem to everyone.'
   };
-  var HD = { s1: 'Slide 20: the sheet as strips', mv: 'Move <i>P</i> along the <i>x</i> axis' };
+  var HD = { s1: 'Slide 23: the sheet as strips', mv: 'Move <i>P</i> along the <i>x</i> axis' };
   function setMode(m) {
     mode = m;
     MODES.forEach(function (x) { PK.ui.pressed(mb['m-' + x[0]], x[0] === m); });

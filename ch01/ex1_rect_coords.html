@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* The rectangular coordinate system (Hayt §1.3, slides 5–6), on pagekit. Colour meaning, used the same way in every
+/* The rectangular coordinate system (Hayt §1.3, slides 7–8), on pagekit. Colour meaning, used the same way in every
    mode: everything that belongs to x is blue (the plane x = const, the edge dx, the faces normal to a_x: dy dz),
    to y orange (c2 / sh2), to z green (c3 / sh3); each also carries its label, so the figure reads in black and white. */
 .eqs { display: grid; gap: 4px 28px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); font-family: var(--serif); font-size: 1.06rem; line-height: 1.9; overflow-x: auto; }
@@ -1691,12 +1691,12 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   /* ---------- the slide examples ---------- */
   var EX = {};
   (function () {
-    /* Slide 5: P(1, 2, 3) and Q(2, −2, 1) as intersections of three planes */
+    /* Slide 7: P(1, 2, 3) and Q(2, −2, 1) as intersections of three planes */
     var P = [1, 2, 3], Q = [2, -2, 1];
     EX.s5 = {
-      btn: '<i>P</i>(1, 2, 3) and <i>Q</i>(2, −2, 1)', h: 'Slide 5: points as intersections of three planes', view: 'def',
+      btn: '<i>P</i>(1, 2, 3) and <i>Q</i>(2, −2, 1)', h: 'Slide 7: points as intersections of three planes', view: 'def',
       q: 'Locate the points *P*(1, 2, 3) and *Q*(2, −2, 1) in right-handed rectangular coordinates.',
-      given: 'Slide 5:  *P*(1, 2, 3),  *Q*(2, −2, 1)  (m)', find: 'Locate *P* and *Q*: each is where three planes meet.',
+      given: 'Slide 7:  *P*(1, 2, 3),  *Q*(2, −2, 1)  (m)', find: 'Locate *P* and *Q*: each is where three planes meet.',
       steps: [
         'Right-handed axes: turning *x* into *y* (through 90°) advances a right-handed screw along +*z*',
         'The plane *x* = 1 holds every point whose *x* coordinate is 1; it meets the *x* axis at *x* = 1',
@@ -1721,12 +1721,12 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
           ['foot of the drop line from *Q*', '(2, −2, 0), 1 below *Q*', '— (dashed drop line in Fig. 1.2(b))']];
       }
     };
-    /* Slide 6: the differential box at P(1, 2, 3) with a visible dx = 0.4, dy = 0.6, dz = 0.3 */
+    /* Slide 8: the differential box at P(1, 2, 3) with a visible dx = 0.4, dy = 0.6, dz = 0.3 */
     var d = [0.4, 0.6, 0.3], P2 = V.add(P, d).map(rnd3), A = [d[1] * d[2], d[2] * d[0], d[0] * d[1]].map(rnd3), dv = rnd3(d[0] * d[1] * d[2]), L = V.len(d);
     EX.s6 = {
-      btn: 'Differential box', h: 'Slide 6: the differential volume element', view: 'box',
+      btn: 'Differential box', h: 'Slide 8: the differential volume element', view: 'box',
       q: 'From *P*(1, 2, 3), increase each coordinate by *dx* = 0.4, *dy* = 0.6, *dz* = 0.3 m (a small box, drawn large enough to see). Find *P*′, the face areas, the volume *dv* and the diagonal *dL*.',
-      given: 'Slide 6:  *P*(1, 2, 3);  *dx* = 0.4,  *dy* = 0.6,  *dz* = 0.3 m', find: 'Find *P*′, the face areas *dS*, the volume *dv* and the diagonal *dL*.',
+      given: 'Slide 8:  *P*(1, 2, 3);  *dx* = 0.4,  *dy* = 0.6,  *dz* = 0.3 m', find: 'Find *P*′, the face areas *dS*, the volume *dv* and the diagonal *dL*.',
       steps: [
         '*P*′ = (1 + 0.4, 2 + 0.6, 3 + 0.3) = ' + pt(P2),
         'The planes *x* = 1, 1.4;  *y* = 2, 2.6;  *z* = 3, 3.3 enclose a box with edges *dx*, *dy*, *dz*',
@@ -2112,7 +2112,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     onStep: function () { F.render(); }
   });
 
-  /* the view family: the planes at 55°/28°, the box (Explore with the box, slide 6, the drill) at −35°/28°; F.home
+  /* the view family: the planes at 55°/28°, the box (Explore with the box, slide 8, the drill) at −35°/28°; F.home
      follows it, so 'Default view' goes to the family's view, and the view turns when the family changes */
   var family = 'def';
   function applyFamily() {
@@ -2129,7 +2129,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       document.getElementById('ex-q').innerHTML = T.html(EX[m].q);
       exSteps.setSteps(EX[m].steps);
     }
-    /* the box modes open at azimuth −35° (their Default view); Explore and slide 5 at 55°/28° */
+    /* the box modes open at azimuth −35° (their Default view); Explore and slide 7 at 55°/28° */
     applyFamily();
     F.invalidate(); F.interact(); F.render(); renderCard();
   }

@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Distance and unit vectors (Hayt §1.4, slides 7–10), on pagekit. Own token: --c4 (the unit vector, violet), as in
+/* Distance and unit vectors (Hayt §1.4, slides 10–13), on pagekit. Own token: --c4 (the unit vector, violet), as in
    vc_vector. Position vectors grey (mut), the distance vector ink (heaviest), its components along x, y, z blue,
    orange, green (c1, c2, c3), each also labelled. */
 :root { --c4: #5a43c8; }
@@ -1668,7 +1668,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   function scene0() { return { pts: [], pos: [], arr: [], path: null, sph: null, lines: [], tips: [], guides: true, mag: null }; }
   function pos(p, t, id) { return { p: p, t: t, id: id }; }
 
-  /* ---------- Explore: Hayt's P(1, 2, 3) and Q(2, −2, 1) (slide 8) ---------- */
+  /* ---------- Explore: Hayt's P(1, 2, 3) and Q(2, −2, 1) (slide 11) ---------- */
   var DEF = { xP: 1, yP: 2, zP: 3, xQ: 2, yQ: -2, zQ: 1 };
   var DEFF = { pos: true, path: true, unit: false, guides: true, lb: true, zd: false };
   var S = Object.assign({}, DEF), show = Object.assign({}, DEFF), mode = 'ex';
@@ -1687,15 +1687,15 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     return s;
   }
 
-  /* ---------- the slide examples: numbers exactly as on slides 8, 9, 10 ---------- */
+  /* ---------- the slide examples: numbers exactly as on slides 11, 12, 13 ---------- */
   var EX = {};
   (function () {
-    /* Slide 8: P(1, 2, 3) to Q(2, −2, 1) */
+    /* Slide 11: P(1, 2, 3) to Q(2, −2, 1) */
     var P = [1, 2, 3], Q = [2, -2, 1], R = V.sub(Q, P);
     EX.s8 = {
-      btn: 'Slide 8', h: 'Slide 8: the vector from <i>P</i> to <i>Q</i>',
+      btn: 'Slide 11', h: 'Slide 11: the vector from <i>P</i> to <i>Q</i>',
       q: 'Find the vector **R**_{PQ} from *P*(1, 2, 3) to *Q*(2, −2, 1).',
-      given: 'Slide 8:  *P*(1, 2, 3),  *Q*(2, −2, 1)  (m)', find: 'Find **R**_{PQ} from *P* to *Q*.',
+      given: 'Slide 11:  *P*(1, 2, 3),  *Q*(2, −2, 1)  (m)', find: 'Find **R**_{PQ} from *P* to *Q*.',
       steps: [
         'Position vectors: **r**_{P} = ' + vecM(P) + ',  **r**_{Q} = ' + vecM(Q),
         'Head to tail, **r**_{P} + **R**_{PQ} = **r**_{Q}, so **R**_{PQ} = **r**_{Q} − **r**_{P}',
