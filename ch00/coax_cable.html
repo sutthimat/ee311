@@ -1,0 +1,1737 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coaxial Cable, Cut Back</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,700;1,400&display=swap">
+<style>/* pagekit.css */
+/* pagekit.css: shared look of the EE311 interactive pages (Hayt, Engineering Electromagnetics, 8th ed.).
+   Included by make_cvlive.py / preview.py at the pagekit css marker comment. A page adds its own tokens in its own
+   <style> after this block (in all three places: :root, the media-query dark block, [data-theme="dark"]).
+   Sections: tokens, type, page layout, controls, figure drawing classes, slide mode (drawer), reduced motion. */
+
+/* ---------- tokens: light; dark twice (system setting unless data-theme="light", and data-theme="dark") ---------- */
+:root {
+  --bg: #f4f6f7; --surface: #ffffff; --paper: #ffffff; --ink: #15191d; --muted: #5a6670; --line: #dbe1e5; --band: #eef3f6;
+  --accent: #0a6fb0; --on-accent: #ffffff; --axis: #7d868e;
+  --c1: #0868a0; --c2: #b4460a; --c3: #237233;                      /* component / vector colours, >= 4.5:1 on paper */
+  --fld: #6b7680;                                                    /* thin background field arrows */
+  --pl: #e8eef2; --pl-e: #8e9ba6;                                    /* planes: near tone, edge tint (<= 40 % opacity) */
+  --sh-hi: #eef8fd; --sh-mid: #b9dff2; --sh-deep: #8ccbe9; --sh-e: #3f86b8;      /* blue surfaces (Hayt) */
+  --sh2-hi: #fff4e8; --sh2-mid: #fbdcbd; --sh2-deep: #f3c193; --sh2-e: #b8621f;  /* orange surfaces */
+  --sh3-hi: #f2faf4; --sh3-mid: #d5eedc; --sh3-deep: #b5dec1; --sh3-e: #3f8a56;  /* green surfaces */
+  --hl: #ffffff;                                                     /* specular highlight */
+  --s0: #f7f1e3; --s1: #f0cf9c; --s2: #dd9550; --s3: #a85a24;        /* sequential map, light -> dark */
+  --d0: #3d7cb0; --d1: #a9cbe6; --d2: #f6f4ef; --d3: #efc79c; --d4: #c26b2c;  /* diverging map, light middle */
+  --ct: #56626c;                                                     /* contours */
+  --serif: 'STIX Two Text', 'Times New Roman', Times, serif;
+  --ui: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --dh: 46%;                                                         /* slide drawer height */
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a; --band: #1c2329;
+    --accent: #4cb8f0; --on-accent: #0f1317; --axis: #75808a;
+    --c1: #4cb8f0; --c2: #ff8a4c; --c3: #5fd07a;
+    --fld: #9aa6b0;
+    --pl: #222a32; --pl-e: #5b6874;
+    --sh-hi: #6aaad2; --sh-mid: #3b77a1; --sh-deep: #285a7d; --sh-e: #7cbbe3;
+    --sh2-hi: #8d5d35; --sh2-mid: #6e4a2a; --sh2-deep: #52371f; --sh2-e: #f0a466;
+    --sh3-hi: #33603f; --sh3-mid: #26492f; --sh3-deep: #1b3523; --sh3-e: #79cf93;
+    --hl: #c9d4dc;
+    --s0: #33414d; --s1: #57493a; --s2: #8f6638; --s3: #dca05a;
+    --d0: #6aa6d6; --d1: #3f6280; --d2: #353b41; --d3: #765539; --d4: #e0a060;
+    --ct: #a3aeb7;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1317; --surface: #171c21; --paper: #171c21; --ink: #e9edf0; --muted: #9aa5ae; --line: #29313a; --band: #1c2329;
+  --accent: #4cb8f0; --on-accent: #0f1317; --axis: #75808a;
+  --c1: #4cb8f0; --c2: #ff8a4c; --c3: #5fd07a;
+  --fld: #9aa6b0;
+  --pl: #222a32; --pl-e: #5b6874;
+  --sh-hi: #6aaad2; --sh-mid: #3b77a1; --sh-deep: #285a7d; --sh-e: #7cbbe3;
+  --sh2-hi: #8d5d35; --sh2-mid: #6e4a2a; --sh2-deep: #52371f; --sh2-e: #f0a466;
+  --sh3-hi: #33603f; --sh3-mid: #26492f; --sh3-deep: #1b3523; --sh3-e: #79cf93;
+  --hl: #c9d4dc;
+  --s0: #33414d; --s1: #57493a; --s2: #8f6638; --s3: #dca05a;
+  --d0: #6aa6d6; --d1: #3f6280; --d2: #353b41; --d3: #765539; --d4: #e0a060;
+  --ct: #a3aeb7;
+  color-scheme: dark;
+}
+
+/* ---------- type ---------- */
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 15px; line-height: 1.6; }
+h1 { font-size: clamp(1.5rem, 3.4vw, 2rem); line-height: 1.2; margin: 0 0 6px; font-weight: 600; text-wrap: balance; text-transform: none; }
+h2 { font-size: .92rem; font-weight: 600; color: var(--muted); margin: 0 0 8px; line-height: 1.5; text-transform: none; }
+.card h2:not(:first-child) { margin-top: 16px; }
+i, .m { font-family: var(--serif); font-style: italic; }
+.v { font-family: var(--serif); font-weight: 700; font-style: normal; }   /* vectors: bold upright */
+.u { font-style: normal; }
+sub.u i, sub i { font-style: italic; }
+.nw { white-space: nowrap; }
+[hidden] { display: none !important; }
+
+/* ---------- page layout: h1, lede, figure first (controls beside it, under it below 960 px), then cards ---------- */
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 28px 56px; }
+.lede { margin: 0 0 18px; color: var(--muted); max-width: 74ch; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; margin: 16px 0; }
+@media (max-width: 960px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.fig { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 12px; min-width: 0; }
+.stage { position: relative; }                                       /* canvas (soft shading) under the SVG */
+.stage canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.fig svg { position: relative; display: block; width: 100%; height: auto; max-width: 100%; cursor: grab; touch-action: none; }
+.fig svg.pk-drag { cursor: grabbing; }
+.fig svg.pk-onh { cursor: move; }
+.fig figcaption { font-size: .85rem; line-height: 1.55; color: var(--muted); padding: 6px 10px 0; }
+.fig figcaption summary { cursor: pointer; font-weight: 500; min-height: 24px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 16px; min-width: 0; margin-bottom: 16px; }
+.band { background: var(--band); padding: 6px 14px; margin-top: 8px; font-family: var(--serif); font-size: 1.04rem; line-height: 1.9; overflow-x: auto; }
+.out { display: grid; gap: 16px 28px; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); margin-top: 4px; }
+.kv { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; row-gap: 2px; margin: 0; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; text-align: right; white-space: nowrap; }
+.tablewrap { overflow-x: auto; max-width: 100%; }
+table.ft { border-collapse: collapse; width: 100%; min-width: 300px; font-size: .9rem; font-variant-numeric: tabular-nums; }
+table.ft th, table.ft td { padding: 5px 10px; text-align: right; border-bottom: 1px solid var(--line); }
+table.ft th:first-child, table.ft td:first-child { text-align: left; }
+table.ft th { font-weight: 600; color: var(--muted); font-size: .8rem; }
+.note { font-size: .8rem; color: var(--muted); margin: 6px 0 0; }
+
+/* ---------- controls (touch targets: ranges/checkboxes >= 24 px, buttons >= 32 px, drawer button 44 px) ---------- */
+.panel { display: grid; gap: 12px; min-width: 0; }
+.grp { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px 12px; min-width: 0; }
+.row { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) 4.4rem; align-items: center; gap: 10px; padding-block: 2px; line-height: 1.5; }
+.row label { font-size: .88rem; }
+.row input[type="range"] { width: 100%; min-width: 0; height: 24px; margin: 0; accent-color: var(--accent); }
+.row input[type="number"] { width: 100%; min-width: 0; min-height: 28px; box-sizing: border-box; font: inherit; font-size: .85rem; font-variant-numeric: tabular-nums; text-align: right; padding: 3px 6px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; }
+.chk { display: flex; align-items: center; gap: 8px; min-height: 28px; padding-block: 2px; font-size: .88rem; line-height: 1.5; cursor: pointer; }
+.chk input { accent-color: var(--accent); width: 18px; height: 18px; margin: 3px; flex: none; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.btns:first-child { margin-top: 0; }
+.btns button { font: inherit; font-size: .85rem; line-height: 1.4; min-height: 32px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.btns button:hover { border-color: var(--accent); }
+.btns button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- figure drawing: lines (pk-l + colour s-* + weight w-*), heads (pk-h + f-*), text (t-*) ---------- */
+.fig svg polyline, .fig svg path.pk-l { fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.pk-l { stroke-width: 1.2; }
+.s-ink { stroke: var(--ink); } .s-mut { stroke: var(--muted); } .s-ax { stroke: var(--axis); } .s-fld { stroke: var(--fld); }
+.s-c1 { stroke: var(--c1); } .s-c2 { stroke: var(--c2); } .s-c3 { stroke: var(--c3); }
+.s-pl { stroke: var(--pl-e); } .s-sh { stroke: var(--sh-e); } .s-sh2 { stroke: var(--sh2-e); } .s-sh3 { stroke: var(--sh3-e); }
+.w-main { stroke-width: 3.6; } .w-comp { stroke-width: 2.3; } .w-axis { stroke-width: 1.6; } .w-guide { stroke-width: 1.1; }
+.w-fld { stroke-width: 1.2; } .w-edge { stroke-width: 1.2; stroke-opacity: .4; }
+.pk-dash { stroke-dasharray: 7 5; stroke-linecap: butt; }            /* opposite / inward meaning: dashes >= 6 px */
+.pk-guide { stroke-dasharray: 4 4; stroke-linecap: butt; }           /* thin dashed construction lines */
+.pk-axn { stroke-dasharray: 5 4; stroke-linecap: butt; }             /* negative half-axes */
+.pk-halo { stroke: var(--paper) !important; stroke-width: 8 !important; opacity: .9; stroke-dasharray: none !important; }
+.f-ink { fill: var(--ink); } .f-mut { fill: var(--muted); } .f-ax { fill: var(--axis); } .f-fld { fill: var(--fld); }
+.f-c1 { fill: var(--c1); } .f-c2 { fill: var(--c2); } .f-c3 { fill: var(--c3); }
+.pk-h { stroke: none; }
+.pk-hol { fill: var(--paper); stroke-width: 1.6; stroke-linejoin: round; }   /* hollow head: paper fill, coloured edge */
+.pk-hol.f-ink { stroke: var(--ink); } .pk-hol.f-c1 { stroke: var(--c1); } .pk-hol.f-c2 { stroke: var(--c2); } .pk-hol.f-c3 { stroke: var(--c3); } .pk-hol.f-mut { stroke: var(--muted); }
+.pk-hhalo { fill: none; stroke: var(--paper); stroke-width: 5; stroke-linejoin: round; }
+/* parts behind a registered surface: ghost = faint and dashed; see-through = solid but lighter */
+.fig svg .pk-gh { stroke-width: 1.1px; stroke-dasharray: 2 4; opacity: .6; stroke-linecap: butt; }
+.fig svg .pk-gs { opacity: .5; }
+.fig svg .pk-ghh { opacity: .4; } .fig svg .pk-ghs { opacity: .5; }
+.pk-dot { fill: var(--ink); stroke: var(--paper); stroke-width: 1.5; }
+.pk-dot.pk-ghd { fill: var(--paper); stroke: var(--ink); stroke-dasharray: 2 2; }
+.pk-ring { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.pk-plate { fill: var(--paper); opacity: .94; }
+.pk-leader { stroke: var(--ink); stroke-width: .9; opacity: .7; fill: none; }
+.pk-kbox { fill: var(--paper); stroke: var(--line); stroke-width: 1; opacity: .96; }   /* in-figure key-value block */
+/* all figure text: serif with a paper halo (paint-order stroke); sizes are set per text in screen px by pagekit.js */
+.fig svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-linejoin: round; font-family: var(--serif);
+  user-select: none; -webkit-user-select: none; pointer-events: none; white-space: pre; }
+.t-ink { fill: var(--ink); } .t-mut { fill: var(--muted); } .t-ax { fill: var(--muted); }
+.t-c1 { fill: var(--c1); } .t-c2 { fill: var(--c2); } .t-c3 { fill: var(--c3); }
+.fig svg tspan.pk-b { font-weight: 700; font-style: normal; } .fig svg tspan.pk-i { font-style: italic; }
+.fig svg tspan.pk-s { font-style: italic; font-weight: 400; } .fig svg tspan.pk-su { font-style: normal; font-weight: 400; }
+
+/* ---------- slide mode: <html data-host="slide"> (CircuitView Live add-in) ----------
+   The figure fills the frame; the controls are a drawer from the bottom, closed at start, opened by the round 44 px
+   button at the bottom right; an open drawer takes the lower --dh of the frame and the figure shrinks above it. */
+.pk-drawer-btn { display: none; }
+[data-host="slide"] body { overflow: hidden; font-size: 13px; margin: 0; }
+[data-host="slide"] .wrap { max-width: none; height: 100vh; box-sizing: border-box; padding: 0; }
+[data-host="slide"] h1, [data-host="slide"] .lede, [data-host="slide"] .wrap > .card, [data-host="slide"] .fig figcaption,
+[data-host="slide"] .pk-page-only { display: none; }
+[data-host="slide"] .layout { position: relative; display: block; height: 100%; margin: 0; overflow: hidden; }
+[data-host="slide"] .fig { position: absolute; inset: 0; border: 0; border-radius: 0; padding: 4px; transition: bottom .2s ease; }
+[data-host="slide"] .stage { width: 100%; height: 100%; }
+[data-host="slide"] .fig svg { width: 100%; height: 100%; touch-action: none; }
+[data-host="slide"] .panel { position: absolute; left: 0; right: 0; bottom: 0; height: var(--dh); box-sizing: border-box; gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr)); padding: 8px 62px 8px 8px; overflow: auto;
+  align-content: start; background: var(--bg); border-top: 1px solid var(--line);
+  transform: translateY(101%); visibility: hidden; transition: transform .2s ease, visibility .2s; }
+[data-host="slide"].ctl-open .panel { transform: none; visibility: visible; }
+[data-host="slide"].ctl-open .fig { bottom: var(--dh); }
+[data-host="slide"] .grp { padding: 7px 10px 9px; }
+[data-host="slide"] .row { grid-template-columns: 5.8rem minmax(0, 1fr) 3.6rem; gap: 6px; }
+[data-host="slide"] .pk-drawer-btn { display: flex; align-items: center; justify-content: center; position: fixed; right: 10px; bottom: 10px; z-index: 5;
+  width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  cursor: pointer; box-shadow: 0 1px 4px rgba(0, 0, 0, .18); opacity: .75; }
+[data-host="slide"] .pk-drawer-btn:hover, [data-host="slide"].ctl-open .pk-drawer-btn { opacity: 1; }
+.pk-drawer-btn svg { width: 20px; height: 20px; }
+
+/* ---------- worked-example steps and drills (PK.ui.steps, PK.ui.drill) ---------- */
+.btns button:disabled { opacity: .45; cursor: default; border-color: var(--line); }
+.pk-steps { margin: 8px 0 0; padding-left: 1.4em; font-size: .9rem; line-height: 1.65; }
+.pk-steps li { padding: 2px 0; color: var(--muted); }
+.pk-steps li.pk-cur { color: var(--ink); }
+.pk-drill-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pk-drill-top label { font-size: .88rem; }
+.pk-drill-top input { width: 5.2rem; min-height: 32px; box-sizing: border-box; font: inherit; font-size: .88rem; font-variant-numeric: tabular-nums; padding: 3px 6px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; }
+.pk-drill-top .btns { margin-top: 0; }
+.pk-q { margin: 10px 0 6px; font-size: .95rem; line-height: 1.6; }
+.pk-ans { display: grid; gap: 6px; }
+.pk-arow { display: grid; grid-template-columns: minmax(4.5rem, auto) minmax(0, 8rem) auto minmax(0, 1fr); align-items: center; gap: 8px; }
+.pk-arow label { font-size: .92rem; font-family: var(--serif); }
+.pk-arow input { width: 100%; min-width: 0; min-height: 32px; box-sizing: border-box; font: inherit; font-size: .9rem; font-variant-numeric: tabular-nums; text-align: right; padding: 3px 8px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; }
+.pk-arow input[aria-invalid="true"] { border-color: var(--c2); }
+.pk-unit { font-size: .88rem; color: var(--muted); }
+.pk-mark { font-size: .85rem; font-weight: 600; }
+.pk-mark.pk-ok { color: var(--c3); } .pk-mark.pk-no { color: var(--c2); }
+.pk-res { min-height: 1.2em; }
+.pk-sol { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; }
+.pk-fab { display: none; }
+[data-host="slide"].ctl-open .pk-fab { display: none !important; }   /* an open drawer has its own Back / Next step */
+[data-host="slide"] .pk-fab:not([hidden]) { display: flex; align-items: center; gap: 2px; position: fixed; right: 62px; bottom: 10px; z-index: 5; height: 44px; box-sizing: border-box;
+  padding: 0 4px; border-radius: 22px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); box-shadow: 0 1px 4px rgba(0, 0, 0, .18); opacity: .85;
+  font-size: 14px; font-variant-numeric: tabular-nums; }
+[data-host="slide"] .pk-fab:hover { opacity: 1; }
+.pk-fab span { min-width: 3.2em; text-align: center; }
+.pk-fab button { width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; font-size: 22px; line-height: 1; cursor: pointer; }
+.pk-fab button:hover:not(:disabled) { background: var(--bg); }
+.pk-fab button:disabled { opacity: .35; cursor: default; }
+
+/* ---------- reduced motion; PK.test switches transitions off with .pk-notrans ---------- */
+@media (prefers-reduced-motion: reduce) { [data-host="slide"] .fig, [data-host="slide"] .panel { transition: none; } }
+.pk-notrans *, .pk-notrans *::before { transition: none !important; }
+</style>
+<style>
+/* Introduction: a real RG-58 coaxial cable (Belden 8240, datasheet rev. 0.540, 2025) cut back layer by layer, to scale,
+   with E between the conductors and H circling the inner conductor. The cable colours are the object's own colours. */
+:root { --cu-hi: #f3c08c; --cu-mid: #d98a48; --cu-deep: #9a5a24; --tc-hi: #eef0f2; --tc-mid: #c3c8cd; --tc-deep: #8d949b;
+  --pe-hi: #ffffff; --pe-mid: #eef1f3; --pe-deep: #c9cfd4; --pvc-hi: #6b7178; --pvc-mid: #3b4046; --pvc-deep: #1e2226; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --cu-hi: #f3c08c; --cu-mid: #d98a48; --cu-deep: #9a5a24; --tc-hi: #eef0f2; --tc-mid: #c3c8cd; --tc-deep: #8d949b;
+  --pe-hi: #ffffff; --pe-mid: #eef1f3; --pe-deep: #c9cfd4; --pvc-hi: #6b7178; --pvc-mid: #3b4046; --pvc-deep: #1e2226; } }
+:root[data-theme="dark"] { --cu-hi: #f3c08c; --cu-mid: #d98a48; --cu-deep: #9a5a24; --tc-hi: #eef0f2; --tc-mid: #c3c8cd; --tc-deep: #8d949b;
+  --pe-hi: #ffffff; --pe-mid: #eef1f3; --pe-deep: #c9cfd4; --pvc-hi: #6b7178; --pvc-mid: #3b4046; --pvc-deep: #1e2226; }
+</style>
+
+<main class="wrap">
+  <h1>A Coaxial Cable, Cut Back</h1>
+  <p class="lede">An RG-58 coaxial cable (Belden 8240) with its layers cut back one by one, drawn to scale from the manufacturer's datasheet: the solid copper inner conductor, the polyethylene insulation, the braided shield and the PVC jacket. With a voltage between the inner conductor and the shield, the electric field <b class="v">E</b> points radially across the insulation; with a current out on the inner conductor and back on the shield, the magnetic field <b class="v">H</b> circles the inner conductor. Turn the cable to look at it from any side.</p>
+
+  <div class="layout">
+    <figure class="fig">
+      <div class="stage"><canvas id="cv" aria-hidden="true"></canvas><svg id="fg" role="img" aria-label="An RG-58 coaxial cable in 3D with its jacket, braided shield and insulation cut back in steps, and the fields E and H on the end face of the insulation"></svg></div>
+      <figcaption><details id="cap" open><summary>About this figure</summary>Belden 8240 (RG-58), from its datasheet: inner conductor 20 AWG solid bare copper, 0.838 mm diameter; polyethylene insulation, 2.95 mm diameter; tinned-copper braid shield, 95 % coverage; PVC jacket, 4.90 mm overall diameter. The datasheet gives no separate thickness for the braid: it is drawn 0.30 mm thick (assumed) and the braid pattern is schematic. The lengths by which the layers are cut back are chosen for display. On the end face of the insulation, <b class="v">E</b> (straight arrows) points from the inner conductor to the shield, for the inner conductor at the higher voltage, and <b class="v">H</b> (dashed circles) circles the inner conductor, for the current <i>I</i> flowing out of the cable end on the inner conductor and back on the shield.</details></figcaption>
+    </figure>
+    <aside class="panel" id="panel">
+      <section class="grp" id="g-view"><h2>View</h2></section>
+      <section class="grp" id="g-disp"><h2>Display</h2></section>
+    </aside>
+  </div>
+
+  <section class="card">
+    <h2>Per metre of this cable</h2>
+    <div class="out"><dl class="kv" id="o-kv"></dl></div>
+    <p class="note">Formula values use the datasheet radii <i>a</i> = 0.419 mm and <i>b</i> = 1.475 mm and an assumed <i>ε</i><sub class="u">r</sub> = 2.25 (a typical value for polyethylene; the datasheet does not give it): <i>C</i>′ = 2π<i>ε</i>/ln(<i>b</i>/<i>a</i>) (Hayt Ch. 6), <i>L</i>′ = (<i>μ</i><sub class="u">0</sub>/2π) ln(<i>b</i>/<i>a</i>) (external inductance, Hayt Ch. 8), <i>v</i> = 1/√(<i>L</i>′<i>C</i>′). The datasheet values are the manufacturer's nominal values. The formula capacitance is about 6 % above the datasheet value. The formulas describe an idealised cable (smooth, perfectly round conductors and a uniform insulation of the assumed permittivity), so a difference of this size is to be expected; the datasheet values are the ones to quote.</p>
+  </section>
+</main>
+
+<script>/* pagekit.js */
+/* pagekit.js: the shared core of the EE311 interactive pages. One global, PK. Included by make_cvlive.py /
+   preview.py at the pagekit js marker comment; the page script comes after it.
+
+   Modules (README.md has the API with examples):
+     PK.v       vector maths                       PK.fmt    numbers: 3 s.f., true minus, units, nbsp
+     PK.text    rich figure text: **bold** *italic* _{sub} _[upright sub]; SVG, HTML and measured boxes
+     PK.theme   tokens from CSS, re-render on scheme / data-theme / data-host change
+     PK.Camera  orthographic az/el camera, z up      PK.VIEW   DEFAULT 55/28, TOP 0/90
+     PK.vis     occluders for hidden lines: polygon, rect, disk, sphere, cylinder, height surface
+     PK.mesh    meshes for soft shading: sphere, cylinder, height, plane
+     PK.shade   Hayt-style tone from the normal, palettes from tokens, plane gradient
+     PK.figure  the figure: frame and screen-px sizes, readouts, fit, drawing, canvas shading, labels, drag, timing
+     PK.ui      slider rows, toggles, buttons, Play/Pause, view controls, slide drawer, caption on phones,
+                worked-example steps (with the slide's '‹ k / n ›' bar), random drills with answer checking
+     PK.test    random-state sweep for reviewers (text-on-text, text-on-line, plates, px, clipping, timing) */
+(function () {
+  'use strict';
+  var PK = window.PK = { version: '1.1' };
+  var D2R = PK.D2R = Math.PI / 180, root = document.documentElement, FIGS = PK.figs = [];
+
+  /* ======================= PK.v: vector maths (arrays [x, y, z]) ======================= */
+  var V = PK.v = {
+    dot: function (a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; },
+    add: function (a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; },
+    sub: function (a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; },
+    mul: function (a, s) { return [a[0] * s, a[1] * s, a[2] * s]; },
+    len: function (a) { return Math.hypot(a[0], a[1], a[2]); },
+    lerp: function (a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; },
+    cross: function (a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; },
+    unit: function (a) { var l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; },
+    clamp: function (v, a, b) { return Math.max(a, Math.min(b, v)); },
+    smooth: function (a, b, x) { var t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); },
+    mix: function (a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  };
+  var dot = V.dot, add = V.add, sub = V.sub, mul = V.mul, lerp = V.lerp, unit = V.unit, clamp = V.clamp, smooth = V.smooth;
+  function f1(n) { return (Math.round(n * 10) / 10).toString(); }
+  function $(s) { return typeof s === 'string' ? document.querySelector(s) : s; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  /* ======================= PK.fmt: one number rule for figure, readouts and tables ======================= */
+  var SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+  function sup(e) { return String(e).replace('-', '⁻').replace(/[0-9]/g, function (d) { return SUP[d]; }); }
+  PK.fmt = {
+    MINUS: '−', NBSP: ' ',
+    /* n(v, sig = 3, {trim, zero}): sig significant figures with a true minus; plain decimals from 10^-3 up to 10^5,
+       otherwise m × 10ⁿ; |v| below zero (default 1e-12) prints 0; trim drops trailing zeros (exact inputs) */
+    n: function (v, sig, o) {
+      sig = sig || 3; o = o || {};
+      if (!isFinite(v)) return '—';
+      if (v === 0 || Math.abs(v) < (o.zero === undefined ? 1e-12 : o.zero)) return '0';
+      v = Number(v.toPrecision(sig));
+      var a = Math.abs(v), e = Math.floor(Math.log10(a) + 1e-12), s;
+      if (e >= -3 && e < 5) s = a.toFixed(Math.max(0, sig - 1 - e));
+      else { s = (a / Math.pow(10, e)).toFixed(sig - 1); if (o.trim) s = s.replace(/\.?0+$/, ''); return (v < 0 ? '−' : '') + s + ' × 10' + sup(e); }
+      if (o.trim && s.indexOf('.') >= 0) s = s.replace(/\.?0+$/, '');
+      return (v < 0 ? '−' : '') + s;
+    },
+    /* x(v): a value made from exact inputs (slider steps): at most 3 s.f., no trailing zeros (1, −4, 2.5) */
+    x: function (v) { return PK.fmt.n(v, 3, { trim: true, zero: 1e-9 }); },
+    /* fix(v, d): d decimals with a true minus and no "−0" */
+    fix: function (v, d) { var s = Math.abs(v).toFixed(d); return (v < 0 && parseFloat(s) !== 0 ? '−' : '') + s; },
+    /* q(v, unit, sig): value, no-break space, unit (the unit may be rich text) */
+    q: function (v, unit, sig) { return PK.fmt.n(v, sig) + (unit ? ' ' + unit : ''); },
+    deg: function (v, d) { return PK.fmt.fix(v, d || 0) + '°'; },
+    /* vec([x, y, z], f): rich text "c₁ a_x − c₂ a_y …" (coefficient 1 omitted); f formats a magnitude (default n) */
+    vec: function (c, f, names) {
+      f = f || PK.fmt.n; names = names || ['x', 'y', 'z'];
+      var s = '';
+      for (var k = 0; k < c.length; k++) {
+        var m = f(Math.abs(c[k])); if (m === '0') continue;
+        s += (s ? (c[k] < 0 ? ' − ' : ' + ') : (c[k] < 0 ? '−' : '')) + (m === '1' ? '' : m + ' ') + '**a**_{' + names[k] + '}';
+      }
+      return s || '0';
+    },
+    /* point coordinates "(1, 2, 3)" */
+    pt: function (c, f) { f = f || PK.fmt.x; return '(' + c.map(function (v) { return f(v); }).join(', ') + ')'; }
+  };
+
+  /* ======================= PK.text: rich figure text ======================= */
+  /* spec: **a** bold upright (vectors), *x* italic (scalars), _{N} subscript (italic; digits upright), _[max] upright
+     subscript; everything else upright. Subscripts are 0.72 of the size but never below 12 px. */
+  var MINPX = PK.MINPX = 12;
+  function subFs(fs) { return Math.min(fs, Math.max(0.72 * fs, MINPX)); }
+  var PCACHE = {};
+  function parse(spec) {
+    if (PCACHE[spec]) return PCACHE[spec];
+    var re = /\*\*([^*]+)\*\*|\*([^*]+)\*|_\{([^}]*)\}|_\[([^\]]*)\]|([^*_]+|[*_])/g, m, out = [];
+    while ((m = re.exec(spec))) {
+      if (m[1] !== undefined) out.push({ s: m[1], st: 'b' });
+      else if (m[2] !== undefined) out.push({ s: m[2], st: 'i' });
+      else if (m[3] !== undefined) out.push({ s: m[3], st: /^[0-9.,]+$/.test(m[3]) ? 'su' : 's' });
+      else if (m[4] !== undefined) out.push({ s: m[4], st: 'su' });
+      else out.push({ s: m[5], st: 'n' });
+    }
+    return (PCACHE[spec] = out);
+  }
+  /* italic correction (as in TeX): a little room after an italic letter followed by upright text, e.g. P(1, 2, 3),
+     so the slanted letter is not cut by the next run's halo */
+  var ICOR = 0.1;
+  function icor(a, b) { return !!(a && b && a.st === 'i' && (b.st === 'n' || b.st === 'b') && /^[^\s ,.;:]/.test(b.s)); }
+  var MC = null, MW = {}, FM = {};
+  function ctx2d() { if (MC === null) { try { MC = document.createElement('canvas').getContext('2d'); } catch (e) { MC = false; } } return MC; }
+  function fontOf(st, fs) { return (st === 'i' || st === 's' ? 'italic ' : '') + (st === 'b' ? '700 ' : '400 ') + fs + "px 'STIX Two Text', 'Times New Roman', Times, serif"; }
+  function runW(s, st, fs) {
+    var k = st + fs + '|' + s;
+    if (MW[k] === undefined) { var c = ctx2d(); if (c) { c.font = fontOf(st, fs); MW[k] = c.measureText(s).width; } else MW[k] = 0.52 * fs * s.length; }
+    return MW[k];
+  }
+  /* em-box ascent/descent of the figure font (what SVG getBBox reports), per size */
+  function fmet(fs) {
+    if (!FM[fs]) {
+      var c = ctx2d(), a = 0.8 * fs, d = 0.25 * fs;
+      if (c) { c.font = fontOf('n', fs); var m = c.measureText('Hgy'); if (m.fontBoundingBoxAscent) { a = m.fontBoundingBoxAscent; d = m.fontBoundingBoxDescent; } }
+      FM[fs] = { a: a, d: d };
+    }
+    return FM[fs];
+  }
+  PK.text = {
+    parse: parse, subFs: subFs,
+    /* measure(spec, fs): { w, asc, desc } of the text box (baseline at 0) */
+    measure: function (spec, fs) {
+      var w = 0, hasSub = false, sf = subFs(fs);
+      parse(spec).forEach(function (r, i, rs) { var sb = r.st === 's' || r.st === 'su'; if (sb) hasSub = true; w += runW(r.s, r.st, sb ? sf : fs) + (icor(r, rs[i + 1]) ? ICOR * fs : 0); });
+      var m = fmet(fs), desc = m.d;
+      if (hasSub) desc = Math.max(desc, 0.22 * fs + fmet(sf).d);
+      return { w: w, asc: m.a, desc: desc };
+    },
+    /* svg(x, y, spec, cls, fs, anchor, attrs): a <text> with its baseline at y */
+    svg: function (x, y, spec, cls, fs, anchor, attrs) {
+      var s = '<text x="' + f1(x) + '" y="' + f1(y) + '" class="' + cls + '" font-size="' + f1(fs) + '" text-anchor="' + (anchor || 'middle') + '"' + (attrs || '') + '>';
+      var down = false, dd = f1(0.22 * fs), sf = f1(subFs(fs));
+      parse(spec).forEach(function (r, i, rs) {
+        var ic = icor(rs[i - 1], r) ? ' dx="' + f1(ICOR * fs) + '"' : '';
+        if (r.st === 's' || r.st === 'su') { s += '<tspan class="' + (r.st === 's' ? 'pk-s' : 'pk-su') + '" font-size="' + sf + '"' + (down ? '' : ' dy="' + dd + '"') + '>' + esc(r.s) + '</tspan>'; down = true; return; }
+        var dy = (down ? ' dy="-' + dd + '"' : '') + ic; down = false;
+        s += '<tspan' + (r.st === 'b' ? ' class="pk-b"' : r.st === 'i' ? ' class="pk-i"' : '') + dy + '>' + esc(r.s) + '</tspan>';
+      });
+      return s + '</text>';
+    },
+    /* html(spec): the same text for the cards: <b class="v">, <i>, <sub class="u"> */
+    html: function (spec) {
+      return parse(spec).map(function (r) {
+        var t = esc(r.s);
+        return r.st === 'b' ? '<b class="v">' + t + '</b>' : r.st === 'i' ? '<i>' + t + '</i>' : r.st === 's' ? '<sub class="u"><i>' + t + '</i></sub>' : r.st === 'su' ? '<sub class="u">' + t + '</sub>' : t;
+      }).join('');
+    },
+    clear: function () { MW = {}; FM = {}; }
+  };
+
+  /* ======================= PK.theme: tokens, cached until the scheme or host changes ======================= */
+  var TK = {}, CSS = null, THL = [];
+  function parseColor(s) {
+    s = (s || '').trim();
+    if (s.charAt(0) === '#') { var h = s.slice(1); if (h.length === 3) h = h.replace(/./g, function (c) { return c + c; }); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+    var m = s.match(/[\d.]+/g); return m ? [+m[0], +m[1], +m[2]] : [128, 128, 128];
+  }
+  PK.theme = {
+    gen: 0,
+    tok: function (n) { if (!(n in TK)) TK[n] = (CSS || (CSS = getComputedStyle(root))).getPropertyValue(n).trim(); return TK[n]; },
+    rgb: function (n) { var k = n + '#rgb'; if (!(k in TK)) TK[k] = parseColor(PK.theme.tok(n)); return TK[k]; },
+    css: function (c) { return 'rgb(' + Math.round(clamp(c[0], 0, 255)) + ',' + Math.round(clamp(c[1], 0, 255)) + ',' + Math.round(clamp(c[2], 0, 255)) + ')'; },
+    dark: function () { var p = PK.theme.rgb('--paper'); return p[0] + p[1] + p[2] < 384; },
+    /* on(fn): call fn after a scheme / data-theme / data-host change (figures re-render themselves) */
+    on: function (fn) { THL.push(fn); },
+    refresh: function () { TK = {}; CSS = null; PK.theme.gen++; THL.forEach(function (fn) { try { fn(); } catch (e) { console.error(e); } }); }
+  };
+  try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { PK.theme.refresh(); }); } catch (e) {}
+  new MutationObserver(function () { PK.theme.refresh(); }).observe(root, { attributes: true, attributeFilter: ['data-theme', 'data-host'] });
+  PK.slide = function () { return root.getAttribute('data-host') === 'slide'; };
+  PK.reducedMotion = function () { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+
+  /* ======================= PK.Camera: orthographic, azimuth from +x toward +y, elevation above xy; z up ======================= */
+  PK.VIEW = { DEFAULT: { az: 55, el: 28 }, TOP: { az: 0, el: 90 } };
+  function Camera() { this.s = 1; this.cx = 0; this.cy = 0; this.set(55, 28); }
+  Camera.prototype.set = function (az, el) {
+    var ca = Math.cos(az * D2R), sa = Math.sin(az * D2R), ce = Math.cos(el * D2R), se = Math.sin(el * D2R);
+    this.az = az; this.el = el;
+    this.RT = [-sa, ca, 0]; this.UP = [-se * ca, -se * sa, ce]; this.FW = [ce * ca, ce * sa, se];   /* FW points to the viewer */
+    this.LT = unit(add(add(mul(this.RT, -0.35), mul(this.UP, 0.75)), mul(this.FW, 0.55)));        /* light: upper left, in front */
+    this.HV = unit(add(this.LT, this.FW));
+  };
+  Camera.prototype.project = function (p) { return { x: this.cx + this.s * dot(p, this.RT), y: this.cy - this.s * dot(p, this.UP) }; };
+  Camera.prototype.depth = function (p) { return dot(p, this.FW); };   /* larger = nearer the viewer */
+  /* toPlane(sx, sy, n, p0): the 3D point under screen point (sx, sy) on the plane through p0 with normal n (null
+     when the plane is nearly edge-on) */
+  Camera.prototype.toPlane = function (sx, sy, n, p0) {
+    var a = (sx - this.cx) / this.s, b = (this.cy - sy) / this.s, o = add(mul(this.RT, a), mul(this.UP, b)), dn = dot(this.FW, n);
+    if (Math.abs(dn) < 0.08) return null;
+    return add(o, mul(this.FW, dot(sub(p0 || [0, 0, 0], o), n) / dn));
+  };
+  PK.Camera = Camera;
+
+  /* ======================= PK.vis: occluders for hidden lines (each: hit(p, d, tol) along the ray toward the viewer) ======================= */
+  function quadRoots(a, b, c) { var D = b * b - 4 * a * c; if (D < 0 || Math.abs(a) < 1e-14) return null; var q = Math.sqrt(D); return [(-b - q) / (2 * a), (-b + q) / (2 * a)]; }
+  PK.vis = {
+    /* a planar polygon (any shape, points in order) */
+    polygon: function (pts) {
+      var n = [0, 0, 0], k;
+      for (k = 0; k < pts.length; k++) { var a = pts[k], b = pts[(k + 1) % pts.length]; n[0] += (a[1] - b[1]) * (a[2] + b[2]); n[1] += (a[2] - b[2]) * (a[0] + b[0]); n[2] += (a[0] - b[0]) * (a[1] + b[1]); }
+      n = unit(n);
+      var e1 = unit(sub(pts[1], pts[0])), e2 = V.cross(n, e1), o = pts[0], q2 = pts.map(function (p) { var d = sub(p, o); return [dot(d, e1), dot(d, e2)]; });
+      return { kind: 'polygon', hit: function (p, d, tol) {
+        var dn = dot(d, n); if (Math.abs(dn) < 1e-12) return false;
+        var t = dot(sub(o, p), n) / dn; if (t <= tol) return false;
+        var q = sub(add(p, mul(d, t)), o), x = dot(q, e1), y = dot(q, e2), c = false;
+        for (var i = 0, j = q2.length - 1; i < q2.length; j = i++) if ((q2[i][1] > y) !== (q2[j][1] > y) && x < (q2[j][0] - q2[i][0]) * (y - q2[i][1]) / (q2[j][1] - q2[i][1]) + q2[i][0]) c = !c;
+        return c;
+      } };
+    },
+    /* rect(c, u, v): the parallelogram c ± u ± v */
+    rect: function (c, u, v) { return PK.vis.polygon([sub(sub(c, u), v), sub(add(c, u), v), add(add(c, u), v), add(sub(c, u), v)]); },
+    disk: function (c, n, r) {
+      n = unit(n);
+      return { kind: 'disk', hit: function (p, d, tol) { var dn = dot(d, n); if (Math.abs(dn) < 1e-12) return false; var t = dot(sub(c, p), n) / dn; return t > tol && V.len(sub(add(p, mul(d, t)), c)) <= r; } };
+    },
+    sphere: function (c, r) {
+      return { kind: 'sphere', hit: function (p, d, tol) { var w = sub(p, c), ts = quadRoots(dot(d, d), 2 * dot(w, d), dot(w, w) - r * r); return !!ts && (ts[0] > tol || ts[1] > tol); } };
+    },
+    /* cylinder(c, a, r, h0, h1, caps): wall of radius r about the axis through c along a, from h0 to h1 along a */
+    cylinder: function (c, a, r, h0, h1, caps) {
+      a = unit(a);
+      var cap0 = caps ? PK.vis.disk(add(c, mul(a, h0)), a, r) : null, cap1 = caps ? PK.vis.disk(add(c, mul(a, h1)), a, r) : null;
+      return { kind: 'cylinder', hit: function (p, d, tol) {
+        var w = sub(p, c), dp = sub(d, mul(a, dot(d, a))), wp = sub(w, mul(a, dot(w, a))), ts = quadRoots(dot(dp, dp), 2 * dot(wp, dp), dot(wp, wp) - r * r);
+        if (ts) for (var i = 0; i < 2; i++) if (ts[i] > tol) { var h = dot(add(w, mul(d, ts[i])), a); if (h >= h0 && h <= h1) return true; }
+        return !!caps && (cap0.hit(p, d, tol) || cap1.hit(p, d, tol));
+      } };
+    },
+    /* height(f, x0, x1, y0, y1, {zmin, zmax, step}): the sheet z = f(x, y) over the rectangle (ray march) */
+    height: function (f, x0, x1, y0, y1, o) {
+      o = o || {};
+      var zmin = o.zmin, zmax = o.zmax, step = o.step || Math.max(x1 - x0, y1 - y0) / 60;
+      if (zmin === undefined) { zmin = 1e9; zmax = -1e9; for (var i = 0; i <= 20; i++) for (var j = 0; j <= 20; j++) { var z = f(x0 + (x1 - x0) * i / 20, y0 + (y1 - y0) * j / 20); zmin = Math.min(zmin, z); zmax = Math.max(zmax, z); } }
+      return { kind: 'height', hit: function (p, d, tol) {
+        if (d[2] <= 1e-6 && p[2] > zmax) return false;
+        var t0 = tol * 2, t1 = 1e9, k;
+        for (k = 0; k < 2; k++) {
+          var lo = k ? y0 : x0, hi = k ? y1 : x1;
+          if (Math.abs(d[k]) < 1e-12) { if (p[k] < lo || p[k] > hi) return false; continue; }
+          var ta = (lo - p[k]) / d[k], tb = (hi - p[k]) / d[k]; t0 = Math.max(t0, Math.min(ta, tb)); t1 = Math.min(t1, Math.max(ta, tb));
+        }
+        if (Math.abs(d[2]) > 1e-12) { var tz0 = (zmin - p[2]) / d[2], tz1 = (zmax - p[2]) / d[2]; t0 = Math.max(t0, Math.min(tz0, tz1)); t1 = Math.min(t1, Math.max(tz0, tz1)); }
+        else if (p[2] < zmin || p[2] > zmax) return false;
+        if (t1 <= t0) return false;
+        var hz = Math.hypot(d[0], d[1]), dt = step / Math.max(hz, 0.2), eps = 1e-6 * (zmax - zmin + 1), side = null;
+        var inside = p[0] >= x0 && p[0] <= x1 && p[1] >= y0 && p[1] <= y1;
+        if (inside) side = p[2] >= f(p[0], p[1]) - eps;
+        for (var t = t0 + 0.5 * dt; t < t1; t += dt) {
+          var q = add(p, mul(d, t)), up = q[2] >= f(q[0], q[1]) - eps;
+          if (side === null) side = up; else if (up !== side) return true;
+        }
+        return false;
+      } };
+    }
+  };
+
+  /* ======================= PK.shade: Hayt-style soft tone from tokens ======================= */
+  var PALC = {};
+  PK.shade = {
+    /* palette('sh') -> [hi, mid, deep] from --sh-hi, --sh-mid, --sh-deep (also 'sh2', 'sh3', or a page's own prefix) */
+    palette: function (name) { var k = name + '#' + PK.theme.gen; return PALC[k] || (PALC[k] = ['-hi', '-mid', '-deep'].map(function (s) { return PK.theme.rgb('--' + name + s); })); },
+    /* ramp(pal, t): t = 0 highlight, 0.5 mid, 1 deep */
+    ramp: function (pal, t) { t = clamp(t, 0, 1); return t < 0.5 ? V.mix(pal[0], pal[1], t / 0.5) : V.mix(pal[1], pal[2], (t - 0.5) / 0.5); },
+    /* tone(cam, n): one continuous function of the normal seen by the camera: mid at the silhouette, a pale band a
+       third in from the lit (left) side, deeper toward the shadow side */
+    tone: function (cam, n) {
+      var nx = dot(n, cam.RT), ny = dot(n, cam.UP);
+      var base = 0.5 + 0.42 * smooth(-0.25, 0.95, nx) - 0.08 * ny;
+      var band = Math.exp(-Math.pow((nx + 0.33) / 0.34, 2) - Math.pow((ny - 0.2) / 0.7, 2));
+      return clamp(base * (1 - 0.92 * band), 0, 1);
+    },
+    /* color(cam, n, spec, near, v): tone -> palette colour, a soft specular highlight, the far side faded toward the
+       paper (near: 0 far .. 1 near), and the top faded (v: 0 bottom .. 1 top, when spec.fadeTop) */
+    color: function (cam, n, spec, near, v) {
+      var pal = Array.isArray(spec.pal) ? spec.pal : PK.shade.palette(spec.pal || 'sh'), pap = PK.theme.rgb('--paper'), c;
+      if (!n) c = pal[1];
+      else {
+        if (dot(n, cam.FW) < 0) n = mul(n, -1);
+        c = PK.shade.ramp(pal, PK.shade.tone(cam, n));
+        var sp = Math.pow(Math.max(0, dot(n, cam.HV)), 18);
+        c = V.mix(c, PK.theme.rgb('--hl'), 0.4 * sp);
+      }
+      var ff = spec.fadeFar === undefined ? 0.25 : spec.fadeFar;
+      if (ff && near !== undefined) c = V.mix(c, pap, ff * (1 - smooth(0, 0.5, near)));
+      if (spec.fadeTop && v !== undefined) c = V.mix(c, pap, spec.fadeTop * smooth(0.4, 1, v));
+      return c;
+    },
+    /* plane(F, pts): a faint linear gradient for a plane on the canvas: the plane tone at the nearest corner,
+       the paper colour at the farthest */
+    plane: function (F, pts, tokName) {
+      var cn = pts[0], cf = pts[0];
+      pts.forEach(function (p) { if (F.cam.depth(p) > F.cam.depth(cn)) cn = p; if (F.cam.depth(p) < F.cam.depth(cf)) cf = p; });
+      return { from: cn, to: cf, stops: [[0, PK.theme.rgb(tokName || '--pl')], [1, PK.theme.rgb('--paper')]] };
+    }
+  };
+
+  /* ======================= PK.mesh: grids for F.surface (pt(i, j), nrm(i, j), i <= nu, j <= nv) ======================= */
+  function gridMesh(nu, nv, P, N, extra) { var m = { nu: nu, nv: nv, pt: function (i, j) { return P[j * (nu + 1) + i]; }, nrm: N ? function (i, j) { return N[j * (nu + 1) + i]; } : null }; for (var k in extra) m[k] = extra[k]; return m; }
+  PK.mesh = {
+    /* sphere(c, r, nu, nv, zBreak): latitude rows from the top; zBreak (e.g. 0) adds a row exactly at z = zBreak so a
+       split plane there cuts no quad */
+    sphere: function (c, r, nu, nv, zBreak) {
+      nu = nu || 28; nv = nv || 14;
+      var th = [], j, i, P = [], N = [];
+      for (j = 0; j <= nv; j++) th.push(Math.PI * j / nv);
+      if (zBreak !== undefined && Math.abs(zBreak - c[2]) < r * 0.999) {
+        var t0 = Math.acos((zBreak - c[2]) / r), best = 1;
+        for (j = 1; j < nv; j++) if (Math.abs(th[j] - t0) < Math.abs(th[best] - t0)) best = j;
+        th[best] = t0;
+      }
+      for (j = 0; j <= nv; j++) for (i = 0; i <= nu; i++) { var ph = 2 * Math.PI * i / nu, n = [Math.sin(th[j]) * Math.cos(ph), Math.sin(th[j]) * Math.sin(ph), Math.cos(th[j])]; N.push(n); P.push(add(c, mul(n, r))); }
+      return gridMesh(nu, nv, P, N);
+    },
+    /* cylinder(c, a, r, h0, h1, nu, nv, ph0, ph1): wall about the axis a through c; v runs 0 (h0) .. 1 (h1) */
+    cylinder: function (c, a, r, h0, h1, nu, nv, ph0, ph1) {
+      nu = nu || 36; nv = nv || 6; ph0 = ph0 || 0; ph1 = ph1 === undefined ? 2 * Math.PI : ph1; a = unit(a);
+      var e1 = unit(V.cross(Math.abs(a[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0], a)), e2 = V.cross(a, e1), P = [], N = [], i, j;
+      for (j = 0; j <= nv; j++) for (i = 0; i <= nu; i++) { var ph = ph0 + (ph1 - ph0) * i / nu, n = add(mul(e1, Math.cos(ph)), mul(e2, Math.sin(ph))); N.push(n); P.push(add(add(c, mul(a, h0 + (h1 - h0) * j / nv)), mul(n, r))); }
+      return gridMesh(nu, nv, P, N, { vOf: function (i, j) { return j / nv; } });
+    },
+    /* height(f, x0, x1, y0, y1, n): z = f(x, y), normals by central differences */
+    height: function (f, x0, x1, y0, y1, n) {
+      n = n || 24;
+      var P = [], N = [], i, j, hx = (x1 - x0) / n, hy = (y1 - y0) / n;
+      for (j = 0; j <= n; j++) for (i = 0; i <= n; i++) {
+        var x = x0 + i * hx, y = y0 + j * hy, z = f(x, y);
+        P.push([x, y, z]); N.push(unit([-(f(x + hx / 2, y) - f(x - hx / 2, y)) / hx, -(f(x, y + hy / 2) - f(x, y - hy / 2)) / hy, 1]));
+      }
+      return gridMesh(n, n, P, N);
+    },
+    plane: function (o, u, v, nu, nv) {
+      nu = nu || 1; nv = nv || 1;
+      var P = [], N = [], n = unit(V.cross(u, v)), i, j;
+      for (j = 0; j <= nv; j++) for (i = 0; i <= nu; i++) { P.push(add(o, add(mul(u, i / nu), mul(v, j / nv)))); N.push(n); }
+      return gridMesh(nu, nv, P, N);
+    }
+  };
+
+  /* ======================= PK.figure ======================= */
+  /* Head sizes on screen (px): length l, full width w, notch nt. Main object 20 x 8, field 9 x 3.8 (PAGE_RULES). */
+  var HEADS = PK.HEADS = { main: { l: 20, w: 8, nt: 4 }, comp: { l: 15, w: 6.4, nt: 3.2 }, axis: { l: 12, w: 8.4, nt: 3 }, small: { l: 10, w: 5, nt: 2.4 }, field: { l: 9, w: 3.8, nt: 1.5 } };
+  var ROLE = { soft: 0, primary: 1, teach: 2 };
+  var FIGN = 0;
+
+  /* PK.figure(opts) -> F. opts:
+       svg, canvas (optional, under the SVG in .stage), view {az, el}, elRange [-30, 90],
+       bounds(F) -> [p3, ...]   points that must fit (the drawing's extent; kept steady while turning)
+       readouts(F) -> [{t, c, pos: 't'|'b', pri: 1|2, key}]   in-figure readout lines (pri 2 may drop in small frames)
+       draw(F)                  draws with F.line / F.arrow / F.dot / F.poly / F.surface / F.label / F.occlude ...
+       drag(name, pt, F)        called while a handle (F.handle) is dragged; pt = screen point {x, y}
+       focus(F) -> {c, len, minPx, name}   optional: zoom on c when len (world) is under minPx on screen (badge shown)
+       onView(az, el)           called when the view changes (sliders are synced by PK.ui.view) */
+  PK.figure = function (o) { return new Fig(o); };
+  function Fig(o) {
+    var F = this;
+    F.o = o; F.svg = $(o.svg); F.cv = o.canvas ? $(o.canvas) : null;
+    F.id = F.svg.id || ('pkf' + (++FIGN)); if (!F.svg.id) F.svg.id = F.id;
+    var v0 = o.view || PK.VIEW.DEFAULT;
+    F.view = { az: v0.az, el: v0.el }; F.home = { az: v0.az, el: v0.el };
+    F.elRange = o.elRange || [-30, 90];
+    F.cam = new Camera(); F.box = { w: 0, h: 0 }; F.W = 640; F.H = 480; F.SL = false;
+    F.fast = false; F.lcache = {}; F.route = []; F.lastRO = null; F.cvKey = ''; F.viewL = []; F.stats = {}; F.ms = 0;
+    F.svg.innerHTML = '<defs></defs><g id="' + F.id + '-d"></g><g id="' + F.id + '-l"></g><g id="' + F.id + '-r"></g>';
+    F.gDefs = F.svg.firstChild; F.gD = F.gDefs.nextSibling; F.gL = F.gD.nextSibling; F.gR = F.gL.nextSibling;
+    F._wire();
+    PK.theme.on(function () { F.box = { w: 0, h: 0 }; F.cvKey = ''; F.lastRO = null; F.render(); });
+    FIGS.push(F);
+    F.renderNow();
+  }
+  var FP = Fig.prototype;
+  FP.P = function (p) { return this.cam.project(p); };
+  FP.depth = function (p) { return this.cam.depth(p); };
+  /* render(): one redraw on the next frame; renderNow(): at once (returns ms); interact(): input is going on, so labels
+     reuse their last spots; the full placement runs 120 ms after the last call */
+  FP.render = function () { var F = this; if (F._q) return; F._q = true; requestAnimationFrame(function () { F._q = false; F.renderNow(); }); };
+  FP.interact = function () { var F = this; F.fast = true; clearTimeout(F._it); F._it = setTimeout(function () { F.fast = false; F.render(); }, 120); };
+  FP.setView = function (az, el, noInteract) {
+    this.view.az = ((az + 180) % 360 + 360) % 360 - 180; this.view.el = clamp(el, this.elRange[0], this.elRange[1]);
+    var F = this; F.viewL.forEach(function (fn) { fn(F.view.az, F.view.el); }); if (F.o.onView) F.o.onView(F.view.az, F.view.el);
+    if (!noInteract) F.interact(); F.render();
+  };
+  FP.onView = function (fn) { this.viewL.push(fn); };
+  FP.invalidate = function () { this.box = { w: 0, h: 0 }; this.cvKey = ''; this.lastRO = null; };
+
+  /* ---------- frame: screen-px sizes. The viewBox is always the SVG box in CSS px, so every size is a screen size ---------- */
+  FP._frame = function () {
+    var F = this;
+    F.SL = PK.slide();
+    if (!F.box.w) { var r = F.svg.getBoundingClientRect(); F.box = { w: r.width, h: r.height }; }
+    F.W = Math.max(160, Math.floor(F.box.w || 640));   /* floor: the SVG never scales below 1, so 12 px stays >= 12 */
+    if (F.SL) F.H = Math.max(120, Math.floor(F.box.h || 400));
+    var W = F.W, H = F.H;
+    if (F.SL) { var mn = clamp(Math.round(Math.min(W, 1.4 * H) / 40), 15, 18); F.FS = { main: mn, small: clamp(Math.round(mn * 0.8), 12, 14), info: clamp(Math.round(mn * 0.8), 12, 14) }; }
+    else F.FS = { main: clamp(Math.round(W / 34), 15, 20), small: clamp(Math.round(W / 50), 12, 15), info: clamp(Math.round(W / 50), 12, 15) };
+    F.btn = null;   /* the slide's corner controls (drawer button, step bar): one box that labels and readouts avoid */
+    if (F.SL) document.querySelectorAll('.pk-drawer-btn, .pk-fab').forEach(function (b) {
+      if (b.hidden || !b.getClientRects().length) return;   /* offsetParent is always null for position: fixed */
+      var br = b.getBoundingClientRect(), sr = F.svg.getBoundingClientRect(), k = sr.width ? W / sr.width : 1;
+      var bx = { l: (br.left - sr.left) * k - 4, r: (br.right - sr.left) * k + 4, t: (br.top - sr.top) * k - 4, b: (br.bottom - sr.top) * k + 4 };
+      if (!(bx.r > 0 && bx.l < W && bx.b > 0 && bx.t < H)) return;
+      F.btn = F.btn ? { l: Math.min(F.btn.l, bx.l), r: Math.max(F.btn.r, bx.r), t: Math.min(F.btn.t, bx.t), b: Math.max(F.btn.b, bx.b) } : bx;
+    });
+  };
+
+  /* ---------- fit: extents over all azimuths at this elevation (steady while turning left-right), blending to the
+     present azimuth only near the top view; the drawing is cropped to these extents ---------- */
+  FP._extents = function (pts) {
+    var F = this, lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9], k;
+    pts.forEach(function (p) { for (k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], p[k]); hi[k] = Math.max(hi[k], p[k]); } });
+    var c = mul(add(lo, hi), 0.5), el = F.view.el, se = Math.sin(el * D2R), ce = Math.cos(el * D2R);
+    function at(azd) {
+      var a = azd * D2R, rt = [-Math.sin(a), Math.cos(a), 0], up = [-se * Math.cos(a), -se * Math.sin(a), ce], e = { hx: 1e-6, ylo: 1e9, yhi: -1e9 };
+      pts.forEach(function (p) { var d = sub(p, c), x = dot(d, rt), y = dot(d, up); e.hx = Math.max(e.hx, Math.abs(x)); e.ylo = Math.min(e.ylo, y); e.yhi = Math.max(e.yhi, y); });
+      return e;
+    }
+    var cur = at(F.view.az), w = smooth(60, 85, Math.abs(el)), all = { hx: 1e-6, ylo: 1e9, yhi: -1e9 };
+    if (w < 1) for (k = 0; k < 36; k++) { var e = at(k * 10); all.hx = Math.max(all.hx, e.hx); all.ylo = Math.min(all.ylo, e.ylo); all.yhi = Math.max(all.yhi, e.yhi); }
+    else all = cur;
+    return { c: c, hx: all.hx + (cur.hx - all.hx) * w, ylo: all.ylo + (cur.ylo - all.ylo) * w, yhi: all.yhi + (cur.yhi - all.yhi) * w };
+  };
+  FP._fitInto = function (ex, x0, y0, x1, y1, m) {
+    var cam = this.cam, s = Math.max(1, Math.min((x1 - x0 - 2 * m) / (2 * ex.hx), (y1 - y0 - 2 * m) / Math.max(ex.yhi - ex.ylo, 1e-6)));
+    cam.s = s; cam.cx = (x0 + x1) / 2 - s * dot(ex.c, cam.RT); cam.cy = (y0 + y1) / 2 + s * ((ex.yhi + ex.ylo) / 2 + dot(ex.c, cam.UP));
+  };
+
+  /* ---------- readouts: rows above / below the drawing (portrait, page) or a column beside it (landscape slide) ---------- */
+  function tw(spec, fs) { return PK.text.measure(spec, fs).w; }
+  function nb(t) { return t.replace(/(\d) (?=[A-Za-zΩ°µ(*])/g, '$1 ').replace(/ = /g, ' = '); }
+  function wrapItems(list, maxw, fs) {
+    var out = [];
+    list.forEach(function (it0) {
+      var t = nb(it0.t), w = tw(t, fs), c = it0.c || 't-ink';
+      if (w <= maxw) { out.push({ t: t, c: c, w: w, br: false }); return; }
+      var cur = '';
+      t.split(' ').forEach(function (tk) { var cand = cur ? cur + ' ' + tk : tk; if (cur && tw(cand, fs) > maxw) { out.push({ t: cur, c: c, w: tw(cur, fs), br: true }); cur = tk; } else cur = cand; });
+      if (cur) out.push({ t: cur, c: c, w: tw(cur, fs), br: true });
+    });
+    return out;
+  }
+  function packRows(list, maxw, gap) {
+    var rows = [], cur = null;
+    list.forEach(function (it) { if (cur && !it.br && !cur.br && cur.w + gap + it.w <= maxw) { cur.items.push(it); cur.w += gap + it.w; } else { cur = { items: [it], w: it.w, br: it.br }; rows.push(cur); } });
+    return rows;
+  }
+  FP._layout = function (items, ex) {
+    var F = this, W = F.W, fs = F.FS.info, lh = Math.round(fs * 1.4), m = Math.round(F.FS.main * 1.15), gap = 18, svg = '', boxes = [], k;
+    var asc = PK.text.measure('Hg', fs).asc;
+    function put(x, y, it) { svg += PK.text.svg(x, y + 0.35 * fs, it.t, it.c + ' pk-ro', fs, 'start'); var mm = PK.text.measure(it.t, fs); boxes.push({ l: x - 1, r: x + mm.w + 1, t: y + 0.35 * fs - mm.asc, b: y + 0.35 * fs + mm.desc }); }
+    var keep = function (pr) { return function (it) { return it.pri <= pr || it.key; }; };
+    /* layoutKey(F) (optional): while it returns the same key in the same frame, the readouts keep the layout they had
+       (column beside or rows above/below), so stepping through an example does not make the figure hop */
+    var lk = F.o.layoutKey ? String(F.o.layoutKey(F)) + '|' + W + 'x' + F.H : null, keepMode = lk !== null && lk === F._lk ? F.layoutMode : null;
+    F._lk = lk;
+    var maxw = W - 16, maxb = F.btn ? Math.max(1, Math.min(maxw - 56, F.btn.l - 12)) : maxw, top, bot;
+    for (var pr = 2; pr >= 1; pr--) {
+      top = packRows(wrapItems(items.filter(function (it) { return it.pos !== 'b' && keep(pr)(it); }), maxw, fs), maxw, gap);
+      bot = packRows(wrapItems(items.filter(function (it) { return it.pos === 'b' && keep(pr)(it); }), maxb, fs), maxb, gap);
+      if (!F.SL || (top.length + bot.length) * lh <= 0.34 * F.H || pr === 1) break;
+    }
+    /* many key lines in a short slide frame: compact lines (12 px subscripts stay clear), so the drawing keeps most of
+       the height (the sweep reports its smallest share as drawMin, target >= 55 %) */
+    if (F.SL && (top.length + bot.length) * lh > 0.3 * F.H) {
+      lh = Math.round(fs * 1.25); gap = 12;
+      top = packRows(wrapItems(items.filter(function (it) { return it.pos !== 'b' && keep(pr)(it); }), maxw, fs), maxw, gap);
+      bot = packRows(wrapItems(items.filter(function (it) { return it.pos === 'b' && keep(pr)(it); }), maxb, fs), maxb, gap);
+    }
+    /* a bottom line too long for the gap beside the corner controls (a formula held together by no-break spaces)
+       sends all bottom lines above the controls, at full width */
+    var lift = 0;
+    if (F.btn && bot.length && (maxb < 160 || bot.some(function (r) { return r.w > maxb + 0.5; }))) {   /* a gap under 160 px is too narrow to read */
+      lift = Math.max(0, F.H - F.btn.t - 2);
+      bot = packRows(wrapItems(items.filter(function (it) { return it.pos === 'b' && keep(pr)(it); }), maxw, fs), maxw, gap);
+    }
+    /* with a layoutKey, the readout bands keep the most rows any state of that key has needed (no hop between steps) */
+    var nT = top.length, nB = bot.length;
+    if (lk !== null) {
+      var fresh = lk !== F._lkKey || !F._lkR, keepW = F._lkW || 0, RR = F._lkR = fresh ? { t: 0, b: 0 } : F._lkR; F._lkKey = lk;
+      /* layoutAll(F) (optional, with layoutKey): the readout lists of every state of this key (e.g. every step of an
+         example); their most rows are reserved from the first state on, so even the first Next step does not hop */
+      F._lkW = 0;
+      if (fresh && F.o.layoutAll) (F.o.layoutAll(F) || []).forEach(function (L) {
+        L.forEach(function (it) { F._lkW = Math.max(F._lkW, tw(nb(it.t), fs)); });   /* the widest line of any state: the landscape column keeps it */
+        L = L.map(function (it) { return Object.assign({ pri: 2, pos: 't' }, it); }).filter(keep(pr));
+        var t2 = packRows(wrapItems(L.filter(function (it) { return it.pos !== 'b'; }), maxw, fs), maxw, gap).length;
+        var bw = lift ? maxw : maxb, b2 = packRows(wrapItems(L.filter(function (it) { return it.pos === 'b'; }), bw, fs), bw, gap);
+        if (!lift && F.btn && b2.length && (maxb < 160 || b2.some(function (r) { return r.w > maxb + 0.5; }))) b2 = packRows(wrapItems(L.filter(function (it) { return it.pos === 'b'; }), maxw, fs), maxw, gap);
+        RR.t = Math.max(RR.t, t2); RR.b = Math.max(RR.b, b2.length);
+      });
+      if (!fresh) F._lkW = keepW;
+      nT = RR.t = Math.max(RR.t, nT); nB = RR.b = Math.max(RR.b, nB);
+    }
+    /* the compact line height also follows the reserved rows, so a short step of a long example uses the same lines */
+    if (F.SL && lh > Math.round(fs * 1.25) && (nT + nB) * lh > 0.3 * F.H) {
+      lh = Math.round(fs * 1.25); gap = 12;
+      top = packRows(wrapItems(items.filter(function (it) { return it.pos !== 'b' && keep(pr)(it); }), maxw, fs), maxw, gap);
+      var bw2 = lift ? maxw : maxb; bot = packRows(wrapItems(items.filter(function (it) { return it.pos === 'b' && keep(pr)(it); }), bw2, fs), bw2, gap);
+      nT = Math.max(nT, top.length); nB = Math.max(nB, bot.length);
+    }
+    var topH = nT ? 6 + nT * lh : 4, botH = (nB ? 6 + nB * lh : 4) + lift;
+    /* slide frames: readout rows above / below, or a column beside the drawing, whichever gives the larger drawing
+       (a short readout in a wide frame stays in rows; a long one in a landscape frame goes beside) */
+    var sc = function (x0, y0, x1, y1) { return Math.min((x1 - x0 - 2 * m) / (2 * ex.hx), (y1 - y0 - 2 * m) / Math.max(ex.yhi - ex.ylo, 1e-6)); };
+    if (F.SL && items.length && W >= 420 && keepMode !== 'port') {
+      var wmax = lk !== null ? F._lkW || 0 : 0; items.forEach(function (it) { wmax = Math.max(wmax, tw(nb(it.t), fs)); });
+      var colW = Math.round(Math.min(Math.max(wmax + 16, 150), 0.38 * W, 320)), lhL = Math.round(fs * 1.4);
+      if (keepMode === 'land' && F._lkCol) colW = Math.max(colW, F._lkCol);   /* the same key keeps the widest column it has had */
+      var ln = wrapItems(items, colW - 14, fs);
+      if (ln.length * lhL > F.H - 8) ln = wrapItems(items.filter(keep(1)), colW - 14, fs);
+      if (ln.length * lhL <= F.H - 8 && (keepMode === 'land' || sc(colW, 4, W - 4, F.H - 4) > 1.03 * sc(4, topH, W - 4, F.H - botH))) {
+        ln.forEach(function (it, q) { put(8, 8 + lhL * (q + 0.5), it); });
+        F.area = { x0: colW, y0: 4, x1: W - 4, y1: F.H - 4 }; F._lkCol = lk !== null ? colW : 0;
+        F._fitInto(ex, F.area.x0, F.area.y0, F.area.x1, F.area.y1, m); F.roSvg = svg; F.roBoxes = boxes; F.layoutMode = 'land'; return;
+      }
+    }
+    if (!F.SL) {
+      var sW = (W - 8 - 2 * m) / (2 * ex.hx);
+      F.H = Math.round(clamp(topH + botH + sW * (ex.yhi - ex.ylo) + 2 * m, 240, Math.max(300, 1.1 * W)));
+    }
+    var row = function (r, y) { var x = 8; r.items.forEach(function (it) { put(x, y, it); x += it.w + gap; }); };
+    for (k = 0; k < top.length; k++) row(top[k], 4 + lh * (k + 0.5));
+    for (k = 0; k < bot.length; k++) row(bot[k], F.H - 4 - lift - lh * (bot.length - k - 0.5));
+    F.area = { x0: 4, y0: topH, x1: W - 4, y1: F.H - botH };
+    F._fitInto(ex, F.area.x0, F.area.y0, F.area.x1, F.area.y1, m);
+    F.roSvg = svg; F.roBoxes = boxes; F.layoutMode = 'port'; void asc;
+  };
+
+  /* ---------- the drawing lists (filled by the page's draw(F)) ---------- */
+  FP._begin = function () {
+    var F = this;
+    F.polys = []; F.items = []; F.dots = []; F.raws = []; F.labels = []; F.occ = []; F.surfs = []; F.handles = []; F.obsExtra = []; F.defs = ''; F.split = null;
+    F.tol = 1e-4;
+  };
+  /* occlude(o): register a surface (PK.vis.*) that hides what lies behind it */
+  FP.occlude = function (o) { this.occ.push(o); return o; };
+  FP.hidden = function (p, skip) { var o = this.occ, d = this.cam.FW; for (var i = 0; i < o.length; i++) if ((!skip || skip.indexOf(o[i]) < 0) && o[i].hit(p, d, this.tol)) return true; return false; };
+  function lineCls(o) { return 'pk-l s-' + (o.color || 'ink') + ' w-' + (o.w || 'guide') + (o.dash ? ' pk-' + o.dash : '') + (o.cls ? ' ' + o.cls : ''); }
+  /* path(pts3, o): a polyline. o: color (ink, mut, ax, fld, c1..c3, pl, sh..), w (main, comp, axis, guide, fld, edge),
+     dash ('dash' opposite meaning, 'guide', 'axn'), cls, role ('primary' default, 'soft', 'teach'), ghost (draw hidden
+     parts faint/dashed, default true), see (hidden parts solid but lighter), n (pieces per segment for the hidden
+     test), halo (paper stroke under it), op (opacity), closed, skipOcc (occluders this line ignores) */
+  FP.path = function (pts, o) {
+    o = o || {};
+    var n = o.n || 1, dense = [], i, j;
+    if (o.closed) pts = pts.concat([pts[0]]);
+    for (i = 0; i < pts.length - 1; i++) for (j = 0; j < n; j++) dense.push(lerp(pts[i], pts[i + 1], j / n));
+    dense.push(pts[pts.length - 1]);
+    this.items.push({ t: 'l', pts: dense, cls: lineCls(o), ghost: o.ghost !== false, see: !!o.see, role: ROLE[o.role || 'primary'], halo: !!o.halo, op: o.op, skip: o.skipOcc || null });
+  };
+  FP.line = function (a, b, o) { o = o || {}; if (!o.n) o = Object.assign({ n: 24 }, o); this.path([a, b], o); };
+  /* arrow(a, b, o): shaft + head of the one family. o as path, plus head ('main', 'comp', 'axis', 'small', 'field' or
+     {l, w, nt}) and hollow (opposite / inward meaning: paper-filled head, use with dash: 'dash'). Returns the head's
+     screen tip and the shaft's 3D end. */
+  FP.arrow = function (a, b, o) {
+    o = o || {};
+    var hs = typeof o.head === 'object' ? o.head : HEADS[o.head || 'comp'], A = this.P(a), B = this.P(b), dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy);
+    if (L < 3) return null;
+    var ux = dx / L, uy = dy / L, nx = -uy, ny = ux, h = Math.min(hs.l, L * 0.9), w = hs.w / 2 * h / hs.l, nt = o.hollow ? 0 : (hs.nt || 0) * h / hs.l;
+    var bx = B.x - ux * h, by = B.y - uy * h, qx = B.x - ux * (h - nt), qy = B.y - uy * (h - nt);
+    var q = [{ x: B.x, y: B.y }, { x: bx + nx * w, y: by + ny * w }, { x: qx, y: qy }, { x: bx - nx * w, y: by - ny * w }];
+    var end = lerp(a, b, 1 - (h - nt) / L);
+    this.line(a, end, o);
+    this.items.push({ t: 'h', q: q, p: lerp(a, b, 1 - 0.5 * h / L), cls: 'pk-h f-' + (o.hcolor || o.color || 'ink') + (o.hollow ? ' pk-hol' : ''), hollow: !!o.hollow, ghost: o.ghost !== false, see: !!o.see, role: ROLE[o.role || 'primary'], op: o.op, skip: o.skipOcc || null });
+    return { tip: B, end: end };
+  };
+  /* dot(p3, o): o.r (px, 4.5), cls, ring (dashed drag ring, soft), handle (name: drag it with opts.drag), role,
+     skipOcc; a hidden dot is drawn hollow and dashed */
+  FP.dot = function (p, o) {
+    o = o || {};
+    var r = o.r || 4.5, q = this.P(p);
+    this.dots.push({ p: p, q: q, r: r, cls: o.cls || 'pk-dot', ring: o.ring, role: ROLE[o.role || 'primary'], skip: o.skipOcc || null });
+    if (o.handle) this.handles.push({ name: o.handle, x: q.x, y: q.y, r: Math.max(18, o.ring ? 13 : r + 10) });
+    return q;
+  };
+  FP.handle = function (name, q, r) { this.handles.push({ name: name, x: q.x, y: q.y, r: r || 18 }); };
+  /* poly(pts3, o): a filled SVG polygon, depth-sorted with the others, drawn under all lines. o: fill, stroke, sw,
+     op (fill-opacity), cls, role of its outline for the labels ('soft' default, null = none), depth */
+  FP.poly = function (pts, o) {
+    o = o || {};
+    var F = this, d = 0, q = pts.map(function (p) { d += F.depth(p); return F.P(p); });
+    F.polys.push({ q: q, d: o.depth !== undefined ? o.depth : d / pts.length, o: o });
+    return q;
+  };
+  /* raw(svg, obs): any SVG string drawn after the lines; obs: [{pts: [{x, y}..], closed, role}] for the labels */
+  FP.raw = function (s, obs) { this.raws.push(s); if (obs) this.obsExtra = this.obsExtra.concat(obs); };
+  /* circle(cx, cy, r, o): a screen circle as a polyline (e.g. a sphere's silhouette r = R * F.cam.s) */
+  FP.circle = function (cx, cy, r, o) {
+    o = o || {}; var q = [], k;
+    for (k = 0; k <= 64; k++) q.push({ x: cx + r * Math.cos(k * Math.PI / 32), y: cy + r * Math.sin(k * Math.PI / 32) });
+    this.raws.push('<polyline class="' + lineCls(o) + ((o.role || 'soft') === 'soft' ? ' soft' : '') + '"' + (o.op ? ' opacity="' + o.op + '"' : '') + ' points="' + q.map(function (p) { return f1(p.x) + ',' + f1(p.y); }).join(' ') + '"/>');
+    this.obsExtra.push({ pts: q, role: o.role || 'soft' });
+  };
+  /* surface(spec): soft shading on the canvas. spec = a PK.mesh grid {nu, nv, pt, nrm, vOf} plus pal ('sh'), alpha,
+     cull (front faces only), grid {every, op}, fadeFar, fadeTop, color(p, n, i, j) to override; or {poly: [p3..],
+     fill: PK.shade.plane(..), alpha}. split: true marks the split plane itself. key: a string that changes when the
+     surface changes (the canvas repaints only when a key, the view, the frame or the theme changes). */
+  FP.surface = function (spec) { this.surfs.push(spec); };
+  /* splitAt(n, d): surfaces on the far side of the plane n·p = d are painted before the split plane, the rest after */
+  FP.splitAt = function (n, d) { this.split = { n: n, d: d || 0 }; };
+  /* label(l): l.t rich text, l.c text class (t-ink, t-mut, t-ax, t-c1..t-c3), l.at anchor (p3 or {x, y}), l.alts more
+     anchors, l.dir preferred direction {x, y}, l.r anchor radius px, l.gap px (3), l.maxd px (20), l.size 'main'|'small',
+     l.pri (0 teaching object first .. 3), l.kind 'owned' (<= 20 px, plate if needed) | 'required' (then a leader, then
+     a plate) | 'optional' (dropped if no clean spot), l.key (a key value: never lost; when it cannot be placed it goes
+     to the in-figure readout block, as l.keyText or l.t), l.inReadout (dropped when the drawing is under 200 px tall),
+     l.id (stable id when the text changes). A required label with inReadout may also drop when no spot is left (its
+     value is in a key readout); otherwise a required label that cannot be placed is reported by PK.test. */
+  FP.label = function (l) { this.labels.push(l); return l; };
+  /* labelArrow(a, b, t, o): a label for the arrow a -> b, along its shaft, on the side away from o.away (p3) */
+  FP.labelArrow = function (a, b, t, o) {
+    o = o || {};
+    var F = this, A = F.P(a), B = F.P(b), dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L;
+    if (o.away) { var C = F.P(o.away), M = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 }; if (nx * (M.x - C.x) + ny * (M.y - C.y) < 0) { nx = -nx; ny = -ny; } }
+    var ts = o.ts || [0.55, 0.7, 0.4, 0.82], at = ts.map(function (t, i) { return { x: A.x + dx * t, y: A.y + dy * t, pen: i }; });
+    return F.label(Object.assign({ t: t, at: at[0], alts: at.slice(1), dir: { x: nx, y: ny }, gap: 4 }, o));
+  };
+  /* axes(o): the three axes drawn the same way on every page: positive halves solid with axis heads, negative halves
+     dashed, labels x, y, z. o.len [Lx, Ly, Lz], o.neg [nx, ny, nz] (lengths of the dashed halves), o.labels (false = none),
+     o.names [rich text x3] (e.g. "*z*, *z*′" when turned axes are drawn) */
+  FP.axes = function (o) {
+    o = o || {};
+    var F = this, Ls = o.len || [1, 1, 1], Ns = o.neg || [0.3, 0.3, 0.3], O = [0, 0, 0], k;
+    for (k = 0; k < 3; k++) {
+      var tip = [0, 0, 0], neg = [0, 0, 0]; tip[k] = Ls[k]; neg[k] = -Ns[k];
+      F.arrow(O, tip, { color: 'ax', w: 'axis', head: 'axis' });
+      if (Ns[k] > 0) F.line(O, neg, { color: 'ax', w: 'guide', dash: 'axn', n: 12 });
+      if (o.labels !== false) {
+        var T = F.P(tip), Oo = F.P(O), dx = T.x - Oo.x, dy = T.y - Oo.y, dl = Math.hypot(dx, dy) || 1;
+        var alt = [0.88, 0.76].map(function (f, i) { var q = F.P(mul(tip, f)); q.pen = 2 + i; return q; });   /* or beside the axis near its tip */
+        if (dl > 8) F.label({ t: (o.names && o.names[k]) || '*' + 'xyz'[k] + '*', c: 't-ax', at: T, alts: alt, dir: { x: dx / dl, y: dy / dl }, pri: o.pri === undefined ? 1 : o.pri, kind: 'required', gap: 2, id: 'axis-' + k });
+      }
+    }
+  };
+
+  /* ---------- obstacles for the labels: every drawn segment in a 16 px grid, with a role ---------- */
+  var OBC = 16;
+  function Obs() { this.a = []; this.g = new Map(); this.stamp = 0; this.seen = new Int32Array(1024); }
+  Obs.prototype.seg = function (x1, y1, x2, y2, role) {
+    var i = this.a.length; this.a.push([x1, y1, x2, y2, role]);
+    /* samples every half cell; each registers the 2 x 2 cells around it, so every cell the segment enters is listed */
+    var n = Math.max(1, Math.ceil(2 * Math.hypot(x2 - x1, y2 - y1) / OBC)), h = OBC / 2;
+    for (var t = 0; t <= n; t++) {
+      var c = Math.floor((x1 + (x2 - x1) * t / n - h) / OBC), r = Math.floor((y1 + (y2 - y1) * t / n - h) / OBC);
+      for (var dc = 0; dc <= 1; dc++) for (var dr = 0; dr <= 1; dr++) {
+        var key = (c + dc + 4096) * 8192 + (r + dr + 4096), lst = this.g.get(key);
+        if (!lst) this.g.set(key, [i]); else if (lst[lst.length - 1] !== i) lst.push(i);
+      }
+    }
+  };
+  Obs.prototype.pts = function (q, closed, role) { for (var i = 0; i < q.length - 1; i++) this.seg(q[i].x, q[i].y, q[i + 1].x, q[i + 1].y, role); if (closed && q.length > 2) this.seg(q[q.length - 1].x, q[q.length - 1].y, q[0].x, q[0].y, role); };
+  Obs.prototype.fill = function (q, role) { this.pts(q, true, role); for (var i = 2; i < q.length; i++) this.seg(q[0].x, q[0].y, q[i].x, q[i].y, role); if (q.length > 3) this.seg(q[1].x, q[1].y, q[3].x, q[3].y, role); };
+  function segRect(x1, y1, x2, y2, b) {
+    var t0 = 0, t1 = 1, dx = x2 - x1, dy = y2 - y1, p = [-dx, dx, -dy, dy], q = [x1 - b.l, b.r - x1, y1 - b.t, b.b - y1];
+    for (var i = 0; i < 4; i++) {
+      if (Math.abs(p[i]) < 1e-12) { if (q[i] < 0) return false; }
+      else { var r = q[i] / p[i]; if (p[i] < 0) { if (r > t1) return false; if (r > t0) t0 = r; } else { if (r < t0) return false; if (r < t1) t1 = r; } }
+    }
+    return true;
+  }
+  PK.segRect = segRect;
+  function segSeg(a, b) {
+    var d1x = a[2] - a[0], d1y = a[3] - a[1], d2x = b[2] - b[0], d2y = b[3] - b[1], den = d1x * d2y - d1y * d2x;
+    if (Math.abs(den) < 1e-12) return false;
+    var t = ((b[0] - a[0]) * d2y - (b[1] - a[1]) * d2x) / den, u = ((b[0] - a[0]) * d1y - (b[1] - a[1]) * d1x) / den;
+    return t > 0.02 && t < 0.98 && u >= 0 && u <= 1;
+  }
+  /* hits(box) -> [soft, primary, teach] crossings */
+  Obs.prototype.hits = function (b, seg) {
+    var out = [0, 0, 0], l = b.l, r = b.r, t = b.t, bt = b.b;
+    var c0 = Math.floor(l / OBC), c1 = Math.floor(r / OBC), r0 = Math.floor(t / OBC), r1 = Math.floor(bt / OBC);
+    if (this.seen.length < this.a.length) this.seen = new Int32Array(this.a.length * 2);
+    this.stamp++;
+    for (var c = c0; c <= c1; c++) for (var rr = r0; rr <= r1; rr++) {
+      var lst = this.g.get((c + 4096) * 8192 + (rr + 4096)); if (!lst) continue;
+      for (var k = 0; k < lst.length; k++) {
+        var i = lst[k]; if (this.seen[i] === this.stamp) continue; this.seen[i] = this.stamp;
+        var g = this.a[i];
+        if (seg ? segSeg(seg, g) : segRect(g[0], g[1], g[2], g[3], b)) out[g[4]]++;
+      }
+    }
+    return out;
+  };
+
+  /* ---------- emit the drawing: hidden-line split, SVG strings, obstacles ---------- */
+  FP._emit = function () {
+    var F = this, ob = F.ob = new Obs(), s = '', occ = F.occ.length > 0;
+    var pts = function (q) { return q.map(function (p) { return f1(p.x) + ',' + f1(p.y); }).join(' '); };
+    F.polys.sort(function (a, b) { return a.d - b.d; }).forEach(function (P) {
+      var o = P.o, sc = (o.cls || '') + ((o.role || 'soft') === 'soft' ? ' soft' : ''), at = (sc.trim() ? ' class="' + sc.trim() + '"' : '') + ' fill="' + (o.fill || 'none') + '"' + (o.op !== undefined ? ' fill-opacity="' + o.op + '"' : '') +
+        ' stroke="' + (o.stroke || o.fill || 'none') + '"' + (o.sw !== undefined ? ' stroke-width="' + o.sw + '"' : (o.stroke ? '' : ' stroke-width="0.8"')) + (o.sop !== undefined ? ' stroke-opacity="' + o.sop + '"' : '') + ' stroke-linejoin="round"';
+      s += '<polygon' + at + ' points="' + pts(P.q) + '"/>';
+      if (o.role !== null) ob.pts(P.q, true, ROLE[o.role || 'soft']);
+    });
+    F.items.forEach(function (L) {
+      var op = L.op !== undefined ? ' opacity="' + L.op + '"' : '';
+      if (L.t === 'h') {
+        var hid = occ && F.hidden(L.p, L.skip);
+        if (hid && !L.ghost && !L.see) return;
+        var hc = L.cls + (L.role === 0 ? ' soft' : '') + (hid ? (L.see ? ' pk-ghs' : ' pk-ghh') : ''), ps = pts(L.q);
+        if (L.hollow) s += '<polygon class="pk-hhalo" points="' + ps + '"/>';
+        s += '<polygon class="' + hc + '"' + op + ' points="' + ps + '"/>';
+        ob.fill(L.q, hid && !L.see && L.role < 2 ? 0 : L.role);
+        return;
+      }
+      var run = [], state = null, P = L.pts;
+      var flush = function () {
+        if (run.length < 2 || (state && !L.ghost && !L.see)) return;
+        var cls = L.cls + (L.role === 0 ? ' soft' : '') + (state ? (L.see ? ' pk-gs' : ' pk-gh') : ''), ps2 = pts(run);
+        if (L.halo && !state) s += '<polyline class="' + L.cls + ' pk-halo" points="' + ps2 + '"/>';
+        s += '<polyline class="' + cls + '"' + op + ' points="' + ps2 + '"/>';
+        var role = state && !L.see && L.role < 2 ? 0 : L.role;
+        for (var q = 0; q < run.length - 1; q++) ob.seg(run[q].x, run[q].y, run[q + 1].x, run[q + 1].y, role);
+      };
+      if (!occ) { run = P.map(F.P, F); state = false; flush(); return; }
+      for (var i = 0; i < P.length - 1; i++) {
+        var h = F.hidden(lerp(P[i], P[i + 1], 0.5), L.skip);
+        if (h !== state) { flush(); run = state === null ? [F.P(P[i])] : [run[run.length - 1]]; state = h; }
+        run.push(F.P(P[i + 1]));
+      }
+      flush();
+    });
+    F.raws.forEach(function (r) { s += r; });
+    F.obsExtra.forEach(function (e) { ob.pts(e.pts, e.closed, ROLE[e.role || 'soft']); });
+    F.dots.forEach(function (D) {
+      var q = D.q, hid = occ && F.hidden(D.p, D.skip);
+      if (D.ring) { s += '<circle class="pk-ring" cx="' + f1(q.x) + '" cy="' + f1(q.y) + '" r="11"/>'; circObs(ob, q.x, q.y, 11, 0); }
+      s += '<circle class="' + D.cls + (hid ? ' pk-ghd' : '') + '" cx="' + f1(q.x) + '" cy="' + f1(q.y) + '" r="' + D.r + '"/>';
+      circObs(ob, q.x, q.y, D.r + 1, D.role);
+    });
+    return s;
+  };
+  function circObs(ob, x, y, r, role) { var q = []; for (var k = 0; k <= 12; k++) q.push({ x: x + r * Math.cos(k * Math.PI / 6), y: y + r * Math.sin(k * Math.PI / 6) }); ob.pts(q, false, role); ob.seg(x - r * 0.7, y, x + r * 0.7, y, role); ob.seg(x, y - r * 0.7, x, y + r * 0.7, role); }
+
+  /* ---------- canvas: soft per-vertex shading, painter's order, optional split plane ---------- */
+  FP._paint = function () {
+    var F = this, cv = F.cv;
+    if (!cv) return;
+    var cam = F.cam, dpr = window.devicePixelRatio || 1, cw = Math.round(F.W * dpr), ch = Math.round(F.H * dpr);
+    var key = [cw, ch, cam.s, cam.cx, cam.cy, cam.az, cam.el].map(function (v) { return (+v).toFixed(3); }).join('|') + '|' + PK.theme.gen + '|' + JSON.stringify(F.split) + '|' +
+      F.surfs.map(function (s) { return s.key === undefined ? Math.random() : s.key; }).join('/');
+    if (key === F.cvKey) return 0;
+    F.cvKey = key;
+    var t0 = performance.now();
+    if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; }
+    var ctx = cv.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cw, ch); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.save(); ctx.beginPath(); ctx.rect(F.area.x0, F.area.y0, F.area.x1 - F.area.x0, F.area.y1 - F.area.y0); ctx.clip();
+    var css = PK.theme.css, list = [], sp = F.split, camSide = sp ? (dot(cam.FW, sp.n) >= 0 ? 1 : -1) : 1;
+    var grp = function (p) { if (!sp) return 0; return (dot(p, sp.n) - sp.d) * camSide >= 0 ? 2 : 0; };
+    F.surfs.forEach(function (S) {
+      if (S.poly) {
+        var d = 0, c = [0, 0, 0]; S.poly.forEach(function (p) { d += cam.depth(p); c = add(c, p); });
+        list.push({ g: S.split ? 1 : grp(mul(c, 1 / S.poly.length)), d: d / S.poly.length, S: S });
+        return;
+      }
+      var nu = S.nu, nv = S.nv, n1 = nu + 1, N = n1 * (nv + 1), X = new Float64Array(N), Y = new Float64Array(N), Dp = new Float64Array(N), i, j, k, dmin = 1e9, dmax = -1e9;
+      var Pp = new Array(N), Nn = new Array(N);
+      for (j = 0; j <= nv; j++) for (i = 0; i <= nu; i++) { k = j * n1 + i; var p = S.pt(i, j), q = cam.project(p); Pp[k] = p; X[k] = q.x; Y[k] = q.y; Dp[k] = cam.depth(p); Nn[k] = S.nrm ? S.nrm(i, j) : null; dmin = Math.min(dmin, Dp[k]); dmax = Math.max(dmax, Dp[k]); }
+      var C = new Array(N);
+      for (j = 0; j <= nv; j++) for (i = 0; i <= nu; i++) { k = j * n1 + i; C[k] = S.color ? S.color(Pp[k], Nn[k], i, j) : PK.shade.color(cam, Nn[k], S, (Dp[k] - dmin) / (dmax - dmin || 1), S.vOf ? S.vOf(i, j) : undefined); }
+      var M = { X: X, Y: Y, C: C, S: S, n1: n1 };
+      for (j = 0; j < nv; j++) for (i = 0; i < nu; i++) {
+        k = j * n1 + i;
+        var ks = [k, k + 1, k + n1 + 1, k + n1];
+        if (S.cull && Nn[k]) { var nc = add(add(Nn[ks[0]], Nn[ks[1]]), add(Nn[ks[2]], Nn[ks[3]])); if (dot(nc, cam.FW) < 0) continue; }
+        var cen = mul(add(add(Pp[ks[0]], Pp[ks[1]]), add(Pp[ks[2]], Pp[ks[3]])), 0.25);
+        list.push({ g: grp(cen), d: (Dp[ks[0]] + Dp[ks[1]] + Dp[ks[2]] + Dp[ks[3]]) / 4, M: M, ks: ks, i: i, j: j });
+      }
+    });
+    list.sort(function (a, b) { return a.g - b.g || a.d - b.d; });
+    var lum = function (c) { return 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]; };
+    function tri(M, a, b, c) {
+      var xs = [M.X[a], M.X[b], M.X[c]], ys = [M.Y[a], M.Y[b], M.Y[c]], cs = [M.C[a], M.C[b], M.C[c]], ls = cs.map(lum), st;
+      var det = (xs[1] - xs[0]) * (ys[2] - ys[0]) - (xs[2] - xs[0]) * (ys[1] - ys[0]);
+      var gx = det ? ((ls[1] - ls[0]) * (ys[2] - ys[0]) - (ls[2] - ls[0]) * (ys[1] - ys[0])) / det : 0, gy = det ? ((xs[1] - xs[0]) * (ls[2] - ls[0]) - (xs[2] - xs[0]) * (ls[1] - ls[0])) / det : 0, gl = Math.hypot(gx, gy);
+      if (gl < 1e-3) st = css(V.mix(V.mix(cs[0], cs[1], 0.5), cs[2], 1 / 3));
+      else {
+        var ux = gx / gl, uy = gy / gl, ts = [0, 1, 2].map(function (v) { return xs[v] * ux + ys[v] * uy; });
+        var lo = ts.indexOf(Math.min.apply(null, ts)), hi = ts.indexOf(Math.max.apply(null, ts)), dd = ts[hi] - ts[lo];
+        if (dd < 0.5) st = css(cs[lo]); else { st = g.createLinearGradient(xs[lo], ys[lo], xs[lo] + ux * dd, ys[lo] + uy * dd); st.addColorStop(0, css(cs[lo])); st.addColorStop(1, css(cs[hi])); }
+      }
+      g.beginPath(); g.moveTo(xs[0], ys[0]); g.lineTo(xs[1], ys[1]); g.lineTo(xs[2], ys[2]); g.closePath();
+      g.fillStyle = st; g.fill(); g.strokeStyle = st; g.lineWidth = 0.7; g.stroke();
+    }
+    /* a translucent surface is painted opaque into its own layer and laid on at its alpha once, so the facet edges
+       (filled and stroked) never show as seams */
+    var g = ctx, layS = null, lay = null;
+    function flushLayer() { if (!layS) return; ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = layS.alpha; ctx.drawImage(lay, 0, 0); ctx.restore(); layS = null; g = ctx; }
+    function useLayer(S) {
+      if (layS === S) return;
+      flushLayer();
+      lay = F._lay || (F._lay = document.createElement('canvas'));
+      if (lay.width !== cw || lay.height !== ch) { lay.width = cw; lay.height = ch; }
+      g = lay.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cw, ch); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.lineJoin = 'round'; g.globalAlpha = 1; layS = S;
+    }
+    ctx.lineJoin = 'round';
+    list.forEach(function (it) {
+      if (it.S) {
+        flushLayer();
+        var S = it.S, q = S.poly.map(function (p) { return cam.project(p); }), f = S.fill, st;
+        if (f && f.from) { var a = cam.project(f.from), b = cam.project(f.to); st = ctx.createLinearGradient(a.x, a.y, b.x + 0.01, b.y); f.stops.forEach(function (s2) { st.addColorStop(s2[0], css(s2[1])); }); }
+        else st = css(f || PK.theme.rgb('--pl'));
+        ctx.globalAlpha = S.alpha === undefined ? 1 : S.alpha;
+        ctx.beginPath(); q.forEach(function (p, i) { if (i) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y); }); ctx.closePath();
+        ctx.fillStyle = st; ctx.fill(); ctx.globalAlpha = 1;
+        return;
+      }
+      var M = it.M, S2 = M.S, ks = it.ks, al = S2.alpha === undefined ? 1 : S2.alpha;
+      if (al < 1) useLayer(S2); else flushLayer();
+      tri(M, ks[0], ks[1], ks[2]); tri(M, ks[0], ks[2], ks[3]);
+      if (S2.grid) {
+        var ev = S2.grid.every || 2;
+        g.globalAlpha = S2.grid.op || 0.35; g.lineWidth = 0.5; g.strokeStyle = css(V.mix(M.C[ks[0]], [0, 0, 0], 0.4)); g.beginPath();
+        if (it.i % ev === 0) { g.moveTo(M.X[ks[0]], M.Y[ks[0]]); g.lineTo(M.X[ks[3]], M.Y[ks[3]]); }
+        if (it.j % ev === 0) { g.moveTo(M.X[ks[0]], M.Y[ks[0]]); g.lineTo(M.X[ks[1]], M.Y[ks[1]]); }
+        if (it.i === S2.nu - 1) { g.moveTo(M.X[ks[1]], M.Y[ks[1]]); g.lineTo(M.X[ks[2]], M.Y[ks[2]]); }
+        if (it.j === S2.nv - 1) { g.moveTo(M.X[ks[3]], M.Y[ks[3]]); g.lineTo(M.X[ks[2]], M.Y[ks[2]]); }
+        g.stroke(); g.globalAlpha = 1;
+      }
+    });
+    flushLayer();
+    ctx.restore();
+    return performance.now() - t0;
+  };
+
+  /* ---------- the label placer (PAGE_RULES 'Label placement' 1-8) ---------- */
+  FP._fs = function (l) { return l.size === 'small' ? this.FS.small : this.FS.main; };
+  FP._place = function (forbid) {
+    var F = this, ob = F.ob, A = F.area, out = [], placed = [], fast = F.fast, small = (A.y1 - A.y0) < 200, dropped = [];
+    var lim = { x0: A.x0 + 1, y0: A.y0 + 1, x1: A.x1 - 1, y1: A.y1 - 1 }, seen = {};
+    var DIRS = []; for (var k = 0; k < 16; k++) DIRS.push([Math.cos(k * Math.PI / 8), Math.sin(k * Math.PI / 8)]);
+    var anc = function (a) { return a && a.length === 3 ? F.P(a) : a; };
+    var valid = function (b) {
+      if (b.l < lim.x0 || b.r > lim.x1 || b.t < lim.y0 || b.b > lim.y1) return false;
+      for (var i = 0; i < placed.length; i++) { var B = placed[i]; if (b.l < B.r + 4 && b.r > B.l - 4 && b.t < B.b + 1 && b.b > B.t - 1) return false; }   /* 4 px between neighbouring labels */
+      for (i = 0; i < forbid.length; i++) { B = forbid[i]; if (b.l < B.r && b.r > B.l && b.t < B.b && b.b > B.t) return false; }
+      return true;
+    };
+    /* score a box: crossings of the box padded 2 px (soft cheap, primary dear, the teaching object never), and the
+       glyph box less 0.5 px for the plate decision (the canvas font metrics can be up to 1 px short of the DOM box,
+       and PK.test shrinks the DOM box by the 1.5 px halo, so 0.5 keeps the two in step) */
+    var judge = function (b) {
+      var h = ob.hits({ l: b.l - 2, r: b.r + 2, t: b.t - 2, b: b.b + 2 });
+      if (h[2]) return null;
+      var core = h[1] ? ob.hits({ l: b.l + 0.5, r: b.r - 0.5, t: b.t + 0.5, b: b.b - 0.5 })[1] : 0;
+      return { soft: h[0], prim: h[1], core: core };
+    };
+    /* a leader may cross no primary line, the teaching object or another label */
+    var leaderOK = function (a, b, g0) {
+      var ls = leaderSeg(a, b, g0); if (!ls) return true;
+      var lc = ob.hits({ l: Math.min(ls[0], ls[2]), r: Math.max(ls[0], ls[2]), t: Math.min(ls[1], ls[3]), b: Math.max(ls[1], ls[3]) }, ls);
+      if (lc[1] || lc[2]) return false;
+      return !placed.concat(forbid).some(function (B) { return segRect(ls[0], ls[1], ls[2], ls[3], { l: B.l - 1, r: B.r + 1, t: B.t - 1, b: B.b + 1 }); });
+    };
+    var list = F.labels.filter(function (l) { return !l._routed; }).map(function (l, i) { return { l: l, i: i }; });
+    list.sort(function (a, b) { return (a.l.pri === undefined ? 2 : a.l.pri) - (b.l.pri === undefined ? 2 : b.l.pri) || a.i - b.i; });
+    list.forEach(function (it) {
+      var l = it.l, kind = l.kind || 'required', fs = F._fs(l), m = PK.text.measure(l.t, fs), w = m.w + 2, h = m.asc + m.desc;
+      var key = l.id || (l.c + '|' + l.t.replace(/[0-9.−\-]/g, ''));
+      seen[key] = (seen[key] || 0) + 1; key += '#' + seen[key];
+      if (small && l.inReadout) return;   /* the readout shows it (mark that readout key: true so it never drops) */
+      var anchors = [anc(l.at)].concat((l.alts || []).map(anc)).filter(Boolean);
+      if (!anchors.length) return;
+      /* what it names lies outside the drawing (cut off by the frame or by a focus zoom): nothing to label there */
+      if (!l.key && !anchors.some(function (a) { return a.x >= A.x0 - 2 && a.x <= A.x1 + 2 && a.y >= A.y0 - 2 && a.y <= A.y1 + 2; })) return;
+      var dl = l.dir ? Math.hypot(l.dir.x, l.dir.y) || 1 : 1, pd = l.dir ? { x: l.dir.x / dl, y: l.dir.y / dl } : { x: -0.6, y: -0.8 };
+      var g0 = (l.r || 0) + (l.gap === undefined ? 3 : l.gap), maxd = l.maxd || 20;
+      var boxAt = function (a, ux, uy, d) {
+        var ext = Math.min(Math.abs(ux) > 1e-6 ? w / 2 / Math.abs(ux) : 1e9, Math.abs(uy) > 1e-6 ? h / 2 / Math.abs(uy) : 1e9);
+        var cx = a.x + ux * (d + ext), cy = a.y + uy * (d + ext);
+        return { l: cx - w / 2, r: cx + w / 2, t: cy - h / 2, b: cy + h / 2 };
+      };
+      var commit = function (b, plate, leader, ai, how) {
+        var a = anchors[ai || 0];
+        placed.push(b);
+        out.push({ l: l, b: b, fs: fs, m: m, plate: plate, leader: leader ? a : null, how: how });
+        F.lcache[key] = { ai: ai || 0, dx: (b.l + b.r) / 2 - a.x, dy: (b.t + b.b) / 2 - a.y, plate: plate, leader: !!leader };
+        if (leader) { var ls = leaderSeg(a, b, g0); if (ls) ob.seg(ls[0], ls[1], ls[2], ls[3], 1); }
+      };
+      var pc = F.lcache[key];
+      /* while input goes on: keep the last offset from the anchor (rule 6), as long as that spot is still clean (or
+         its leader is still clear); a spot that now collides, or sits on a plate, gets the same search as after input
+         (a plate only when there is still no clean spot). So the drag-time spot is the one the placement after input
+         stops keeps (rule 8: no jump on release) */
+      if (fast && pc && anchors[pc.ai]) {
+        var a0 = anchors[pc.ai], bq = { l: a0.x + pc.dx - w / 2, r: a0.x + pc.dx + w / 2, t: a0.y + pc.dy - h / 2, b: a0.y + pc.dy + h / 2 };
+        if (valid(bq)) { var jq = judge(bq); if (jq && jq.core === 0 && (!pc.leader || leaderOK(a0, bq, g0))) { commit(bq, false, pc.leader, pc.ai, 'reuse'); return; } }
+      }
+      /* after input: keep the drag-time spot when it is still valid and clean (rule 8: no jumps) */
+      var keepPrev = null;
+      if (!fast && F._keepOK && pc && anchors[pc.ai]) {
+        var a1 = anchors[pc.ai], bp = { l: a1.x + pc.dx - w / 2, r: a1.x + pc.dx + w / 2, t: a1.y + pc.dy - h / 2, b: a1.y + pc.dy + h / 2 };
+        if (valid(bp)) { var jp = judge(bp); if (jp && jp.core === 0 && (!pc.leader || (kind === 'required' && leaderOK(a1, bp, g0)))) { commit(bp, false, pc.leader, pc.ai, 'kept'); return; } if (jp && pc.plate) keepPrev = { b: bp, ai: pc.ai }; }
+      }
+      var prevC = pc && anchors[pc.ai] ? { x: anchors[pc.ai].x + pc.dx, y: anchors[pc.ai].y + pc.dy } : null;
+      /* the search: 16 directions on rings of growing gap (<= maxd), nearest clean ring first (rules 2, 5) */
+      var search = function (rings, nd, onlyFirst) {
+        var best = null;
+        for (var ri = 0; ri < rings.length; ri++) {
+          var d = rings[ri];
+          for (var ai = 0; ai < (onlyFirst ? 1 : anchors.length); ai++) {
+            var a = anchors[ai];
+            for (var di = 0; di < 16; di += nd) {
+              var u = DIRS[di], b = boxAt(a, u[0], u[1], d);
+              var sc = 2 * d + 6 * (1 - u[0] * pd.x - u[1] * pd.y) + (a.pen || ai) * 4;
+              if (prevC) sc += 0.4 * Math.hypot((b.l + b.r) / 2 - prevC.x, (b.t + b.b) / 2 - prevC.y);   /* a label that must move moves the least */
+              if (best && sc >= best.sc) continue;
+              if (!valid(b)) continue;
+              var j = judge(b); if (!j) continue;
+              sc += 600 * j.prim + 40 * j.soft + 2000 * j.core;
+              if (!best || sc < best.sc) best = { sc: sc, b: b, ai: ai, j: j, d: d };
+            }
+          }
+          if (best && best.j.prim === 0) break;
+        }
+        return best;
+      };
+      var rings = [g0, g0 + 5, g0 + 10, maxd].filter(function (d, i, arr) { return d <= Math.max(maxd, g0) && arr.indexOf(d) === i; });
+      var best = search(rings, 1, false);   /* the same search during input as after it, so a drag-time spot is also the spot kept after input stops */
+      if (best && best.j.core === 0) { commit(best.b, false, null, best.ai, 'clean'); return; }
+      if (keepPrev) { commit(keepPrev.b, true, null, keepPrev.ai, 'kept'); return; }
+      if (kind === 'optional') { if (l.key) dropped.push(l); return; }
+      /* required: a clean spot farther out with a thin leader to the anchor (rule 3, before a plate) */
+      if (kind === 'required') {
+        var lb = null;
+        [28, 36, 46].forEach(function (d) {
+          if (lb) return;
+          for (var di = 0; di < 16; di++) {
+            var u = DIRS[di], b = boxAt(anchors[0], u[0], u[1], d); if (!valid(b)) continue;
+            var j = judge(b); if (!j || j.core) continue;
+            if (!leaderOK(anchors[0], b, g0)) continue;
+            var sc = d + 6 * (1 - u[0] * pd.x - u[1] * pd.y) + 40 * j.soft + 600 * j.prim;
+            if (!lb || sc < lb.sc) lb = { sc: sc, b: b };
+          }
+        });
+        if (lb) { commit(lb.b, false, true, 0, 'leader'); return; }
+      }
+      /* owned / required with no clean spot: a small paper plate at the best spot (lines stop at it) */
+      if (best) { commit(best.b, true, null, best.ai, 'plate'); return; }
+      /* nothing valid within reach (frame edge, other labels): a required label looks farther out, on a plate with a
+         leader if it must; it is dropped only when even that fails */
+      if (kind === 'required') {
+        var far = search([28, 36, 46, 60], 1, true);
+        if (far && leaderOK(anchors[0], far.b, g0)) { commit(far.b, far.j.core > 0, true, 0, 'far'); return; }
+        far = anchors.length > 1 ? search([28, 36, 46, 60], 1, false) : null;   /* or from another of its anchors */
+        if (far && leaderOK(anchors[far.ai], far.b, g0)) { commit(far.b, far.j.core > 0, true, far.ai, 'far'); return; }
+      }
+      dropped.push(l);
+    });
+    var dr = dropped.filter(function (l) { return (l.kind || 'required') !== 'optional' && !l.key && !l.inReadout; });
+    F.stats.dropped = dr.length; F.stats.droppedList = dr.map(function (l) { return l.t; });
+    return { out: out, dropKeys: dropped.filter(function (l) { return l.key; }) };
+  };
+  function leaderSeg(a, b, g0) {
+    var lx = clamp(a.x, b.l - 1, b.r + 1), ly = clamp(a.y, b.t - 1, b.b + 1), d = Math.hypot(lx - a.x, ly - a.y);
+    if (d < g0 + 6) return null;
+    return [a.x + (lx - a.x) * g0 / d, a.y + (ly - a.y) * g0 / d, lx, ly];
+  }
+  FP._labelsSvg = function (res) {
+    var s = '', lead = '', F = this, plates = 0, leaders = 0;
+    res.out.forEach(function (p) {
+      var b = p.b, x = (b.l + b.r) / 2, y = b.t + p.m.asc;
+      if (p.leader) { var ls = leaderSeg(p.leader, b, (p.l.r || 0) + (p.l.gap === undefined ? 3 : p.l.gap)); if (ls) { lead += '<line class="pk-leader" x1="' + f1(ls[0]) + '" y1="' + f1(ls[1]) + '" x2="' + f1(ls[2]) + '" y2="' + f1(ls[3]) + '"/>'; leaders++; } }
+      if (p.plate) { s += '<rect class="pk-plate" x="' + f1(b.l - 2) + '" y="' + f1(b.t - 1) + '" width="' + f1(b.r - b.l + 4) + '" height="' + f1(b.b - b.t + 2) + '" rx="3"/>'; plates++; }
+      s += PK.text.svg(x, y, p.l.t, (p.l.c || 't-ink') + ' pk-lab', p.fs, 'middle', (p.plate ? ' data-plate="1"' : '') + (p.l.key ? ' data-key="1"' : ''));
+    });
+    F.stats.plates = plates; F.stats.leaders = leaders; F.stats.placed = res.out.length;
+    return lead + s;
+  };
+
+  /* ---------- one full render ---------- */
+  FP.renderNow = function () {
+    var F = this, t0 = performance.now(), o = F.o;
+    F._frame();
+    F.cam.set(F.view.az, F.view.el);
+    var pass, svgD, res, routed = F.fast ? F.route.slice() : [], cvMs = 0;
+    F._keepOK = !F.fast && F._prevFast;   /* rule 8: the render after input stops keeps valid drag-time spots */
+    for (pass = 0; pass < 3; pass++) {
+      var items = (o.readouts ? o.readouts(F) : []).map(function (it) { return Object.assign({ pri: 2, pos: 't' }, it); });
+      routed.forEach(function (l) { items.push({ t: l.keyText || l.t, c: l.c || 't-ink', pos: 't', pri: 1, key: true }); });
+      F._layout(items, F._extents(o.bounds(F)));
+      F.svg.setAttribute('viewBox', '0 0 ' + F.W + ' ' + F.H);
+      F._focus();
+      F._begin();
+      o.draw(F);
+      var rk = {}; routed.forEach(function (l) { rk[l.id || l.t] = 1; });
+      F.labels.forEach(function (l) { if (l.key && rk[l.id || l.t]) l._routed = true; });
+      svgD = F._emit();
+      var forbid = F.roBoxes.slice(); if (F.badgeBox) forbid.push(F.badgeBox); if (F.btn) forbid.push(F.btn);
+      res = F._place(forbid);
+      if (!res.dropKeys.length || F.fast) break;
+      routed = routed.concat(res.dropKeys);   /* rule 7: a key value that found no spot goes to the readout block */
+    }
+    F.route = routed; F._prevFast = F.fast;
+    cvMs = F._paint() || 0;
+    var A = F.area, cid = F.id + '-clip';
+    F.gDefs.innerHTML = '<clipPath id="' + cid + '"><rect x="' + f1(A.x0) + '" y="' + f1(A.y0) + '" width="' + f1(A.x1 - A.x0) + '" height="' + f1(A.y1 - A.y0) + '"/></clipPath>' + F.defs;
+    F.gD.setAttribute('clip-path', 'url(#' + cid + ')');
+    F.gD.innerHTML = svgD;
+    F.gL.innerHTML = F._labelsSvg(res) + (F.badgeSvg || '');
+    if (F.roSvg !== F.lastRO) { F.gR.innerHTML = F.roSvg; F.lastRO = F.roSvg; }
+    var nk = 0; F.labels.forEach(function (l) { if (l.key) nk++; });
+    F.stats.keys = nk; F.stats.routed = routed.length; F.stats.passes = pass + 1; F.stats.canvasMs = cvMs;
+    F.ms = performance.now() - t0;
+    return F.ms;
+  };
+  /* focus zoom: in small frames the teaching object keeps a readable size; a badge says so */
+  FP._focus = function () {
+    var F = this; F.badgeSvg = ''; F.badgeBox = null; F.zoom = 1;
+    if (!F.o.focus) return;
+    var f = F.o.focus(F); if (!f) return;
+    var px = f.len * F.cam.s, Z = px < f.minPx ? Math.min(3, f.minPx / px) : 1;
+    if (Z < 1.15) return;
+    var A = F.area, cam = F.cam; F.zoom = Z;
+    cam.s *= Z; cam.cx = (A.x0 + A.x1) / 2 - cam.s * dot(f.c, cam.RT); cam.cy = (A.y0 + A.y1) / 2 + cam.s * dot(f.c, cam.UP);
+    var fs = F.FS.small, t = '×' + Z.toFixed(1) + ' zoom on ' + (f.name || 'the object'), m = PK.text.measure(t, fs), x = A.x0 + 6, y = A.y0 + 4 + m.asc;
+    F.badgeBox = { l: x - 3, r: x + m.w + 3, t: y - m.asc - 1, b: y + m.desc + 1 };
+    F.badgeSvg = '<rect class="pk-plate" x="' + f1(F.badgeBox.l) + '" y="' + f1(F.badgeBox.t) + '" width="' + f1(F.badgeBox.r - F.badgeBox.l) + '" height="' + f1(F.badgeBox.b - F.badgeBox.t) + '" rx="3"/>' + PK.text.svg(x, y, t, 't-mut', fs, 'start', ' data-badge="1"');
+  };
+
+  /* ---------- input: drag to turn (mouse and touch), drag a handle to move it, resize, theme ---------- */
+  FP._wire = function () {
+    var F = this, svg = F.svg, drag = null;
+    function pt(e) { var r = svg.getBoundingClientRect(), k = r.width ? F.W / r.width : 1; return { x: (e.clientX - r.left) * k, y: (e.clientY - r.top) * k }; }
+    function near(q) { var best = null, bd = 1e9; (F.handles || []).forEach(function (h) { var d = Math.hypot(q.x - h.x, q.y - h.y); if (d < h.r && d < bd) { bd = d; best = h; } }); return best; }
+    svg.addEventListener('pointerdown', function (e) {
+      var q = pt(e), h = F.o.drag ? near(q) : null;
+      drag = h ? { h: h.name } : { x: e.clientX, y: e.clientY, az: F.view.az, el: F.view.el };
+      svg.classList.add('pk-drag');
+      try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault();
+    });
+    svg.addEventListener('pointermove', function (e) {
+      if (!drag) { svg.classList.toggle('pk-onh', !!(F.o.drag && near(pt(e)))); return; }
+      if (drag.h) { F.interact(); F.o.drag(drag.h, pt(e), F); F.render(); return; }
+      var k = 300 / (svg.getBoundingClientRect().width || 600);
+      F.setView(drag.az - (e.clientX - drag.x) * k, drag.el + (e.clientY - drag.y) * k);
+    });
+    function end() { drag = null; svg.classList.remove('pk-drag'); }
+    svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end);
+    try {
+      new ResizeObserver(function (en) {
+        var cr = en[0].contentRect;
+        if (Math.abs(cr.width - F.box.w) > 1 || (PK.slide() && Math.abs(cr.height - F.box.h) > 1)) { F.box = { w: cr.width, h: cr.height }; F.render(); }
+      }).observe(svg);
+    } catch (err) {}
+  };
+  try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+    PK.text.clear();
+    /* layoutKey memory was measured with the fallback font: forget it so the layout is chosen again with the real widths */
+    FIGS.forEach(function (F) { F._lkR = null; F._lkW = 0; F._lkCol = 0; F.render(); });
+  }); } catch (e) {}
+
+  /* ======================= PK.ui: controls ======================= */
+  var STEPS = [];   /* every PK.ui.steps on the page (their slide bars follow PK.ui.show) */
+  function decs(step) { var s = String(step), i = s.indexOf('.'); return i < 0 ? 0 : s.length - i - 1; }
+  PK.ui = {
+    /* slider(host, {id, label (HTML), min, max, step, value, onInput(v)}) -> {row, set(v), get()} */
+    slider: function (host, o) {
+      host = $(host);
+      var row = document.createElement('div'), lab = document.createElement('label'), rng = document.createElement('input'), num = document.createElement('input'), d = decs(o.step || 1);
+      row.className = 'row'; lab.htmlFor = 'n-' + o.id; lab.innerHTML = o.label;
+      rng.type = 'range'; rng.id = 'r-' + o.id; rng.setAttribute('aria-label', lab.textContent);
+      num.type = 'number'; num.id = 'n-' + o.id;
+      [rng, num].forEach(function (e) { e.min = o.min; e.max = o.max; e.step = o.step || 1; });
+      var api = { row: row, get: function () { return parseFloat(rng.value); }, set: function (v) { rng.value = v; num.value = (+v).toFixed(d); } };
+      api.set(o.value);
+      rng.addEventListener('input', function () { num.value = (+rng.value).toFixed(d); o.onInput(parseFloat(rng.value)); });
+      num.addEventListener('input', function () { var v = parseFloat(num.value); if (isNaN(v)) return; v = clamp(v, parseFloat(rng.min), parseFloat(rng.max)); rng.value = v; o.onInput(v); });   /* the present range (a page may change it) */
+      row.appendChild(lab); row.appendChild(rng); row.appendChild(num); host.appendChild(row);
+      return api;
+    },
+    /* toggle(host, {id, label (HTML), checked, onChange(b)}): the label text sits in ONE span (PAGE_RULES Layout) */
+    toggle: function (host, o) {
+      host = $(host);
+      var lab = document.createElement('label'); lab.className = 'chk';
+      lab.innerHTML = '<input type="checkbox" id="' + o.id + '"' + (o.checked ? ' checked' : '') + '><span>' + o.label + '</span>';
+      var inp = lab.firstChild; inp.addEventListener('change', function () { o.onChange(inp.checked); });
+      host.appendChild(lab);
+      return { el: lab, input: inp, set: function (b) { inp.checked = !!b; }, get: function () { return inp.checked; } };
+    },
+    /* buttons(host, [{id, label, onClick, pressed}]) -> {id: button} */
+    buttons: function (host, list) {
+      host = $(host);
+      var box = document.createElement('div'), out = {}; box.className = 'btns';
+      list.forEach(function (b) {
+        var e = document.createElement('button'); e.type = 'button'; e.id = b.id; e.innerHTML = b.label;
+        if (b.pressed !== undefined) e.setAttribute('aria-pressed', String(!!b.pressed));
+        e.addEventListener('click', b.onClick); box.appendChild(e); out[b.id] = e;
+      });
+      host.appendChild(box);
+      return out;
+    },
+    pressed: function (btn, on) { btn.setAttribute('aria-pressed', String(!!on)); },
+    /* show(el, on): controls that do not apply are hidden, not disabled */
+    show: function (el, on) { $(el).hidden = !on; STEPS.forEach(function (st) { st.sync(); }); },
+    /* play(btn, tick(dt) -> false to stop): Play / Pause, paused at start; dt in s (at most 0.05) */
+    play: function (btn, tick) {
+      btn = $(btn);
+      var P = { playing: false }, last = null;
+      function step(ts) { if (!P.playing) return; var dt = last === null ? 0.016 : Math.min(0.05, (ts - last) / 1000); last = ts; if (tick(dt) === false) { P.set(false); return; } requestAnimationFrame(step); }
+      P.set = function (on) { P.playing = !!on; btn.textContent = on ? 'Pause' : 'Play'; btn.setAttribute('aria-pressed', String(!!on)); if (on) { last = null; requestAnimationFrame(step); } };
+      btn.addEventListener('click', function () { P.set(!P.playing); });
+      P.set(false);
+      return P;
+    },
+    /* view(host, F): azimuth / elevation rows, Default view and Top view buttons, kept in step with dragging */
+    view: function (host, F, o) {
+      host = $(host); o = o || {};
+      var az = PK.ui.slider(host, { id: (o.id || 'v') + 'az', label: 'azimuth (°)', min: -180, max: 180, step: 1, value: Math.round(F.view.az), onInput: function (v) { F.setView(v, F.view.el); } });
+      var el = PK.ui.slider(host, { id: (o.id || 'v') + 'el', label: 'elevation (°)', min: F.elRange[0], max: F.elRange[1], step: 1, value: Math.round(F.view.el), onInput: function (v) { F.setView(F.view.az, v); } });
+      PK.ui.buttons(host, [
+        { id: (o.id || 'v') + '-def', label: 'Default view', onClick: function () { F.setView(F.home.az, F.home.el); } },
+        { id: (o.id || 'v') + '-top', label: 'Top view', onClick: function () { F.setView(PK.VIEW.TOP.az, PK.VIEW.TOP.el); } }
+      ]);
+      F.onView(function (a, e) { az.set(Math.round(a)); el.set(Math.round(e)); });
+      if (o.note !== false) { var p = document.createElement('p'); p.className = 'note'; p.innerHTML = o.note || 'Drag the figure to turn it: left–right changes the azimuth, up–down the elevation.'; host.appendChild(p); }
+      return { az: az, el: el };
+    },
+    /* drawer(panel): the round 44 px button that opens the slide drawer (added to the page if missing) */
+    drawer: function (panel) {
+      panel = $(panel || '.panel');
+      var b = document.querySelector('.pk-drawer-btn');
+      if (!b) {
+        b = document.createElement('button'); b.type = 'button'; b.className = 'pk-drawer-btn';
+        b.innerHTML = '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="6" cy="4.5" r="2" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="9" r="2" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/><circle cx="7.5" cy="13.5" r="2" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/></svg>';
+        panel.parentNode.insertBefore(b, panel);
+      }
+      if (!panel.id) panel.id = 'pk-panel';
+      b.setAttribute('aria-controls', panel.id); b.setAttribute('aria-expanded', 'false'); b.title = 'Show controls';
+      b.addEventListener('click', function () {
+        var open = root.classList.toggle('ctl-open');
+        b.setAttribute('aria-expanded', String(open)); b.title = open ? 'Hide controls' : 'Show controls';
+        FIGS.forEach(function (F) { F.interact(); F.render(); });
+      });
+      return b;
+    },
+    /* caption(details): a long figcaption collapses on phones */
+    caption: function (d) { d = $(d); if (d && window.matchMedia('(max-width: 640px)').matches) d.open = false; },
+    /* steps(host, {id, steps: [rich text], onStep(k), fab: true, when(), vis: the element whose hiding hides the bar}) -> {get(), set(k), setSteps(list), text(), n()}
+       A worked example shown one step at a time: k = 0 is the problem alone, k = n shows every step. In the panel:
+       Back / Next step / Start over, 'Step k of n' and the list of the steps shown so far. In slide mode a small
+       '‹ k / n ›' bar sits beside the drawer button (fab: false leaves it out), so the lecturer can step without
+       opening the drawer. The page draws what step k adds and puts text() in a key readout of the figure. */
+    steps: function (host, o) {
+      host = $(host); o = o || {};
+      var id = o.id || 'st', list = o.steps || [], k = 0, api;
+      var b = PK.ui.buttons(host, [
+        { id: id + '-back', label: '‹ Back', onClick: function () { api.set(k - 1); } },
+        { id: id + '-next', label: 'Next step ›', onClick: function () { api.set(k + 1); } },
+        { id: id + '-zero', label: 'Start over', onClick: function () { api.set(0); } }
+      ]);
+      var st = document.createElement('p'); st.className = 'note pk-stepn'; st.setAttribute('aria-live', 'polite'); host.appendChild(st);
+      var ol = document.createElement('ol'); ol.className = 'pk-steps'; host.appendChild(ol);
+      var fab = null, fn = null;
+      if (o.fab !== false) {
+        fab = document.createElement('div'); fab.className = 'pk-fab'; fab.setAttribute('role', 'group'); fab.setAttribute('aria-label', 'Steps');
+        fab.innerHTML = '<button type="button" aria-label="Previous step">‹</button><span></span><button type="button" aria-label="Next step">›</button>';
+        fab.children[0].addEventListener('click', function () { api.set(k - 1); });
+        fab.children[2].addEventListener('click', function () { api.set(k + 1); });
+        fn = fab.children[1];
+        (document.querySelector('.fig') || document.body).appendChild(fab);
+      }
+      function show() {
+        var n = list.length;
+        st.textContent = n ? (k === 0 ? 'Press Next step for the solution (' + n + ' steps).' : 'Step ' + k + ' of ' + n + (k === n ? ' (done)' : '')) : '';
+        ol.innerHTML = list.slice(0, k).map(function (t, i) { return '<li' + (i === k - 1 ? ' class="pk-cur"' : '') + '>' + PK.text.html(t) + '</li>'; }).join('');
+        b[id + '-back'].disabled = k === 0; b[id + '-next'].disabled = k === n; b[id + '-zero'].hidden = k === 0;
+        if (fab) { fn.textContent = k + ' / ' + n; fab.children[0].disabled = k === 0; fab.children[2].disabled = k === n; }
+        sync();
+      }
+      /* the slide bar shows only while this stepper's own controls are not hidden (one bar when a page has several) */
+      function sync() {
+        if (!fab) return;
+        var off = !list.length || !!(o.vis ? $(o.vis) : host).closest('[hidden]') || (o.when && !o.when());
+        if (fab.hidden !== off) { fab.hidden = off; FIGS.forEach(function (F) { F.invalidate(); F.render(); }); }
+      }
+      api = {
+        get: function () { return k; }, n: function () { return list.length; },
+        text: function () { return k ? list[k - 1] : ''; },
+        set: function (v) { v = clamp(Math.round(v), 0, list.length); if (v === k) return; k = v; show(); if (o.onStep) o.onStep(k); FIGS.forEach(function (F) { F.render(); }); },
+        sync: sync,
+        setSteps: function (l) { list = l || []; k = 0; show(); if (o.onStep) o.onStep(0); FIGS.forEach(function (F) { F.invalidate(); F.render(); }); }
+      };
+      show(); STEPS.push(api);
+      return api;
+    },
+    /* drill(host, {id, gen(rng) -> problem, onProblem(problem), onStep(k), start}) -> {problem(), no(), steps, set(no)}
+       A random drill. gen(rng) returns {q: rich text (the statement), ans: [{label: rich text, v: number, unit,
+       tol: relative (0.01), abs: absolute tolerance near zero, deg: true for an angle in degrees (±360° accepted)}], steps: [rich text]}; rng() is a seeded random in
+       [0, 1), so 'Problem 4821' is the same problem for everyone who types 4821. The student types each answer
+       (numbers, + − × /, ^, brackets, √ and π accepted) and presses Check; Show solution steps through the steps. */
+    drill: function (host, o) {
+      host = $(host); o = o || {};
+      var id = o.id || 'dr', P = null, no = 0, api;
+      var top = document.createElement('div'); top.className = 'pk-drill-top';
+      top.innerHTML = '<label for="' + id + '-no">Problem</label><input type="number" id="' + id + '-no" min="1" max="9999" step="1" inputmode="numeric">';
+      host.appendChild(top);
+      var noIn = top.querySelector('input');
+      PK.ui.buttons(top, [{ id: id + '-new', label: 'New problem', onClick: function () { var v; do { v = 1 + Math.floor(Math.random() * 9999); } while (v === no); api.set(v); } }]);
+      var q = document.createElement('p'); q.className = 'pk-q'; host.appendChild(q);
+      var form = document.createElement('div'); form.className = 'pk-ans'; host.appendChild(form);
+      var bb = PK.ui.buttons(host, [
+        { id: id + '-chk', label: 'Check', onClick: check },
+        { id: id + '-sol', label: 'Show solution', onClick: function () { openSol(); if (steps.get() === 0) steps.set(1); } }
+      ]);
+      var res = document.createElement('p'); res.className = 'note pk-res'; res.setAttribute('aria-live', 'polite'); host.appendChild(res);
+      var sol = document.createElement('div'); sol.className = 'pk-sol'; host.appendChild(sol);
+      function openSol() { sol.hidden = false; bb[id + '-sol'].hidden = true; }
+      var steps = PK.ui.steps(sol, { id: id + '-st', steps: [], vis: host, onStep: function (k) { if (k > 0) openSol(); if (o.onStep) o.onStep(k); } });
+      /* num(text): a typed answer as a number. Numbers (true minus, decimal comma, e-notation, '× 10^n'), + − × · * / ^,
+         brackets, √ (√6, 2√6, 1/√6, √(1/6)), sqrt(), π; NaN if it is not a plain expression of these */
+      function num(t) {
+        t = String(t).trim().replace(/[−–]/g, '-').replace(/\s+/g, '').replace(/[×x·]10\^?(?=[-+]?\d)/gi, 'e').replace(/[×·]/g, '*').replace(/(\d),(\d)/g, '$1.$2').replace(/°/g, '').replace(/sqrt/gi, '√').replace(/pi|π/gi, 'π');
+        if (!t || /[^0-9.e+\-*\/^()√π]/i.test(t)) return NaN;
+        var p = 0;
+        function peek() { return t.charAt(p); }
+        function atom() {
+          var c = peek(), v;
+          if (c === '(') { p++; v = sum(); if (peek() !== ')') throw 0; p++; return v; }
+          if (c === '√') { p++; return Math.sqrt(unary()); }
+          if (c === 'π') { p++; return Math.PI; }
+          var m = t.slice(p).match(/^(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/i);
+          if (!m) throw 0; p += m[0].length; return parseFloat(m[0]);
+        }
+        function power() { var v = atom(); if (peek() === '^') { p++; v = Math.pow(v, unary()); } return v; }
+        function unary() { var c = peek(); if (c === '-' || c === '+') { p++; var v = unary(); return c === '-' ? -v : v; } return power(); }
+        function prod() {
+          var v = unary();
+          for (;;) {
+            var c = peek();
+            if (c === '*' || c === '/') { p++; var w = unary(); v = c === '*' ? v * w : v / w; }
+            else if (c === '√' || c === '(' || c === 'π') v *= unary();   /* 2√6, 3(…), 2π */
+            else return v;
+          }
+        }
+        function sum() { var v = prod(); for (;;) { var c = peek(); if (c === '+' || c === '-') { p++; var w = prod(); v = c === '+' ? v + w : v - w; } else return v; } }
+        try { var v = sum(); return p === t.length && isFinite(v) ? v : NaN; } catch (e) { return NaN; }
+      }
+      function check() {
+        var ok = 0, n = P.ans.length;
+        P.ans.forEach(function (a, i) {
+          var inp = document.getElementById(id + '-a' + i), mk = document.getElementById(id + '-m' + i), raw = inp.value.trim(), v = num(raw);
+          var dv = a.deg ? Math.abs(((v - a.v) % 360 + 540) % 360 - 180) : Math.abs(v - a.v);   /* deg: angles 360° apart are the same answer */
+          var good = !isNaN(v) && dv <= Math.max((a.tol === undefined ? 0.01 : a.tol) * Math.abs(a.v), a.abs === undefined ? 1e-12 : a.abs);   /* default floor only absorbs float noise in a true 0 (answers in SI below ~10⁻¹⁰: use a scaled unit) */
+          if (good) ok++;
+          mk.textContent = raw === '' ? '' : isNaN(v) ? '? not a number' : good ? '✓ correct' : '✗ not yet';
+          mk.className = 'pk-mark ' + (good ? 'pk-ok' : 'pk-no');
+          inp.setAttribute('aria-invalid', String(!good && raw !== ''));
+        });
+        /* name the 1 % rule only when it is the rule of every field; otherwise the page states its own tolerances */
+        var plain = P.ans.every(function (a) { return (a.tol === undefined || a.tol === 0.01) && !a.abs; });
+        res.textContent = ok === n ? 'All ' + n + ' correct.' : ok + ' of ' + n + ' correct' + (plain ? ' (answers within 1 % count)' : '') + (ok ? '.' : ': try again, or show the solution.');
+      }
+      api = {
+        problem: function () { return P; }, no: function () { return no; }, steps: steps,
+        set: function (v) {
+          no = clamp(Math.round(v) || 1, 1, 9999); noIn.value = no;
+          P = o.gen(rngOf(Math.imul(no, 2654435761) >>> 0));
+          q.innerHTML = PK.text.html(P.q);
+          form.innerHTML = P.ans.map(function (a, i) {
+            return '<div class="pk-arow"><label for="' + id + '-a' + i + '">' + PK.text.html(a.label) + '</label><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="' + id + '-a' + i + '">' +
+              '<span class="pk-unit">' + (a.unit ? PK.text.html(a.unit) : '') + '</span><span class="pk-mark" id="' + id + '-m' + i + '"></span></div>';
+          }).join('');
+          form.querySelectorAll('input').forEach(function (inp) { inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') check(); }); });
+          res.textContent = ''; sol.hidden = true; bb[id + '-sol'].hidden = false;
+          if (o.onProblem) o.onProblem(P);
+          steps.setSteps(P.steps || []);
+        }
+      };
+      noIn.addEventListener('change', function () { api.set(+noIn.value); });
+      api.parse = num;
+      api.set(o.start || 1);
+      return api;
+    }
+  };
+
+  /* ======================= PK.test: the reviewers' sweep ======================= */
+  /* PK.test.use(F, {random(rng), reset()}) registers the page's state randomiser. In the console:
+       PK.test.sweep({n: 40, seed: 1})   random states and views, full placement each; returns a summary
+       PK.test.check()                   the present state only
+     Counts (PAGE_RULES 'Label placement' 4): text-on-text = two glyph boxes (each shrunk by the halo width) overlap;
+     text-on-line = a primary drawn segment (DOM, clipped to the drawing area) crosses an unplated label's shrunk glyph
+     box; soft = the same for soft layers (allowed under the halo); plates and leaders per state; the smallest text px
+     on screen (subscripts included); clipped = text outside the frame; keyMissing = key values neither on the figure
+     nor in the readout block; ms = full render time, msFast = a drag-time render. */
+  var TEST = { F: null, h: null };
+  function rngOf(seed) { var a = seed >>> 0; return function () { a = (a + 0x6D2B79F5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function domSegs(F) {
+    var segs = [], A = F.area;
+    function role(e) { var c = (e.getAttribute('class') || '') + ' ' + ((e.parentNode && e.parentNode.getAttribute && e.parentNode.getAttribute('class')) || ''); if (/pk-halo|pk-hhalo|pk-plate/.test(c)) return -1; return /\bsoft\b|pk-gh\b|pk-ghh/.test(c) ? 0 : 1; }
+    var inClip = false;   /* lines of the drawing group are clipped to the drawing area, so they cannot reach a readout */
+    function add2(x1, y1, x2, y2, r) { segs.push([x1, y1, x2, y2, r, inClip]); }
+    function poly(P, closed, r) { for (var i = 0; i < P.length - 1; i++) add2(P[i][0], P[i][1], P[i + 1][0], P[i + 1][1], r); if (closed && P.length > 2) add2(P[P.length - 1][0], P[P.length - 1][1], P[0][0], P[0][1], r); }
+    [F.gD, F.gL].forEach(function (g) {
+      inClip = g === F.gD;
+      g.querySelectorAll('polyline, polygon, line, circle').forEach(function (e) {
+        var r = role(e); if (r < 0) return;
+        var tag = e.tagName.toLowerCase();
+        if (tag === 'line') add2(+e.getAttribute('x1'), +e.getAttribute('y1'), +e.getAttribute('x2'), +e.getAttribute('y2'), r);
+        else if (tag === 'circle') { var cx = +e.getAttribute('cx'), cy = +e.getAttribute('cy'), rr = +e.getAttribute('r'), P = []; for (var k = 0; k <= 12; k++) P.push([cx + rr * Math.cos(k * Math.PI / 6), cy + rr * Math.sin(k * Math.PI / 6)]); poly(P, false, /ring/.test(e.getAttribute('class')) ? 0 : r); }
+        else { var P2 = (e.getAttribute('points') || '').trim().split(/\s+/).map(function (s) { var c = s.split(','); return [+c[0], +c[1]]; }); poly(P2, tag === 'polygon', r); }
+      });
+    });
+    return segs.map(function (s) { return { s: s, a: A }; });
+  }
+  function textBoxes(F) {
+    var out = [];
+    F.svg.querySelectorAll('text').forEach(function (t) {
+      var b; try { b = t.getBBox(); } catch (e) { return; }
+      if (!b.width) return;
+      var hw = (parseFloat(getComputedStyle(t).strokeWidth) || 3) / 2;
+      out.push({ el: t, lab: /pk-lab/.test(t.getAttribute('class')), plate: t.hasAttribute('data-plate') || t.hasAttribute('data-badge'), badge: t.hasAttribute('data-badge'), key: t.hasAttribute('data-key'),
+        full: { l: b.x, r: b.x + b.width, t: b.y, b: b.y + b.height }, g: { l: b.x + hw, r: b.x + b.width - hw, t: b.y + hw, b: b.y + b.height - hw } });
+    });
+    return out;
+  }
+  function measureState(F) {
+    var r = { tt: 0, tl: 0, soft: 0, plates: F.stats.plates || 0, leaders: F.stats.leaders || 0, minPx: 1e9, clipped: 0, keyMissing: 0, dropped: F.stats.dropped || 0, worst: [] };
+    var T = textBoxes(F), S = domSegs(F), A = F.area, i, j, sc = (F.svg.getScreenCTM() || { a: 1 }).a;
+    for (i = 0; i < T.length; i++) for (j = i + 1; j < T.length; j++) {
+      var a = T[i].g, b = T[j].g;
+      if (Math.min(a.r, b.r) - Math.max(a.l, b.l) > 0.5 && Math.min(a.b, b.b) - Math.max(a.t, b.t) > 0.5) { r.tt++; r.worst.push('text-on-text: ' + T[i].el.textContent + ' / ' + T[j].el.textContent); }
+    }
+    T.forEach(function (t) {
+      var g = t.g;
+      if (t.full.l < -0.5 || t.full.r > F.W + 0.5 || t.full.t < -0.5 || t.full.b > F.H + 0.5) { r.clipped++; r.worst.push('clipped: ' + t.el.textContent); }
+      var Bn = F.btn;   /* the slide's corner controls are HTML over the SVG: text under them counts as clipped */
+      if (Bn && Math.min(t.g.r, Bn.r - 4) - Math.max(t.g.l, Bn.l + 4) > 0.5 && Math.min(t.g.b, Bn.b - 4) - Math.max(t.g.t, Bn.t + 4) > 0.5) { r.clipped++; r.worst.push('under the corner controls: ' + t.el.textContent); }
+      if (t.lab && (t.full.l < A.x0 - 0.5 || t.full.r > A.x1 + 0.5 || t.full.t < A.y0 - 0.5 || t.full.b > A.y1 + 0.5)) { r.clipped++; r.worst.push('outside the drawing area: ' + t.el.textContent); }
+      [t.el].concat([].slice.call(t.el.querySelectorAll('tspan'))).forEach(function (e) { r.minPx = Math.min(r.minPx, parseFloat(getComputedStyle(e).fontSize) * sc); });
+      if (t.plate) return;
+      var ro = /pk-ro/.test(t.el.getAttribute('class') || '');   /* readout lines sit outside the drawing: a line drawn through them counts too */
+      var cb = ro ? g : { l: Math.max(g.l, A.x0), r: Math.min(g.r, A.x1), t: Math.max(g.t, A.y0), b: Math.min(g.b, A.y1) };
+      if (cb.l >= cb.r || cb.t >= cb.b) return;
+      S.forEach(function (q) {
+        var s = q.s; if (ro && s[5]) return; if (!segRect(s[0], s[1], s[2], s[3], cb)) return;
+        if (s[4]) { r.tl++; r.worst.push((ro ? 'readout crossed by a line: ' : 'text-on-line: ') + t.el.textContent); } else r.soft++;
+      });
+    });
+    (F.stats.droppedList || []).forEach(function (t) { r.worst.push('required label dropped: ' + t); });
+    var placedKeys = T.filter(function (t) { return t.key; }).length;
+    r.keyMissing = Math.max(0, (F.stats.keys || 0) - placedKeys - (F.stats.routed || 0));
+    return r;
+  }
+  function med(a) { var b = a.slice().sort(function (x, y) { return x - y; }); return b.length ? b[Math.floor(b.length / 2)] : 0; }
+  PK.test = {
+    use: function (F, h) { TEST.F = F; TEST.h = h || {}; },
+    check: function (F) { F = F || TEST.F || FIGS[0]; F.fast = false; F.invalidate(); F.renderNow(); return measureState(F); },
+    /* sweep({n, seed, views: true, fig}): state 0 is the page's reset state at the default view */
+    sweep: function (o) {
+      o = o || {};
+      var F = o.fig || TEST.F || FIGS[0], h = TEST.h || {}, n = o.n || 40, rng = rngOf(o.seed || 1), sum = { states: n, drawMin: 1, textOnText: 0, textOnLine: 0, soft: 0, plates: 0, leaders: 0, minPx: 1e9, clipped: 0, keyMissing: 0, requiredDropped: 0, routedKeys: 0 }, ms = [], msF = [], worst = [];
+      root.classList.add('pk-notrans');
+      var v0 = { az: F.view.az, el: F.view.el };
+      F.invalidate();
+      for (var i = 0; i < n; i++) {
+        if (i === 0) { if (h.reset) h.reset(); F.view = { az: F.home.az, el: F.home.el }; }
+        else {
+          if (h.random) h.random(rng);
+          if (o.views !== false) F.view = { az: Math.round(-180 + 360 * rng()), el: Math.round(clamp(-25 + 115 * rng(), F.elRange[0], F.elRange[1])) };
+        }
+        F._lkR = null; F._lkCol = 0;   /* each random state is measured on its own (no rows kept from the state before) */
+        F.fast = true; msF.push(F.renderNow());
+        F.fast = false; F.cvKey = ''; ms.push(F.renderNow());
+        var r = measureState(F);
+        sum.textOnText += r.tt; sum.textOnLine += r.tl; sum.soft += r.soft; sum.plates += r.plates; sum.leaders += r.leaders; sum.clipped += r.clipped; sum.keyMissing += r.keyMissing; sum.requiredDropped += r.dropped; sum.routedKeys += F.stats.routed || 0;
+        sum.minPx = Math.min(sum.minPx, r.minPx);
+        sum.drawMin = Math.min(sum.drawMin, (F.area.y1 - F.area.y0) / F.H);   /* the drawing's share of the figure height (never collapsed) */
+        r.worst.forEach(function (w) { worst.push('state ' + i + ' (az ' + Math.round(F.view.az) + '°, el ' + Math.round(F.view.el) + '°): ' + w); });
+        if (o.stopAt === i) { root.classList.remove('pk-notrans'); return r; }   /* leave this state on screen to inspect */
+      }
+      sum.drawMin = +sum.drawMin.toFixed(2); sum.platesPerState = +(sum.plates / n).toFixed(2); sum.leadersPerState = +(sum.leaders / n).toFixed(2);
+      sum.msMedian = +med(ms).toFixed(2); sum.msMax = +Math.max.apply(null, ms).toFixed(2); sum.msFastMedian = +med(msF).toFixed(2);
+      sum.worst = worst.slice(0, 20);
+      if (h.reset) h.reset();
+      F.view = v0; F.fast = false; F.invalidate(); F.renderNow();
+      sum.frame = F.W + '×' + F.H + (F.SL ? ' slide' + (root.classList.contains('ctl-open') ? ', drawer open' : '') : ' page') + (PK.theme.dark() ? ', dark' : ', light');
+      root.classList.remove('pk-notrans');
+      return sum;
+    }
+  };
+})();
+</script>
+<script>
+(function () {
+  var V = PK.v, fmt = PK.fmt, T = PK.text;
+  /* ---------- Belden 8240 (RG-58), mm ---------- */
+  var RA = 0.838 / 2, RB = 2.95 / 2, RS = RB + 0.30, RJ = 4.90 / 2;   /* RS: braid outer radius, assumed (not in the datasheet) */
+  var XJ = 5, XS = 7.5, XB = 10, XC = 12.5;                                /* where each layer ends (display choice) */
+  var E0 = 8.854e-12, MU0 = 4e-7 * Math.PI, ER = 2.25, LN = Math.log(RB / RA);
+  var Cp = 2 * Math.PI * ER * E0 / LN, Lp = MU0 / (2 * Math.PI) * LN, vel = 1 / Math.sqrt(Lp * Cp);
+  var DEFF = { E: true, H: true, lb: true };
+  var show = Object.assign({}, DEFF);
+  var AX = [1, 0, 0];
+
+  function annulus(x, r0, r1, nu, dir) {   /* flat ring at x, facing +x (dir = 1) or -x (dir = -1) */
+    nu = nu || 48; var P = [], N = [], i, j;
+    for (j = 0; j <= 1; j++) for (i = 0; i <= nu; i++) { var ph = 2 * Math.PI * i / nu, r = j ? r1 : r0; P.push([x, r * Math.cos(ph), r * Math.sin(ph)]); N.push([dir, 0, 0]); }
+    return { nu: nu, nv: 1, pt: function (i, j) { return P[j * (nu + 1) + i]; }, nrm: function (i, j) { return N[j * (nu + 1) + i]; } };
+  }
+  function cyl(r, x0, x1, nv) { return PK.mesh.cylinder([0, 0, 0], AX, r, x0, x1, 64, nv || 4); }
+
+  var F = PK.figure({
+    svg: '#fg', canvas: '#cv', view: { az: 35, el: 22 },   /* not 55/28: turned toward the cut end so the fields on its face can be read */
+    bounds: function () { return [[-0.5, -RJ, -RJ], [-0.5, RJ, RJ], [XC + 0.5, -RJ, -RJ], [XC + 0.5, RJ, RJ], [-0.5, RJ, -RJ], [XC + 0.5, -RJ, RJ]]; },
+    readouts: function () {
+      return [
+        { t: 'Belden 8240 (RG-58), to scale: 0.838 / 2.95 / 4.90 mm', c: 't-ink', pos: 't', key: true },
+        { t: 'datasheet: 93.5 pF/m, 52 Ω, 66 % of *c*', c: 't-mut', pos: 'b', key: true }
+      ];
+    },
+    draw: draw
+  });
+
+  function draw(F) {
+    /* the cable: jacket, braid, insulation, conductor, each with its end face */
+    F.surface(Object.assign(cyl(RJ, -0.3, XJ, 8), { pal: 'pvc', cull: true, key: 'j' }));
+    F.surface(Object.assign(annulus(XJ, RS, RJ, 64, 1), { pal: 'pvc', key: 'je' }));
+    F.surface(Object.assign(cyl(RS, XJ, XS, 4), { pal: 'tc', cull: true, key: 's' }));
+    F.surface(Object.assign(annulus(XS, RB, RS, 64, 1), { pal: 'tc', key: 'se' }));
+    F.surface(Object.assign(cyl(RB, XS, XB, 4), { pal: 'pe', cull: true, key: 'b' }));
+    F.surface(Object.assign(annulus(XB, RA, RB, 64, 1), { pal: 'pe', key: 'be' }));
+    F.surface(Object.assign(cyl(RA, XB, XC, 2), { pal: 'cu', cull: true, key: 'c' }));
+    F.surface(Object.assign(annulus(XC, 0, RA, 32, 1), { pal: 'cu', key: 'ce' }));
+    F.occlude(PK.vis.cylinder([0, 0, 0], AX, RJ, -0.3, XJ, true));
+    F.occlude(PK.vis.cylinder([0, 0, 0], AX, RS, XJ, XS, true));
+    F.occlude(PK.vis.cylinder([0, 0, 0], AX, RB, XS, XB, true));
+    F.occlude(PK.vis.cylinder([0, 0, 0], AX, RA, XB, XC, true));
+    /* the braid: two families of helices (pattern schematic) */
+    var nb = 8, pitch = 2.4;
+    for (var k = 0; k < nb; k++) [1, -1].forEach(function (sg) {
+      var pts = [];
+      var run = [];   /* only the side toward the viewer: the far side is hidden by the braid itself */
+      for (var t = 0; t <= 60; t++) {
+        var x = XJ + (XS - XJ) * t / 60, ph = 2 * Math.PI * k / nb + sg * 2 * Math.PI * (x - XJ) / pitch, n = [0, Math.cos(ph), Math.sin(ph)];
+        if (V.dot(n, F.cam.FW) > 0.05) run.push([x, (RS + 0.01) * n[1], (RS + 0.01) * n[2]]);
+        else { if (run.length > 1) F.path(run, { color: 'mut', w: 'guide', role: 'soft' }); run = []; }
+      }
+      if (run.length > 1) F.path(run, { color: 'mut', w: 'guide', role: 'soft' });
+    });
+    /* E on the end face of the insulation: radial, inner conductor to shield */
+    var xf = XB + 0.02, Ea = null, Ha = null;
+    if (show.E) for (var i = 0; i < 8; i++) {
+      var ph = 2 * Math.PI * (i + 0.5) / 8, u = [0, Math.cos(ph), Math.sin(ph)];
+      var a0 = V.add([xf, 0, 0], V.mul(u, RA + 0.08)), a1 = V.add([xf, 0, 0], V.mul(u, RB - 0.08));
+      F.arrow(a0, a1, { color: 'c1', w: 'comp', head: 'comp' }); if (i === 1) Ea = [a0, a1];
+    }
+    /* H on the same face: circles about the axis; current I towards +x on the inner conductor: H = a_x x a_r direction */
+    if (show.H) [1.15].forEach(function (r, n) {
+      var pts = []; for (var t = 0; t <= 64; t++) { var ph = 2 * Math.PI * t / 64; pts.push([xf, r * Math.cos(ph), r * Math.sin(ph)]); }
+      F.path(pts, { color: 'c2', w: 'comp', dash: 'dash' });
+      [0.0, 0.25, 0.5, 0.75].forEach(function (f, m) {
+        var ph = 2 * Math.PI * f + n * 0.4, p = [xf, r * Math.cos(ph), r * Math.sin(ph)], d = V.cross(AX, [0, Math.cos(ph), Math.sin(ph)]);
+        var q0 = V.add(p, V.mul(d, -0.35)), q1 = V.add(p, V.mul(d, 0.35)); F.arrow(q0, q1, { color: 'c2', w: 'comp', head: 'comp' }); if (m === 0) Ha = [q0, q1];
+      });
+    });
+    /* the current I on the inner conductor, out of the cable end */
+    var I0 = [XB + 0.4, 0, RA + 0.35], I1 = [XC - 0.3, 0, RA + 0.35];
+    F.arrow(I0, I1, { color: 'ink', w: 'comp', head: 'comp', halo: true });
+    if (!show.lb) return;
+    F.label({ t: 'PVC jacket', c: 't-ink', at: F.P([XJ * 0.45, 0, RJ]), alts: [F.P([XJ * 0.45, RJ, 0])], dir: { x: 0, y: -1 }, r: 6, pri: 1, kind: 'required', id: 'j' });
+    F.label({ t: 'braided shield', c: 't-ink', at: F.P([(XJ + XS) / 2, 0, RS]), alts: [F.P([(XJ + XS) / 2, RS, 0])], dir: { x: 0, y: -1 }, r: 6, pri: 1, kind: 'required', id: 's' });
+    F.label({ t: 'polyethylene', c: 't-ink', at: F.P([(XS + XB) / 2, 0, RB]), alts: [F.P([(XS + XB) / 2, RB, 0])], dir: { x: 0, y: -1 }, r: 6, pri: 1, kind: 'required', id: 'b' });
+    F.label({ t: 'copper', c: 't-ink', at: F.P([(XB + XC) / 2 + 1, 0, -RA]), alts: [F.P([(XB + XC) / 2, RA, 0])], dir: { x: 0, y: 1 }, r: 6, pri: 1, kind: 'required', id: 'c' });
+    F.labelArrow(I0, I1, '*I*', { c: 't-ink', pri: 1, kind: 'owned', id: 'I' });
+    if (Ea) F.labelArrow(Ea[0], Ea[1], '**E**', { c: 't-c1', pri: 1, kind: 'owned', id: 'E' });
+    if (Ha) F.labelArrow(Ha[0], Ha[1], '**H**', { c: 't-c2', pri: 1, kind: 'owned', id: 'H' });
+  }
+
+  function renderCard() {
+    var h = T.html;
+    document.getElementById('o-kv').innerHTML = [
+      ['capacitance *C*′ (datasheet)', '93.5 pF/m'], ['*C*′ = 2π*ε*/ln(*b*/*a*), *ε*_[r] = 2.25 assumed', fmt.q(Cp * 1e12, 'pF/m')],
+      ['inductance *L*′ = (*μ*_{0}/2π) ln(*b*/*a*)', fmt.q(Lp * 1e9, 'nH/m')],
+      ['signal speed (datasheet)', '66 % of *c*'], ['*v* = 1/√(*L*′*C*′)', fmt.q(vel / 1e8, '× 10⁸ m/s') + ' (' + fmt.fix(100 * vel / 2.998e8, 1) + ' % of *c*)'],
+      ['characteristic impedance (datasheet)', '52 Ω'], ['√(*L*′/*C*′)', fmt.q(Math.sqrt(Lp / Cp), 'Ω')]
+    ].map(function (r) { return '<dt>' + h(r[0]) + '</dt><dd>' + h(r[1]) + '</dd>'; }).join('');
+  }
+  function changed() { F.interact(); F.render(); }
+  PK.ui.view('#g-view', F, { note: 'Drag the cable to turn it.' });
+  var tg = {};
+  [['E', 'Electric field <b class="v">E</b>'], ['H', 'Magnetic field <b class="v">H</b>'], ['lb', 'Labels']].forEach(function (r) {
+    tg[r[0]] = PK.ui.toggle('#g-disp', { id: 'f-' + r[0], label: r[1], checked: show[r[0]], onChange: function (b) { show[r[0]] = b; changed(); } });
+  });
+  PK.ui.buttons('#g-disp', [{ id: 'btn-reset', label: 'Reset all', onClick: function () { Object.keys(DEFF).forEach(function (k) { show[k] = DEFF[k]; tg[k].set(DEFF[k]); }); F.setView(F.home.az, F.home.el); changed(); } }]);
+  PK.ui.drawer('#panel');
+  PK.ui.caption('#cap');
+  renderCard();
+  PK.test.use(F, { random: function (rng) { show.E = rng() < 0.8; show.H = rng() < 0.8; show.lb = rng() < 0.9; }, reset: function () { Object.assign(show, DEFF); } });
+})();
+</script>
+<style>.ee311-brand{display:flex;justify-content:flex-end;align-items:center;gap:14px;padding:10px max(16px,env(safe-area-inset-right,0px)) 0 16px;box-sizing:border-box;width:100%}.ee311-brand img{height:40px;width:auto;display:block}.ee311-brand img.ee{height:50px}.ee311-brand i{width:1px;height:30px;background:#c9d0d6}@media (max-width:480px){.ee311-brand img{height:30px}.ee311-brand img.ee{height:38px}.ee311-brand i{height:22px}}@media (prefers-color-scheme:dark){.ee311-brand span{background:#f4f6f7;border-radius:6px;padding:4px 8px}.ee311-brand i{background:#3a444d}}.ee311-brand.in-head{width:auto;margin-left:auto;padding:0;align-self:center;gap:10px}.ee311-brand.in-head img{height:30px}.ee311-brand.in-head img.ee{height:38px}.ee311-brand.in-head i{height:22px}[data-host="slide"] .ee311-brand{display:none}@media print{.ee311-brand{display:none}}</style><div class="ee311-brand" role="banner"><span><img class="ee" src="data:image/png;base64,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" alt="Department of Electrical Engineering, Chiang Mai University"></span><i aria-hidden="true"></i><span><img src="data:image/png;base64,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" alt="Chiang Mai University"></span></div><script>(function(){var b=document.currentScript.previousElementSibling;if(document.documentElement.getAttribute("data-host")==="slide"){b.remove();return;}function go(){var h=innerWidth>=700&&document.querySelector("#app>header");if(h){b.classList.add("in-head");h.appendChild(b);}else document.body.insertBefore(b,document.body.firstChild);}if(document.body)go();else document.addEventListener("DOMContentLoaded",go);})();</script>
