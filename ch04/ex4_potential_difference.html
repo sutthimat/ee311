@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Potential difference and potential (Hayt Sections 4.3, 4.4; slides 10–14), on pagekit. V is the teaching object:
+/* Potential difference and potential (Hayt Sections 4.3, 4.4; slides 11–15), on pagekit. V is the teaching object:
    equipotential spheres (or cylinders) are soft discs tinted by their V on the diverging map (light middle = 0 V),
    with the same colour strip beside the V axis of the plot (the labelled colour scale). E is the main vector colour
    (c1), always radial, so it crosses every equipotential at right angles. The carried +1 C test charge: a thin dark
@@ -1745,11 +1745,11 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var RX = 6.3, RMIN = 1, RMAX = 6;   /* Explore: the scene radius (steady while dragging); A, B stay at 1 m <= r <= 6 m */
 
   /* ---------- the examples ---------- */
-  /* slide 10: line charge (illustrative numbers from the digest, not on the slide) */
+  /* slide 11: line charge (illustrative numbers from the digest, not on the slide) */
   var LC = { rl: 10, a: 1, b: 5, phi: -60, k: K2 * 10 };
   LC.V = LC.k * Math.log(LC.b / LC.a);
   var XLC = {
-    q: 'Slide 10: the work to carry *Q* from *ρ* = *b* to *ρ* = *a* near an infinite line charge (slide 8), divided by *Q*, is the potential difference *V*_{ab}. Our numbers (not on the slide): *ρ*_{L} = 10 nC/m, *a* = 1 cm, *b* = 5 cm.',
+    q: 'Slide 11: the work to carry *Q* from *ρ* = *b* to *ρ* = *a* near an infinite line charge (slide 8), divided by *Q*, is the potential difference *V*_{ab}. Our numbers (not on the slide): *ρ*_{L} = 10 nC/m, *a* = 1 cm, *b* = 5 cm.',
     given: 'Line charge *ρ*_{L} = 10 nC/m on the *z* axis;  *ρ* = *a* = 1 cm, *ρ* = *b* = 5 cm (our numbers)',
     givenC: '*ρ*_{L} = 10 nC/m on *z*;  *a* = 1 cm, *b* = 5 cm (our numbers)',
     steps: [
@@ -1763,11 +1763,11 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       '*V*_{ab} = ' + n4(LC.k) + ' × ln 5 = ' + n4(LC.V) + ' V', '*b* > *a*: *V*_{ab} > 0;  on a circle, d**L** ⊥ **E**: no work'],
     soFar: ['**E** = *ρ*_{L}/(2π*ε*_{0}*ρ*) **a**_{ρ}', '*W* = (*Qρ*_{L}/2π*ε*_{0}) ln(*b*/*a*)', '*V*_{ab} = (*ρ*_{L}/2π*ε*_{0}) ln(*b*/*a*)', '*V*_{ab} = ' + n4(LC.V) + ' V']
   };
-  /* slide 11: point charge (our numbers) */
+  /* slide 12: point charge (our numbers) */
   var PC = { Q: 15, A: [2, -2, 1], B: [0, -3, 4] };
   PC.kq = K * PC.Q; PC.rA = 3; PC.rB = 5; PC.VAB = PC.kq * (1 / 3 - 1 / 5); PC.VA = PC.kq / 3; PC.EA = PC.kq / 9;
   var XPC = {
-    q: 'Slide 11: the potential difference between *A* and *B* in the field of a point charge *Q* at the origin, Eq. (12). Our numbers (not on the slide): *Q* = 15 nC, *A*(2, −2, 1), *B*(0, −3, 4) m.',
+    q: 'Slide 12: the potential difference between *A* and *B* in the field of a point charge *Q* at the origin, Eq. (12). Our numbers (not on the slide): *Q* = 15 nC, *A*(2, −2, 1), *B*(0, −3, 4) m.',
     given: '*Q* = 15 nC at the origin;  *A*(2, −2, 1) m, *B*(0, −3, 4) m (our numbers)',
     givenC: '*Q* = 15 nC;  *A*(2, −2, 1), *B*(0, −3, 4) m',
     steps: [
@@ -2468,7 +2468,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       note = 'The slide gives the line-charge result in symbols; these numbers are ours (the digest\'s illustrative set). The zero reference of the plot, <i>V</i> = 0 on <i>ρ</i> = <i>b</i>, is our choice (like the outer conductor of a coaxial cable); <i>V</i><sub class="u"><i>ab</i></sub> does not depend on it.';
     } else if (mode === 'pc') {
       rows.push(['*Q*/4π*ε*_{0}', n4(PC.kq) + ' V·m'], ['*r*_{A}, *r*_{B}', '3 m, 5 m'], ['*V*_{AB}', n4(PC.VAB) + ' V'], ['*V*_{A} (zero at infinity)', n4(PC.VA) + ' V'], ['*V*_{B} (zero at infinity)', n4(PC.kq / 5) + ' V']);
-      note = 'Slide 11 states Eq. (12) in symbols; the numbers here are ours. The path drawn goes along the radius, then on the sphere through <i>A</i>: any other path gives the same <i>V</i><sub class="u"><i>AB</i></sub>.';
+      note = 'Slide 12 states Eq. (12) in symbols; the numbers here are ours. The path drawn goes along the radius, then on the sphere through <i>A</i>: any other path gives the same <i>V</i><sub class="u"><i>AB</i></sub>.';
     } else if (mode === 'd44') {
       rows.push(['(a) legs along *x*, *y*, *z*', '−70 V, −81 V, +12 V'], ['(a) *V*_{MN}', '−139.0 V (slide: −139.0 V)'], ['*V* = −2*x*³ − 3*y*² − 4*z* + *C*', '*V*(*Q*) = *C*, *V*(*P*) = 2 + *C*'], ['(b) *V*_{M}', '−120.0 V (slide: −120.0 V)'], ['(c) *V*_{N}', '19.0 V (slide: 19.0 V)']);
       note = 'Both reference points of the drill happen to give <i>C</i> = 0. With another reference, <i>V</i><sub class="u"><i>M</i></sub> and <i>V</i><sub class="u"><i>N</i></sub> move by the same amount and <i>V</i><sub class="u"><i>MN</i></sub> stays −139.0 V.';
@@ -2533,13 +2533,13 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   function syncRows() { rows.Q.set(S.Q); rows.rA.set(Math.round(V.len(S.A) * 10) / 10); rows.rB.set(Math.round(V.len(S.B) * 10) / 10); rows.r0.set(S.r0); rows.V0.set(S.V0); rows.t.set(S.t); }
   var MN = {
     ex: 'A point charge <i>Q</i> at the origin and two points. <i>V</i><sub class="u"><i>AB</i></sub>: <i>B</i> is the initial (last-named) point, <i>A</i> the final one. Play carries a +1 C test charge from <i>B</i> to <i>A</i>.',
-    lc: 'Slide 10: the potential difference near an infinite line charge, Eq. (11), from the work of slide 8 divided by <i>Q</i>. Step through the solution (in a slide: ‹ › at the bottom right).',
-    pc: 'Slide 11: the potential difference in the field of a point charge, Eq. (12), and the absolute potential, Eq. (14). Step through the solution.',
-    d44: 'Drill D4.4 (slide 12): <i>V</i><sub class="u"><i>MN</i></sub> as a line integral along three legs, then absolute potentials from two references. Step through the solution.',
-    d45: 'Drill D4.5 (slide 14): one point, three zero references. Step through the solution.',
+    lc: 'Slide 11: the potential difference near an infinite line charge, Eq. (11), from the work of slide 8 divided by <i>Q</i>. Step through the solution (in a slide: ‹ › at the bottom right).',
+    pc: 'Slide 12: the potential difference in the field of a point charge, Eq. (12), and the absolute potential, Eq. (14). Step through the solution.',
+    d44: 'Drill D4.4 (slide 13): <i>V</i><sub class="u"><i>MN</i></sub> as a line integral along three legs, then absolute potentials from two references. Step through the solution.',
+    d45: 'Drill D4.5 (slide 15): one point, three zero references. Step through the solution.',
     dr: 'A random problem of the D4.5 kind; its number gives the same problem to everyone.'
   };
-  var HEAD = { lc: 'Line charge (slide 10)', pc: 'Point charge (slide 11)', d44: 'Drill D4.4', d45: 'Drill D4.5' };
+  var HEAD = { lc: 'Line charge (slide 11)', pc: 'Point charge (slide 12)', d44: 'Drill D4.4', d45: 'Drill D4.5' };
   function setMode(m) {
     play.set(false);
     mode = m;

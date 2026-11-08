@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Divergence (Hayt §3.5, slides 19–22), on pagekit. The teaching object is the small probe box: each face is tinted
+/* Divergence (Hayt §3.5, slides 23–26), on pagekit. The teaching object is the small probe box: each face is tinted
    by its own outward flux (orange with a + glyph: flux leaves; blue with a − glyph: flux enters; pale: none), and the
    box carries the number ∮D·dS/Δv. div D is a scalar: a number and a tint, never an arrow. D is drawn as thin field
    arrows in the plane of the probe; flux lines (point charge only) use the chapter's teal token --flx. */
@@ -1896,10 +1896,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     soFarC: ['−e⁻ˣ sin *y*', 'e⁻ˣ sin *y*', '2', 'div **D** = 2', '2 at (−1, 1.5, 0)'],
     soFar: ['∂*D*_{x}/∂*x* = −e⁻ˣ sin *y*', '∂*D*_{y}/∂*y* = e⁻ˣ sin *y*', '∂*D*_{z}/∂*z* = 2', 'div **D** = 2 C/m³', '2 at (−1, 1.5, 0)']
   };
-  /* ---------- the point charge (slide 21) ---------- */
+  /* ---------- the point charge (slide 25) ---------- */
   var PPC = [1.6, 1.2, 0], APC = 0.8;
   var XPC = {
-    q: 'Slide 21: the point charge *Q* at the origin, **D** = *Q*/(4π*r*²) **a**_{r}. Show that div **D** = 0 except at the origin. (*Q* = 1 nC is chosen for the numbers.)',
+    q: 'Slide 25: the point charge *Q* at the origin, **D** = *Q*/(4π*r*²) **a**_{r}. Show that div **D** = 0 except at the origin. (*Q* = 1 nC is chosen for the numbers.)',
     given: '**D** = *Q*/(4π*r*²) **a**_{r},  *Q* = 1 nC at the origin (chosen value)',
     givenC: '*Q*/(4π*r*²) **a**_{r},  *Q* = 1 nC at the origin',
     soFarC: ['*D*_{θ} = *D*_{φ} = 0', '*r*²*D*_{r} = 0.0796 nC', 'div **D** = 0'],
@@ -2474,13 +2474,13 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   }
   var MN = {
     ex: 'A field and a small probe box. Its faces show where flux leaves (orange, +) and enters (blue, −); its number is the net outflow per volume.',
-    e34: 'Example 3.4 (slide 21): div <b class="v">D</b> term by term, then the probe at two more points. Step through the solution (in a slide: ‹ › at the bottom right).',
-    pc: 'Slide 21: the point charge. div <b class="v">D</b> = 0 away from the origin; a box around the origin has the net outflow <i>Q</i>. Step through.',
-    d37: 'Drill D3.7 (slide 22): div <b class="v">D</b> at a point in rectangular, cylindrical and spherical form, term by term. Step through.',
-    d38: 'Drill D3.8 (slide 22): <i>ρ</i><sub class="u"><i>v</i></sub> = div <b class="v">D</b> as an expression; in (b) and (c) the terms cancel. Step through.',
+    e34: 'Example 3.4 (slide 25): div <b class="v">D</b> term by term, then the probe at two more points. Step through the solution (in a slide: ‹ › at the bottom right).',
+    pc: 'Slide 25: the point charge. div <b class="v">D</b> = 0 away from the origin; a box around the origin has the net outflow <i>Q</i>. Step through.',
+    d37: 'Drill D3.7 (slide 26): div <b class="v">D</b> at a point in rectangular, cylindrical and spherical form, term by term. Step through.',
+    d38: 'Drill D3.8 (slide 26): <i>ρ</i><sub class="u"><i>v</i></sub> = div <b class="v">D</b> as an expression; in (b) and (c) the terms cancel. Step through.',
     dr: 'A random problem of the D3.7 kind; its number gives the same problem to everyone.'
   };
-  var HEAD = { e34: 'Example 3.4: div <b class="v">D</b> of the Example 3.3 field', pc: 'Slide 21: the point charge', d37: 'Drill D3.7: div <b class="v">D</b> at a point', d38: 'Drill D3.8: <i>ρ</i><sub class="u"><i>v</i></sub> from <b class="v">D</b>' };
+  var HEAD = { e34: 'Example 3.4: div <b class="v">D</b> of the Example 3.3 field', pc: 'Slide 25: the point charge', d37: 'Drill D3.7: div <b class="v">D</b> at a point', d38: 'Drill D3.8: <i>ρ</i><sub class="u"><i>v</i></sub> from <b class="v">D</b>' };
   function setMode(m) {
     mode = m;
     MODES.forEach(function (x) { PK.ui.pressed(mb['m-' + x[0]], x[0] === m); });

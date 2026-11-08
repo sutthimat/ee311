@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Gauss's law applied to symmetrical charge distributions (Hayt §3.3, slides 11–15), on pagekit. D is the teaching
+/* Gauss's law applied to symmetrical charge distributions (Hayt §3.3, slides 13–17), on pagekit. D is the teaching
    object: heavy ink arrows on the gaussian surface (lighter where the surface faces away). Positive charge orange
    (c2 dot and line, sh2 surfaces, solid rims), negative charge blue (sh surfaces, dashed rims). The gaussian surface
    is faint green (sh3) with a thin rim; the outward normal dS (green arrow) sits on a highlighted patch. Flux lines
@@ -799,7 +799,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   /* ---------- the drawing lists (filled by the page's draw(F)) ---------- */
   FP._begin = function () {
     var F = this;
-    F.polys = []; F.items = []; F.dots = []; F.raws = []; F.labels = []; F.occ = []; F.surfs = []; F.handles = []; F.obsExtra = []; F.defs = ''; F.split = null;
+    F.polys = []; F.items = []; F.dots = []; F.raws = []; F.rawsTop = []; F.labels = []; F.occ = []; F.surfs = []; F.handles = []; F.obsExtra = []; F.defs = ''; F.split = null;
     F.tol = 1e-4;
   };
   /* occlude(o): register a surface (PK.vis.*) that hides what lies behind it */
@@ -854,6 +854,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   };
   /* raw(svg, obs): any SVG string drawn after the lines; obs: [{pts: [{x, y}..], closed, role}] for the labels */
   FP.raw = function (s, obs) { this.raws.push(s); if (obs) this.obsExtra = this.obsExtra.concat(obs); };
+  /* rawTop(svg): drawn after the dots, e.g. the + / − glyph on a charge disc (raw() would sit under the disc) */
+  FP.rawTop = function (s) { this.rawsTop.push(s); };
   /* circle(cx, cy, r, o): a screen circle as a polyline (e.g. a sphere's silhouette r = R * F.cam.s) */
   FP.circle = function (cx, cy, r, o) {
     o = o || {}; var q = [], k;
@@ -997,6 +999,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       s += '<circle class="' + D.cls + (hid ? ' pk-ghd' : '') + '" cx="' + f1(q.x) + '" cy="' + f1(q.y) + '" r="' + D.r + '"/>';
       circObs(ob, q.x, q.y, D.r + 1, D.role);
     });
+    F.rawsTop.forEach(function (r) { s += r; });
     return s;
   };
   function circObs(ob, x, y, r, role) { var q = []; for (var k = 0; k <= 12; k++) q.push({ x: x + r * Math.cos(k * Math.PI / 6), y: y + r * Math.sin(k * Math.PI / 6) }); ob.pts(q, false, role); ob.seg(x - r * 0.7, y, x + r * 0.7, y, role); ob.seg(x, y - r * 0.7, x, y + r * 0.7, role); }
@@ -1831,8 +1834,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var PC = (function () {
     var Q = 0.25, r = 0.5, A = PI4 * r * r, D = Q / (PI4 * r * r * 1e-4);
     return {
-      head: 'Slide 11: a point charge',
-      q: 'Find **D** of a point charge *Q* with Gauss\'s law (slide 11). The slide works with symbols; the numbers *Q* = 0.25 μC and *r* = 0.5 cm are chosen here, as in D3.5 (a).',
+      head: 'Slide 13: a point charge',
+      q: 'Find **D** of a point charge *Q* with Gauss\'s law (slide 13). The slide works with symbols; the numbers *Q* = 0.25 μC and *r* = 0.5 cm are chosen here, as in D3.5 (a).',
       given: 'Point charge *Q* at the origin, gaussian sphere of radius *r*;  numbers chosen: *Q* = 0.25 μC, *r* = 0.5 cm (as in D3.5 (a))',
       gs: '*Q* = 0.25 μC, sphere *r* = 0.5 cm (chosen)',
       steps: [
@@ -1850,8 +1853,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var LC = (function () {
     var rl = 60, rho = 2, L = 5, A = 2 * PI * rho * L, Q = rl * L * 1e-3, D = rl / (2 * PI * rho), E = D * 1e-6 / EPS0;
     return {
-      head: 'Slide 12: an infinite line charge',
-      q: 'Find **D** of an infinite uniform line charge *ρ*_{L} on the *z* axis (slide 12). The slide works with symbols; *ρ*_{L} = 60 nC/m (Example 3.2\'s 30 nC over 0.5 m), *ρ* = 2 mm and *L* = 5 mm are chosen here.',
+      head: 'Slide 14: an infinite line charge',
+      q: 'Find **D** of an infinite uniform line charge *ρ*_{L} on the *z* axis (slide 14). The slide works with symbols; *ρ*_{L} = 60 nC/m (Example 3.2\'s 30 nC over 0.5 m), *ρ* = 2 mm and *L* = 5 mm are chosen here.',
       given: 'Line charge *ρ*_{L} on the *z* axis, gaussian cylinder of radius *ρ* and length *L*;  numbers chosen: *ρ*_{L} = 60 nC/m, *ρ* = 2 mm, *L* = 5 mm',
       gs: '*ρ*_{L} = 60 nC/m;  cylinder *ρ* = 2 mm, *L* = 5 mm (chosen)',
       steps: [
@@ -2542,10 +2545,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   PK.ui.view('#g-view', F, { note: 'Drag the figure to turn it: left–right changes the azimuth, up–down the elevation.' });
   var MN = {
     ex: 'Pick a charge and a gaussian surface. With the matching surface <b class="v">D</b> is normal and constant on it (or runs along it); with another, <b class="v">D</b> varies over it and Gauss\'s law gives only the total flux.',
-    pc: 'Slide 11: the sphere about a point charge. Step through the solution (in a slide: ‹ › at the bottom right).',
-    lc: 'Slide 12: the cylinder about an infinite line charge. Step through the solution.',
-    x32: 'Example 3.2 (slides 13–14): a coaxial cable; the gaussian cylinder between, inside and outside the conductors.',
-    d35: 'Drill D3.5 (slide 15): a point charge and charged spherical shells, drawn to scale.',
+    pc: 'Slide 13: the sphere about a point charge. Step through the solution (in a slide: ‹ › at the bottom right).',
+    lc: 'Slide 14: the cylinder about an infinite line charge. Step through the solution.',
+    x32: 'Example 3.2 (slides 15–16): a coaxial cable; the gaussian cylinder between, inside and outside the conductors.',
+    d35: 'Drill D3.5 (slide 17): a point charge and charged spherical shells, drawn to scale.',
     dr: 'A random problem of the same kind (shells or a coax); its number gives the same problem to everyone.'
   };
   function setMode(m) {

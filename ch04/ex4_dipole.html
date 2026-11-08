@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* The electric dipole (Hayt Section 4.7; slides 27–30), on pagekit. V is the teaching object: in the meridian plane
+/* The electric dipole (Hayt Section 4.7; slides 31–34), on pagekit. V is the teaching object: in the meridian plane
    (the yz-plane, phi = 90 deg) the field map of Fig. 4.9 is redrawn from its equations: soft colour bands between the
    equipotentials (diverging map, light middle = 0 V, labelled colour strip), the equipotentials as thin dashed contour
    lines and the streamlines r = C1 sin^2(theta) in the main vector colour with small heads, so the two read apart in
@@ -237,7 +237,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   <div class="layout">
     <figure class="fig">
       <div class="stage"><svg id="fg" role="img" aria-label="An electric dipole on the z axis with a point P in the yz-plane, the distances R1 and R2, the field map of equipotentials and streamlines, and a plot of the far-field accuracy or of the fall-off with distance"></svg></div>
-      <figcaption><details id="cap" open><summary>About this figure</summary>The orange dot with + is +<i>Q</i>, the blue dot with − is −<i>Q</i>, on the <i>z</i> axis at ±<i>d</i>/2. The ringed point <i>P</i> lies in the <i>yz</i>-plane (<i>φ</i> = 90°), at the distance <i>r</i> from the origin and the angle <i>θ</i> from the +<i>z</i> axis; the dark lines <i>R</i><sub class="u">1</sub>, <i>R</i><sub class="u">2</sub> run to it from +<i>Q</i> and −<i>Q</i>. The field map is Fig. 4.9 redrawn from its equations, for the point dipole of Eqs. (33)–(35) with <i>Qd</i> = 4π<i>ε</i><sub class="u">0</sub> as on slide 28, so <i>V</i> = cos <i>θ</i>/<i>r</i>² volts with <i>r</i> in metres: the soft colour bands lie between the equipotentials <i>V</i> = 0, ±0.2, …, ±1 V (dashed contour lines; the strip gives the colours: <span class="sw"></span> blue negative, pale 0 V, orange positive), and the blue curves with small heads are the streamlines <i>r</i> = <i>C</i><sub class="u">1</sub> sin²<i>θ</i> (<i>C</i><sub class="u">1</sub> = 1, 1.5, 2, 2.5 m), which cross every equipotential at right angles. The plane <i>z</i> = 0 has <i>V</i> = 0. The green arrow is <b class="v">p</b> = <i>Q</i><b class="v">d</b>, drawn beside the axis (its length is <i>d</i>). The plot gives either the far-field <i>V</i> divided by the exact <i>V</i> against <i>r</i>/<i>d</i> (it tends to 1), or a log–log plot of |<i>V</i>| (solid) and |<b class="v">E</b>| (dashed) against <i>r</i>, for one charge +<i>Q</i> (thin) and for the dipole (thick): slopes −1, −2 and −2, −3. Orthographic view; lengths in metres.</details></figcaption>
+      <figcaption><details id="cap" open><summary>About this figure</summary>The orange dot with + is +<i>Q</i>, the blue dot with − is −<i>Q</i>, on the <i>z</i> axis at ±<i>d</i>/2. The ringed point <i>P</i> lies in the <i>yz</i>-plane (<i>φ</i> = 90°), at the distance <i>r</i> from the origin and the angle <i>θ</i> from the +<i>z</i> axis; the dark lines <i>R</i><sub class="u">1</sub>, <i>R</i><sub class="u">2</sub> run to it from +<i>Q</i> and −<i>Q</i>. The field map is Fig. 4.9 redrawn from its equations, for the point dipole of Eqs. (33)–(35) with <i>Qd</i> = 4π<i>ε</i><sub class="u">0</sub> as on slide 32, so <i>V</i> = cos <i>θ</i>/<i>r</i>² volts with <i>r</i> in metres: the soft colour bands lie between the equipotentials <i>V</i> = 0, ±0.2, …, ±1 V (dashed contour lines; the strip gives the colours: <span class="sw"></span> blue negative, pale 0 V, orange positive), and the blue curves with small heads are the streamlines <i>r</i> = <i>C</i><sub class="u">1</sub> sin²<i>θ</i> (<i>C</i><sub class="u">1</sub> = 1, 1.5, 2, 2.5 m), which cross every equipotential at right angles. The plane <i>z</i> = 0 has <i>V</i> = 0. The green arrow is <b class="v">p</b> = <i>Q</i><b class="v">d</b>, drawn beside the axis (its length is <i>d</i>). The plot gives either the far-field <i>V</i> divided by the exact <i>V</i> against <i>r</i>/<i>d</i> (it tends to 1), or a log–log plot of |<i>V</i>| (solid) and |<b class="v">E</b>| (dashed) against <i>r</i>, for one charge +<i>Q</i> (thin) and for the dipole (thick): slopes −1, −2 and −2, −3. Orthographic view; lengths in metres.</details></figcaption>
     </figure>
     <aside class="panel" id="panel">
       <section class="grp" id="g-mode"><h2>Mode</h2></section>
@@ -1748,14 +1748,14 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   function rMin(d) { return Math.max(0.4, 0.5 * d + 0.25); }
 
   /* ---------- the examples ---------- */
-  /* slide 27 (our numbers): Q = 10 nC, d = 0.5 m, P at r = 2 m, theta = 60 deg, phi = 90 deg */
+  /* slide 31 (our numbers): Q = 10 nC, d = 0.5 m, P at r = 2 m, theta = 60 deg, phi = 90 deg */
   var DV = { Q: 10, d: 0.5, r: 2, th: 60 };
   (function () {
     var R = Rs(DV.d, DV.r, DV.th); DV.R1 = R[0]; DV.R2 = R[1]; DV.kq = K * DV.Q;
     DV.Vx = DV.kq * (1 / DV.R1 - 1 / DV.R2); DV.Vf = DV.kq * DV.d * Math.cos(DV.th * D2R) / (DV.r * DV.r); DV.rat = DV.Vf / DV.Vx;
   })();
   var XDV = {
-    q: 'Slide 27: the potential of two charges +*Q* at (0, 0, *d*/2) and −*Q* at (0, 0, −*d*/2) at a point *P* in the *yz*-plane, exactly and for a distant *P*, Eq. (33). Our numbers (not on the slide): *Q* = 10 nC, *d* = 0.5 m, *P* at *r* = 2 m, *θ* = 60°, *φ* = 90°.',
+    q: 'Slide 31: the potential of two charges +*Q* at (0, 0, *d*/2) and −*Q* at (0, 0, −*d*/2) at a point *P* in the *yz*-plane, exactly and for a distant *P*, Eq. (33). Our numbers (not on the slide): *Q* = 10 nC, *d* = 0.5 m, *P* at *r* = 2 m, *θ* = 60°, *φ* = 90°.',
     given: '±*Q* at (0, 0, ±*d*/2):  *Q* = 10 nC, *d* = 0.5 m;  *P*: *r* = 2 m, *θ* = 60°, *φ* = 90° (our numbers)',
     givenC: '*Q* = 10 nC, *d* = 0.5 m;  *P*: *r* = 2 m, *θ* = 60°',
     steps: [
@@ -1770,20 +1770,20 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       '*V* ≐ *Qd* cos *θ*/(4π*ε*_{0}*r*²) = ' + n4(DV.Vf) + ' V', '**p** = *Q***d** = 5 **a**_{z} nC·m;  *V* = **p**·**a**_{r}/(4π*ε*_{0}*r*²)'],
     soFar: ['*R*_{1} = ' + n4(DV.R1) + ' m, *R*_{2} = ' + n4(DV.R2) + ' m', '*V* = ' + n4(DV.Vx) + ' V (exact)', '*V* = ' + n4(DV.Vx) + ' V;  *R*_{2} − *R*_{1} ≐ 0.25 m', '*V* = ' + n4(DV.Vx) + ' V;  *R*_{2} − *R*_{1} ≐ 0.25 m, *R*_{1}*R*_{2} ≈ 4 m²', '*V* = ' + n4(DV.Vx) + ' V exact, ' + n4(DV.Vf) + ' V far field']
   };
-  /* slide 28 (our numbers): Qd = 4 pi eps0 (as for the map), P at r = 1.5 m, theta = 60 deg: on the streamline C1 = 2 */
+  /* slide 32 (our numbers): Qd = 4 pi eps0 (as for the map), P at r = 1.5 m, theta = 60 deg: on the streamline C1 = 2 */
   var DE = { r: 1.5, th: 60 };
   (function () { var c = 1 / Math.pow(DE.r, 3); DE.c = c; DE.V = Math.cos(DE.th * D2R) / (DE.r * DE.r); DE.Er = 2 * c * Math.cos(DE.th * D2R); DE.Et = c * Math.sin(DE.th * D2R); DE.E = Math.hypot(DE.Er, DE.Et); })();
   var XDE = {
-    q: 'Slide 28: the field of the dipole as **E** = −∇*V* of Eq. (33) in spherical coordinates, then the field map (Fig. 4.9) with *Qd* = 4π*ε*_{0}. Our numbers (not on the slide): *P* at *r* = 1.5 m, *θ* = 60°, *φ* = 90°.',
-    given: '*V* = *Qd* cos *θ*/(4π*ε*_{0}*r*²) (33);  *Qd* = 4π*ε*_{0} as on slide 28, so *Qd*/4π*ε*_{0} = 1 V·m² (the map in V);  *P*: *r* = 1.5 m, *θ* = 60° (our numbers)',
-    givenC: '*Qd* = 4π*ε*_{0} (slide 28);  *P*: *r* = 1.5 m, *θ* = 60°',
+    q: 'Slide 32: the field of the dipole as **E** = −∇*V* of Eq. (33) in spherical coordinates, then the field map (Fig. 4.9) with *Qd* = 4π*ε*_{0}. Our numbers (not on the slide): *P* at *r* = 1.5 m, *θ* = 60°, *φ* = 90°.',
+    given: '*V* = *Qd* cos *θ*/(4π*ε*_{0}*r*²) (33);  *Qd* = 4π*ε*_{0} as on slide 32, so *Qd*/4π*ε*_{0} = 1 V·m² (the map in V);  *P*: *r* = 1.5 m, *θ* = 60° (our numbers)',
+    givenC: '*Qd* = 4π*ε*_{0} (slide 32);  *P*: *r* = 1.5 m, *θ* = 60°',
     steps: [
       '**E** = −∇*V*, with ∇*V* = (∂*V*/∂*r*) **a**_{r} + (1/*r*)(∂*V*/∂*θ*) **a**_{θ} + (1/(*r* sin *θ*))(∂*V*/∂*φ*) **a**_{φ} in spherical coordinates (32)',
       '∂*V*/∂*r* = −*Qd* cos *θ*/(2π*ε*_{0}*r*³);  (1/*r*)(∂*V*/∂*θ*) = −*Qd* sin *θ*/(4π*ε*_{0}*r*³);  ∂*V*/∂*φ* = 0  (34)',
       '**E** = (*Qd*/4π*ε*_{0}*r*³)(2 cos *θ* **a**_{r} + sin *θ* **a**_{θ}) (35);  at *P*: 1/1.5³ = ' + n4(DE.c) + ' V/m, **E** = ' + n3(DE.Er) + ' **a**_{r} + ' + n3(DE.Et) + ' **a**_{θ} V/m, |**E**| = ' + n3(DE.E) + ' V/m',
       'Field map: *V* = cos *θ*/*r*², so the equipotentials are *r* = √(cos *θ*/*V*) for *V* = 0, ±0.2, …, ±1 V;  at *P*: *V* = 0.5/2.25 = ' + n3(DE.V) + ' V',
       'Streamlines: *E*_{θ}/*E*_{r} = *r* d*θ*/d*r* = sin *θ*/(2 cos *θ*), so d*r*/*r* = 2 cot *θ* d*θ* and *r* = *C*_{1} sin²*θ* (*C*_{1} = 1, 1.5, 2, 2.5 m);  *P* is on *C*_{1} = 1.5/sin²60° = 2 m',
-      '**E** crosses every equipotential at right angles. Far away, *V* ∝ 1/*r*² and *E* ∝ 1/*r*³, one power faster than for a point charge (slide 29)'
+      '**E** crosses every equipotential at right angles. Far away, *V* ∝ 1/*r*² and *E* ∝ 1/*r*³, one power faster than for a point charge (slide 33)'
     ],
     stepsC: ['**E** = −∇*V*, ∇*V* in spherical coordinates (32)', '∂*V*/∂*r* = −*Qd* cos *θ*/(2π*ε*_{0}*r*³);  (1/*r*)∂*V*/∂*θ* = −*Qd* sin *θ*/(4π*ε*_{0}*r*³)', '**E** = ' + n3(DE.Er) + ' **a**_{r} + ' + n3(DE.Et) + ' **a**_{θ} V/m', 'equipotentials *r* = √(cos *θ*/*V*);  *V*_{P} = ' + n3(DE.V) + ' V',
       'streamlines *r* = *C*_{1} sin²*θ*;  *P* on *C*_{1} = 2 m', '**E** ⊥ equipotentials;  *V* ∝ 1/*r*², *E* ∝ 1/*r*³'],
@@ -2081,7 +2081,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     out.push({ t: nbx((cmp ? 'far field: ' : 'far field (33): *Qd* cos *θ*/(4π*ε*_{0}*r*²) = ') + n3(N.Vf) + ' V;') + ' ' + nbx(cz ? 'both 0 on *z* = 0' : 'ratio ' + n4(N.rat)) + ' ' + nbx('at *r*/*d* = ' + fmt.n(S.r / S.d, 3)), c: 't-ink', pos: 't', key: true });
     var pT = nbx('*P*: *r* = ' + fmt.x(S.r) + ' m, *θ* = ' + Math.round(S.th) + '°');
     var mT = show.map ? (cmp ? ' ' + nbx('map: point dipole;') : ' ' + nbx('map: point dipole (far field), *V* = cos *θ*/*r*² in V;')) : '';
-    out.push({ t: (cmp ? nbx('*d* = ' + fmt.x(S.d) + ' m, *Qd*/4π*ε*_{0} = 1 V·m²;') : nbx('*d* = ' + fmt.x(S.d) + ' m, *Q* = ' + n3(N.Q) + ' nC,') + ' ' + nbx('so that *Qd*/4π*ε*_{0} = 1 V·m² (slide 28);')) + mT + ' ' + pT, c: 't-mut', pos: 'b', key: true });
+    out.push({ t: (cmp ? nbx('*d* = ' + fmt.x(S.d) + ' m, *Qd*/4π*ε*_{0} = 1 V·m²;') : nbx('*d* = ' + fmt.x(S.d) + ' m, *Q* = ' + n3(N.Q) + ' nC,') + ' ' + nbx('so that *Qd*/4π*ε*_{0} = 1 V·m² (slide 32);')) + mT + ' ' + pT, c: 't-mut', pos: 'b', key: true });
     if (show.E) out.push({ t: nbx('**E** (35) = ' + n3(N.Er) + ' **a**_{r} + ' + n3(N.Et) + ' **a**_{θ} V/m;') + ' ' + nbx('arrow: direction only'), c: 't-mut', pos: 'b', pri: 2 });
     if (S.plot === 'fall' && plotOn(F)) out.push({ t: nbx('for *r* ≲ *d* the curves follow the nearer charge;') + ' ' + nbx('the slopes −2, −3 hold only for *r* ≫ *d*'), c: 't-mut', pos: 'b', key: true });
     return out;
@@ -2171,7 +2171,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       if (th > 0.02) F.path(ap, { color: 'ink', w: 'guide', role: 'primary' });
     }
     if (showR) { F.line(Qp, P, { color: 'ink', w: 'axis', role: 'teach' }); F.line(Qn, P, { color: 'ink', w: 'axis', role: 'teach' }); }
-    /* slide 27: the extra length R2 - R1 = d cos(theta) at the -Q end (a dashed perpendicular from +Q onto R2) */
+    /* slide 31: the extra length R2 - R1 = d cos(theta) at the -Q end (a dashed perpendicular from +Q onto R2) */
     var foot = null;
     if (sc.par) {
       var u = V.unit(V.sub(P, Qn)), tq = V.dot(V.sub(Qp, Qn), u); foot = V.add(Qn, V.mul(u, tq));
@@ -2517,14 +2517,14 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       rows.push(['*d*, *Q* = (4π*ε*_{0} × 1 V·m²)/*d*', fmt.x(S.d) + ' m, ' + n4(N.Q) + ' nC (*Qd*/4π*ε*_{0} = 1 V·m²)'], ['*P*', '*r* = ' + fmt.x(S.r) + ' m, *θ* = ' + Math.round(S.th) + '°, *φ* = 90°'],
         ['*R*_{1}, *R*_{2}', n4(N.R1) + ' m, ' + n4(N.R2) + ' m'], ['*V* exact = (*Q*/4π*ε*_{0})(1/*R*_{1} − 1/*R*_{2})', n4(N.Vx) + ' V'], ['*V* far field = *Qd* cos *θ*/(4π*ε*_{0}*r*²)', n4(N.Vf) + ' V'],
         ['far field / exact (*r*/*d* = ' + fmt.n(S.r / S.d, 3) + ')', Math.abs(Math.cos(S.th * D2R)) < 1e-7 ? 'both 0 (limit ' + n4(N.rat) + ')' : n4(N.rat)], ['**E** far field (35)', n3(N.Er) + ' **a**_{r} + ' + n3(N.Et) + ' **a**_{θ} V/m, |**E**| = ' + n3(N.E) + ' V/m']);
-      note = 'The charge follows <i>d</i> so that <i>Qd</i> = 4π<i>ε</i><sub class="u">0</sub>, as for the map of slide 28: the map then reads <i>V</i> in volts. The map and <b class="v">E</b> are the far field (a point dipole); the exact <i>V</i> of the two charges differs from it by the ratio shown, which tends to 1 as <i>r</i>/<i>d</i> grows. On the plane <i>z</i> = 0 both are 0. <i>ε</i><sub class="u">0</sub> = 8.854 × 10⁻¹² F/m.';
+      note = 'The charge follows <i>d</i> so that <i>Qd</i> = 4π<i>ε</i><sub class="u">0</sub>, as for the map of slide 32: the map then reads <i>V</i> in volts. The map and <b class="v">E</b> are the far field (a point dipole); the exact <i>V</i> of the two charges differs from it by the ratio shown, which tends to 1 as <i>r</i>/<i>d</i> grows. On the plane <i>z</i> = 0 both are 0. <i>ε</i><sub class="u">0</sub> = 8.854 × 10⁻¹² F/m.';
     } else if (mode === 'dv') {
       rows.push(['*Q*/4π*ε*_{0}', n4(DV.kq) + ' V·m'], ['*R*_{1}, *R*_{2}', n4(DV.R1) + ' m, ' + n4(DV.R2) + ' m'], ['*R*_{2} − *R*_{1} (*d* cos *θ* = 0.25 m)', n4(DV.R2 - DV.R1) + ' m'], ['*R*_{1}*R*_{2} (*r*² = 4 m²)', n4(DV.R1 * DV.R2) + ' m²'],
         ['*V* exact', n4(DV.Vx) + ' V'], ['*V* far field (33)', n4(DV.Vf) + ' V (ratio ' + n4(DV.rat) + ')'], ['**p** = *Q***d**', '5 **a**_{z} nC·m']);
-      note = 'Slide 27 derives Eq. (33) in symbols; these numbers are ours. At <i>r</i> = 4<i>d</i> the far-field formula is already within 1.4 %.';
+      note = 'Slide 31 derives Eq. (33) in symbols; these numbers are ours. At <i>r</i> = 4<i>d</i> the far-field formula is already within 1.4 %.';
     } else if (mode === 'de') {
-      rows.push(['*Qd*/4π*ε*_{0}', '1 V·m² (*Qd* = 4π*ε*_{0}, slide 28)'], ['*P*', '*r* = 1.5 m, *θ* = 60°'], ['*V*_{P}', n4(DE.V) + ' V'], ['*Qd*/(4π*ε*_{0}*r*³)', n4(DE.c) + ' V/m'], ['**E**_{P}', n4(DE.Er) + ' **a**_{r} + ' + n4(DE.Et) + ' **a**_{θ} V/m'], ['|**E**_{P}|', n4(DE.E) + ' V/m'], ['streamline through *P*', '*C*_{1} = 2 m']);
-      note = 'Slide 28 gives Eq. (35) in symbols and draws the map with <i>Qd</i> = 4π<i>ε</i><sub class="u">0</sub>; the point <i>P</i> is ours. Equipotential values on the map: <i>V</i> = 0, ±0.2, …, ±1 V; on the <i>z</i> axis they lie at <i>r</i> = 2.236, 1.581, 1.291, 1.118, 1.000 m.';
+      rows.push(['*Qd*/4π*ε*_{0}', '1 V·m² (*Qd* = 4π*ε*_{0}, slide 32)'], ['*P*', '*r* = 1.5 m, *θ* = 60°'], ['*V*_{P}', n4(DE.V) + ' V'], ['*Qd*/(4π*ε*_{0}*r*³)', n4(DE.c) + ' V/m'], ['**E**_{P}', n4(DE.Er) + ' **a**_{r} + ' + n4(DE.Et) + ' **a**_{θ} V/m'], ['|**E**_{P}|', n4(DE.E) + ' V/m'], ['streamline through *P*', '*C*_{1} = 2 m']);
+      note = 'Slide 32 gives Eq. (35) in symbols and draws the map with <i>Qd</i> = 4π<i>ε</i><sub class="u">0</sub>; the point <i>P</i> is ours. Equipotential values on the map: <i>V</i> = 0, ±0.2, …, ±1 V; on the <i>z</i> axis they lie at <i>r</i> = 2.236, 1.581, 1.291, 1.118, 1.000 m.';
     } else if (mode === 'd49') {
       rows.push(['(a) *r*, **p**·**a**_{r}', n4(D49.rA) + ' m, ' + n4(D49.prA) + ' nC·m'], ['(a) *V* at *P*_{A}', n4(D49.VA) + ' V (slide: 0.23 V)'], ['(b) **a**_{r}', fmt.vec(D49.arB, n4)], ['(b) **p**·**a**_{r}', n4(D49.prB) + ' nC·m'], ['(b) *V*', n4(D49.VB) + ' V (slide: 1.97 V)'], ['*ψ* (between **p** and **a**_{r})', fmt.fix(D49.psiA, 1) + '°, ' + fmt.fix(D49.psiB, 1) + '°']);
       note = 'The arrow <b class="v">p</b> shows the direction of the moment (a moment, in C·m, has no length in the figure). <i>ε</i><sub class="u">0</sub> = 8.854 × 10⁻¹² F/m.';
@@ -2555,7 +2555,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   rows.d = PK.ui.slider(gg, { id: 'd', label: '<i>d</i> (m)', min: 0.25, max: 1.2, step: 0.05, value: S.d, onInput: function (v) { S.d = v; S.r = Math.max(S.r, rMin(v)); rows.r.set(S.r); changed(); } });
   rows.r = PK.ui.slider(gg, { id: 'r', label: '<i>r</i> (m)', min: 0.4, max: 2.6, step: 0.05, value: S.r, onInput: function (v) { S.r = Math.max(v, rMin(S.d)); if (S.r !== v) rows.r.set(S.r); changed(); } });
   rows.th = PK.ui.slider(gg, { id: 'th', label: '<i>θ</i> (°)', min: 0, max: 180, step: 1, value: S.th, onInput: function (v) { S.th = v; changed(); } });
-  var gn = document.createElement('p'); gn.className = 'note'; gn.innerHTML = '<i>P</i> stays in the <i>yz</i>-plane (<i>φ</i> = 90°). Drag the ringed point in the figure, or drag elsewhere to turn the view. The charge is <i>Q</i> = (4π<i>ε</i><sub class="u">0</sub> × 1 V·m²)/<i>d</i>, so that <i>Qd</i>/4π<i>ε</i><sub class="u">0</sub> = 1 V·m² as on slide 28.'; gg.appendChild(gn);
+  var gn = document.createElement('p'); gn.className = 'note'; gn.innerHTML = '<i>P</i> stays in the <i>yz</i>-plane (<i>φ</i> = 90°). Drag the ringed point in the figure, or drag elsewhere to turn the view. The charge is <i>Q</i> = (4π<i>ε</i><sub class="u">0</sub> × 1 V·m²)/<i>d</i>, so that <i>Qd</i>/4π<i>ε</i><sub class="u">0</sub> = 1 V·m² as on slide 32.'; gg.appendChild(gn);
   var gst = document.getElementById('g-st');
   steps = PK.ui.steps(gst, { id: 'xs', steps: [], onStep: function () { F.render(); renderCard(); } });
   drill = PK.ui.drill('#g-drill', {
@@ -2573,13 +2573,13 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   function syncRows() { rows.d.set(S.d); rows.r.set(S.r); rows.th.set(S.th); }
   var MN = {
     ex: 'The dipole on the <i>z</i> axis and a point <i>P</i> in the <i>yz</i>-plane: the exact <i>V</i> against the far-field Eq. (33), the field map of Fig. 4.9 and how fast the fields fall off.',
-    dv: 'Slide 27: the potential of the dipole, exactly and for a distant point, Eq. (33), and the dipole moment, Eqs. (36), (37). Step through the derivation (in a slide: ‹ › at the bottom right).',
-    de: 'Slide 28: <b class="v">E</b> = −∇<i>V</i> in spherical coordinates, Eq. (35), then the field map of Fig. 4.9 (equipotentials and streamlines). Step through it.',
-    d49: 'Drill D4.9 (slide 30): <i>V</i> = <b class="v">p</b>·<b class="v">a</b><sub class="u"><i>r</i></sub>/(4π<i>ε</i><sub class="u">0</sub><i>r</i>²) for a dipole moment with three components. Step through the solution.',
-    d410: 'Drill D4.10 (slide 30): <i>V</i> and <b class="v">E</b> of <b class="v">p</b> = 6 <b class="v">a</b><sub class="u"><i>z</i></sub> nC·m at a point in the <i>xz</i>-plane. Step through the solution.',
+    dv: 'Slide 31: the potential of the dipole, exactly and for a distant point, Eq. (33), and the dipole moment, Eqs. (36), (37). Step through the derivation (in a slide: ‹ › at the bottom right).',
+    de: 'Slide 32: <b class="v">E</b> = −∇<i>V</i> in spherical coordinates, Eq. (35), then the field map of Fig. 4.9 (equipotentials and streamlines). Step through it.',
+    d49: 'Drill D4.9 (slide 34): <i>V</i> = <b class="v">p</b>·<b class="v">a</b><sub class="u"><i>r</i></sub>/(4π<i>ε</i><sub class="u">0</sub><i>r</i>²) for a dipole moment with three components. Step through the solution.',
+    d410: 'Drill D4.10 (slide 34): <i>V</i> and <b class="v">E</b> of <b class="v">p</b> = 6 <b class="v">a</b><sub class="u"><i>z</i></sub> nC·m at a point in the <i>xz</i>-plane. Step through the solution.',
     dr: 'A random problem of the D4.9 / D4.10 kind; its number gives the same problem to everyone.'
   };
-  var HEAD = { dv: 'Dipole V (slide 27)', de: 'Dipole E (slide 28)', d49: 'Drill D4.9', d410: 'Drill D4.10' };
+  var HEAD = { dv: 'Dipole V (slide 31)', de: 'Dipole E (slide 32)', d49: 'Drill D4.9', d410: 'Drill D4.10' };
   function setMode(m) {
     var was = mode; mode = m;
     MODES.forEach(function (x) { PK.ui.pressed(mb['m-' + x[0]], x[0] === m); });

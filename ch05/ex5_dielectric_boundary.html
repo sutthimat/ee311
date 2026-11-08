@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Dielectric–dielectric boundary (Hayt Section 5.8, slides 28–33), on pagekit. Each dielectric is a soft tinted block
+/* Dielectric–dielectric boundary (Hayt Section 5.8, slides 33–38), on pagekit. Each dielectric is a soft tinted block
    whose tint deepens with its relative permittivity (own tokens --di0 for ε_r = 1 .. --di1 for ε_r = 6, edge --di-e).
    D is the teaching object: heavy ink arrows; E is a thinner blue arrow; P a thinner orange arrow; normal and
    tangential parts thin grey arrows; the unit normal n green. The gaussian pillbox is faint blue with a green top
@@ -1794,7 +1794,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     return {
       ph: p, r1up: true, sD: 50, sE: 5, dim: 2,
       fx: { DN: 1, box: 1, Dt: 2, D2: 3, th2: 3, D2v: 4, E: 5 },
-      q: 'Refraction of **D** (slides 30–31): region 1 (*z* > 0) has *ε*_{r1} = 3 and region 2 (*z* < 0) *ε*_{r2} = 1 (so *ε*_{1}/*ε*_{2} = 3), with no free charge on the boundary. In region 1 *D*_{1} = 100 nC/m² at *θ*_{1} = 47.5° from the normal. Use (39)–(43) to find *θ*_{2}, *D*_{2} and *E*_{1}, *E*_{2}.',
+      q: 'Refraction of **D** (slides 35–36): region 1 (*z* > 0) has *ε*_{r1} = 3 and region 2 (*z* < 0) *ε*_{r2} = 1 (so *ε*_{1}/*ε*_{2} = 3), with no free charge on the boundary. In region 1 *D*_{1} = 100 nC/m² at *θ*_{1} = 47.5° from the normal. Use (39)–(43) to find *θ*_{2}, *D*_{2} and *E*_{1}, *E*_{2}.',
       given: 'Refraction: region 1 (*z* > 0): *ε*_{r1} = 3;  region 2 (*z* < 0): *ε*_{r2} = 1;  *D*_{1} = 100 nC/m² at *θ*_{1} = 47.5° from the normal',
       givenC: '*ε*_{r1} = 3 (*z* > 0), *ε*_{r2} = 1;  *D*_{1} = 100 nC/m², *θ*_{1} = 47.5°',
       steps: [
@@ -2264,10 +2264,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   });
   var MN = {
     ex: 'Two dielectrics meet at <i>z</i> = 0 (region 1 above, as in Hayt Fig. 5.10): set <i>ε</i><sub>r1</sub>, <i>ε</i><sub>r2</sub> and the angle <i>θ</i><sub>1</sub> of <b class="v">D</b><sub class="u">1</sub>.',
-    rf: 'Refraction of <b class="v">D</b> (slides 30–31): Eqs. (39)–(43) step by step, with <i>ε</i><sub>1</sub>/<i>ε</i><sub>2</sub> = 3. In a slide: ‹ › at the bottom right.',
-    e55: 'Example 5.5 (slide 32): the fields inside the Teflon slab of Example 5.4. Step through the solution.',
-    d59: 'Drill D5.9 (slide 33): the parts of <b class="v">D</b><sub class="u">1</sub> at the boundary <i>z</i> = 0. Step through the solution.',
-    d510: 'Drill D5.10 (slide 33): <b class="v">D</b><sub class="u">2</sub> and <b class="v">P</b><sub class="u">2</sub> across the boundary of D5.9. Step through the solution.',
+    rf: 'Refraction of <b class="v">D</b> (slides 35–36): Eqs. (39)–(43) step by step, with <i>ε</i><sub>1</sub>/<i>ε</i><sub>2</sub> = 3. In a slide: ‹ › at the bottom right.',
+    e55: 'Example 5.5 (slide 37): the fields inside the Teflon slab of Example 5.4. Step through the solution.',
+    d59: 'Drill D5.9 (slide 38): the parts of <b class="v">D</b><sub class="u">1</sub> at the boundary <i>z</i> = 0. Step through the solution.',
+    d510: 'Drill D5.10 (slide 38): <b class="v">D</b><sub class="u">2</sub> and <b class="v">P</b><sub class="u">2</sub> across the boundary of D5.9. Step through the solution.',
     dr: 'A random problem of the D5.9/D5.10 kind; its number gives the same problem to everyone.'
   };
   var HEAD = { rf: 'Refraction: Eqs. (39)–(43)', e55: 'Example 5.5: inside the Teflon slab', d59: 'Drill D5.9: the parts of <b class="v">D</b><sub class="u">1</sub>', d510: 'Drill D5.10: <b class="v">D</b><sub class="u">2</sub>, <b class="v">P</b><sub class="u">2</sub> and <i>θ</i><sub>2</sub>' };

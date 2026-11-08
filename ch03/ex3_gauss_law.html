@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Gauss's law (Hayt §3.2, slides 7–10), on pagekit. D is the teaching object: heavy ink arrows. E (D3.3) is a thinner
+/* Gauss's law (Hayt §3.2, slides 8–11), on pagekit. D is the teaching object: heavy ink arrows. E (D3.3) is a thinner
    blue arrow. The outward normal ΔS / dS and the patch it belongs to are green. Gaussian surfaces are faint blue
    (alpha about 0.2) with a thin rim. Charges are orange dots with a + glyph or blue dots with a − glyph; line and
    sheet charges are orange. Flux lines are thin and teal-grey (own token --flx). */
@@ -2465,9 +2465,9 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   function showSweep() { PK.ui.show(swBox, mode === 'e31' && steps.get() >= 4); rows.sw.set(Math.round(SW.f * 100)); }
   var MN = {
     ex: 'A closed surface <i>S</i> and up to three point charges. Ψ out of <i>S</i> is the charge inside, whatever the shape.',
-    e31: 'Example 3.1 (slide 9): Gauss&#39;s law checked on a sphere about a point charge. Step through the solution (in a slide: ‹ › at the bottom right); Play sweeps the strips that build up the sphere.',
-    d33: 'Drill D3.3 (slide 10): a given <b class="v">D</b> field, its <b class="v">E</b>, and the charge in two spheres. Step through the solution.',
-    d34: 'Drill D3.4 (slide 10): flux leaving a cube for three charge distributions, each shown alone. Step through the solution.',
+    e31: 'Example 3.1 (slide 10): Gauss&#39;s law checked on a sphere about a point charge. Step through the solution (in a slide: ‹ › at the bottom right); Play sweeps the strips that build up the sphere.',
+    d33: 'Drill D3.3 (slide 11): a given <b class="v">D</b> field, its <b class="v">E</b>, and the charge in two spheres. Step through the solution.',
+    d34: 'Drill D3.4 (slide 11): flux leaving a cube for three charge distributions, each shown alone. Step through the solution.',
     dr: 'A random problem of the D3.4 kind; its number gives the same problem to everyone.'
   };
   var HEAD = { e31: 'Example 3.1: a sphere about a point charge', d33: 'Drill D3.3: <b class="v">D</b> = 0.3<i>r</i>² <b class="v">a</b><sub class="u"><i>r</i></sub> nC/m²', d34: 'Drill D3.4: the cube <i>x</i>, <i>y</i>, <i>z</i> = ±5' };

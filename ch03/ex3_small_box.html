@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* The differential volume element (Hayt §3.4, slides 16–18), on pagekit. The small box is the teaching object (ink
+/* The differential volume element (Hayt §3.4, slides 19–21), on pagekit. The small box is the teaching object (ink
    edges). Its faces are tinted by their outward flux: warm (orange) = flux out (+), cool (blue) = flux in (−), grey =
    no flux or not yet in the step. Short teal arrows at the faces give the flux direction only (out: solid head; in:
    dashed with a hollow head); the number beside each is the face's flux, an exact face integral (8 × 8 Gauss points).
@@ -814,7 +814,7 @@ table.ft td, table.ft th { white-space: nowrap; }
   /* ---------- the drawing lists (filled by the page's draw(F)) ---------- */
   FP._begin = function () {
     var F = this;
-    F.polys = []; F.items = []; F.dots = []; F.raws = []; F.labels = []; F.occ = []; F.surfs = []; F.handles = []; F.obsExtra = []; F.defs = ''; F.split = null;
+    F.polys = []; F.items = []; F.dots = []; F.raws = []; F.rawsTop = []; F.labels = []; F.occ = []; F.surfs = []; F.handles = []; F.obsExtra = []; F.defs = ''; F.split = null;
     F.tol = 1e-4;
   };
   /* occlude(o): register a surface (PK.vis.*) that hides what lies behind it */
@@ -869,6 +869,8 @@ table.ft td, table.ft th { white-space: nowrap; }
   };
   /* raw(svg, obs): any SVG string drawn after the lines; obs: [{pts: [{x, y}..], closed, role}] for the labels */
   FP.raw = function (s, obs) { this.raws.push(s); if (obs) this.obsExtra = this.obsExtra.concat(obs); };
+  /* rawTop(svg): drawn after the dots, e.g. the + / − glyph on a charge disc (raw() would sit under the disc) */
+  FP.rawTop = function (s) { this.rawsTop.push(s); };
   /* circle(cx, cy, r, o): a screen circle as a polyline (e.g. a sphere's silhouette r = R * F.cam.s) */
   FP.circle = function (cx, cy, r, o) {
     o = o || {}; var q = [], k;
@@ -1012,6 +1014,7 @@ table.ft td, table.ft th { white-space: nowrap; }
       s += '<circle class="' + D.cls + (hid ? ' pk-ghd' : '') + '" cx="' + f1(q.x) + '" cy="' + f1(q.y) + '" r="' + D.r + '"/>';
       circObs(ob, q.x, q.y, D.r + 1, D.role);
     });
+    F.rawsTop.forEach(function (r) { s += r; });
     return s;
   };
   function circObs(ob, x, y, r, role) { var q = []; for (var k = 0; k <= 12; k++) q.push({ x: x + r * Math.cos(k * Math.PI / 6), y: y + r * Math.sin(k * Math.PI / 6) }); ob.pts(q, false, role); ob.seg(x - r * 0.7, y, x + r * 0.7, y, role); ob.seg(x, y - r * 0.7, x, y + r * 0.7, role); }
@@ -1725,7 +1728,7 @@ table.ft td, table.ft th { white-space: nowrap; }
     if (Math.abs(tot) < 1e-12 * m) tot = 0;
     return { f: f, pair: [f[0] + f[1], f[2] + f[3], f[4] + f[5]], tot: tot, dv: dv, ratio: tot / dv, m: m };
   }
-  /* the first-order (Taylor) estimate of each face, as on slide 16: (±D_a0 + (Δa/2) ∂D_a/∂a) × (face area) */
+  /* the first-order (Taylor) estimate of each face, as on slide 19: (±D_a0 + (Δa/2) ∂D_a/∂a) × (face area) */
   function taylor(D0, dd, h) { return FACE.map(function (fc) { var a = fc.a, u = (a + 1) % 3, v = (a + 2) % 3; return (fc.s * D0[a] + h[a] * dd[a]) * 4 * h[u] * h[v]; }); }
 
   /* ---------- the fields ---------- */
@@ -1777,13 +1780,13 @@ table.ft td, table.ft th { white-space: nowrap; }
 
   /* ---------- the slide examples ---------- */
   var n3 = function (v) { return fmt.n(v); }, n4 = function (v) { return fmt.n(v, 4); };
-  /* Front + back (slide 16): Example 3.3's field at P(0, 1, 0), box 0.5 m (numbers chosen for the figure) */
+  /* Front + back (slide 19): Example 3.3's field at P(0, 1, 0), box 0.5 m (numbers chosen for the figure) */
   var FB = (function () {
     var f = FL.e33, c = [0, 1, 0], h = 0.25, H = [h, h, h], r = boxFlux(f.D, c, H), D0 = f.D(c), dd = f.dd(c), tay = taylor(D0, dd, H);
     var Dxf = f.D([h, 1, 0])[0], Dxb = f.D([-h, 1, 0])[0], DxfT = D0[0] + h * dd[0];
     var X = {
       c: c, h: h, r: r, D0: D0, dd: dd, tay: tay, Dxf: Dxf, Dxb: Dxb, SC: 0.5,
-      q: 'Slide 16: a small box Δ*x* Δ*y* Δ*z* centred at *P*. Find, to first order, the flux leaving its front face (Δ*x*/2 from *P*, normal **a**_{x}) and its back face (normal −**a**_{x}), and their sum. Numbers chosen for the figure: **D** of Example 3.3 at *P*(0, 1, 0), Δ*x* = Δ*y* = Δ*z* = 0.5 m.',
+      q: 'Slide 19: a small box Δ*x* Δ*y* Δ*z* centred at *P*. Find, to first order, the flux leaving its front face (Δ*x*/2 from *P*, normal **a**_{x}) and its back face (normal −**a**_{x}), and their sum. Numbers chosen for the figure: **D** of Example 3.3 at *P*(0, 1, 0), Δ*x* = Δ*y* = Δ*z* = 0.5 m.',
       given: FL.e33.t + ' (Example 3.3);  box at *P*(0, 1, 0), Δ*x* = Δ*y* = Δ*z* = 0.5 m (chosen)',
       givenC: 'Example 3.3 field;  *P*(0, 1, 0), Δ*x* = Δ*y* = Δ*z* = 0.5 m (chosen)',
       steps: [
@@ -1805,13 +1808,13 @@ table.ft td, table.ft th { white-space: nowrap; }
     };
     return X;
   })();
-  /* Example 3.3 (slide 17): Δv = 10⁻⁹ m³ at the origin, a cube 1 mm on a side (drawn in mm) */
+  /* Example 3.3 (slide 20): Δv = 10⁻⁹ m³ at the origin, a cube 1 mm on a side (drawn in mm) */
   var E33 = (function () {
     var f = FL.e33, h = 5e-4, r = boxFlux(f.D, [0, 0, 0], [h, h, h]), nC = r.f.map(function (v) { return v * 1e9; }), tot = r.tot * 1e9;
     var nz = function (v) { return sg(v, 1e-6); };
     return {
       r: r, nC: nC, tot: tot,
-      q: 'Example 3.3 (slide 17): find the approximate value of the total charge enclosed in an incremental volume of 10⁻⁹ m³ located at the origin, if ' + FL.e33.t + '.',
+      q: 'Example 3.3 (slide 20): find the approximate value of the total charge enclosed in an incremental volume of 10⁻⁹ m³ located at the origin, if ' + FL.e33.t + '.',
       given: FL.e33.t + ';  Δ*v* = 10⁻⁹ m³ at the origin (a cube 1 mm on a side)',
       givenC: 'Example 3.3 field;  Δ*v* = 10⁻⁹ m³ at the origin',
       steps: [
@@ -1830,14 +1833,14 @@ table.ft td, table.ft th { white-space: nowrap; }
       soFarC: ['∂*D*_{x}/∂*x* = 0', '∂*D*_{y}/∂*y* = 0', '∂*D*_{z}/∂*z* = 2']
     };
   })();
-  /* D3.6 (slide 18) */
+  /* D3.6 (slide 21) */
   var D36 = (function () {
     var f = FL.d36, P = [2, -1, 3], D = f.D(P), E = D.map(function (v) { return v * 1e-12 / EPS0; }), dd = f.dd(P), B = dd[0] + dd[1] + dd[2], Q = B * 1e-12 * 1e-12;
     var rS = Math.cbrt(3e-12 / (4 * Math.PI)), RD = 0.25, psi = 4096 / 3;
     var Ev = fmt.vec(E, n4), Dv = fmt.vec(D, fi);
     return {
       P: P, D: D, E: E, dd: dd, B: B, Q: Q, rS: rS, RD: RD, mag: RD / rS, psi: psi, sD: 1000, sE: 100,
-      q: 'D3.6 (slide 18): given ' + f.t + ' in free space, find (a) the total electric flux through the rectangular surface *z* = 2, 0 < *x* < 2, 1 < *y* < 3, in the **a**_{z} direction; (b) **E** at *P*(2, −1, 3); (c) an approximate value for the total charge in an incremental sphere at *P*(2, −1, 3) of volume 10⁻¹² m³.',
+      q: 'D3.6 (slide 21): given ' + f.t + ' in free space, find (a) the total electric flux through the rectangular surface *z* = 2, 0 < *x* < 2, 1 < *y* < 3, in the **a**_{z} direction; (b) **E** at *P*(2, −1, 3); (c) an approximate value for the total charge in an incremental sphere at *P*(2, −1, 3) of volume 10⁻¹² m³.',
       given: f.t + ';  *P*(2, −1, 3)',
       givenC: 'D3.6 field (pC/m²);  *P*(2, −1, 3)',
       steps: [
@@ -2150,7 +2153,7 @@ table.ft td, table.ft th { white-space: nowrap; }
     if (px > 150) dims(F, c, H, ['Δ*x*', 'Δ*y*', 'Δ*z*']);
   }
 
-  /* ---------- Front + back (slide 16) ---------- */
+  /* ---------- Front + back (slide 19) ---------- */
   function drawFB(F) {
     var k = steps.get(), X = FB, c = X.c, h = X.h, H = [h, h, h], list = [];
     if (k >= 2) list.push(0); if (k >= 3) list.push(1);
@@ -2358,12 +2361,12 @@ table.ft td, table.ft th { white-space: nowrap; }
   });
   var MN = {
     ex: 'Choose a field, move <i>P</i> and size the box. Play shrinks the box: watch ∮/Δ<i>v</i> approach the sum of the ∂ terms at <i>P</i>.',
-    fb: 'Slide 16: the first-order flux through the front and back faces and their sum. Step through the solution (in a slide: ‹ › at the bottom right).',
-    e33: 'Example 3.3 (slide 17): the three ∂ terms at the origin, each with its pair of faces, and the charge in 10⁻⁹ m³.',
-    d36: 'Drill D3.6 (slide 18): (a) flux through a rectangle, (b) <b class="v">E</b> at <i>P</i>, (c) the charge in a tiny sphere at <i>P</i>.',
+    fb: 'Slide 19: the first-order flux through the front and back faces and their sum. Step through the solution (in a slide: ‹ › at the bottom right).',
+    e33: 'Example 3.3 (slide 20): the three ∂ terms at the origin, each with its pair of faces, and the charge in 10⁻⁹ m³.',
+    d36: 'Drill D3.6 (slide 21): (a) flux through a rectangle, (b) <b class="v">E</b> at <i>P</i>, (c) the charge in a tiny sphere at <i>P</i>.',
     dr: 'A random problem of the D3.6 (c) kind; its number gives the same problem to everyone.'
   };
-  var HEAD = { fb: 'Slide 16: the front and back faces', e33: 'Example 3.3: the charge in 10⁻⁹ m³ at the origin', d36: 'Drill D3.6' };
+  var HEAD = { fb: 'Slide 19: the front and back faces', e33: 'Example 3.3: the charge in 10⁻⁹ m³ at the origin', d36: 'Drill D3.6' };
   function setMode(m) {
     play.set(false);
     if (mode === 'ex' && S.d !== Math.round(S.d * 100) / 100) S.d = Math.round(S.d * 100) / 100;

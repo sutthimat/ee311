@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* The nature of dielectric materials (Hayt Section 5.7; slides 23–27), on pagekit. All pictures are flat (a fixed plan
+/* The nature of dielectric materials (Hayt Section 5.7; slides 27–31), on pagekit. All pictures are flat (a fixed plan
    view: x to the right, y up). Conductor plates: solid, slightly metallic grey (own palette --mt-*). The dielectric:
    a soft cream slab (--sl-*). Free charge: full orange dots with a + glyph and full blue dots with a − glyph, on the
    plates. Bound charge (the ends of the molecular dipoles and the charge on the slab faces): the same colours in a
@@ -1707,12 +1707,12 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var DEF = { er: 3.8, D: 8, kind: 'polar', pic: 'cap', th: 53, closed: false, t: 0 };
   var S = Object.assign({}, DEF), mode = 'ex', lab = true;
 
-  /* ---------- Example: D generalized (slide 25), a stated example: Teflon, ±10 nC/m² ---------- */
+  /* ---------- Example: D generalized (slide 29), a stated example: Teflon, ±10 nC/m² ---------- */
   var XDG = (function () {
     var d = diel(2.1, 10);
     return {
       d: d, cap: { er: 2.1, D: 10, kind: 'polar' },
-      q: 'Slide 25: Gauss’s law with *ε*_{0}**E** counts all the charge, bound and free. Separate the free charge and define **D**. A stated example: a Teflon slab (*ε*_{r} = 2.1) between plates carrying the free charge ±10 nC/m²; a gaussian box (faces 1 m²) encloses the + plate’s face and the slab’s left face.',
+      q: 'Slide 29: Gauss’s law with *ε*_{0}**E** counts all the charge, bound and free. Separate the free charge and define **D**. A stated example: a Teflon slab (*ε*_{r} = 2.1) between plates carrying the free charge ±10 nC/m²; a gaussian box (faces 1 m²) encloses the + plate’s face and the slab’s left face.',
       given: 'A stated example: Teflon slab (*ε*_{r} = 2.1) between plates with free charge ±10 nC/m²;  gaussian box with faces of 1 m² around the + plate and the slab’s left face',
       givenC: 'Teflon, *ε*_{r} = 2.1;  free ±10 nC/m²;  box faces 1 m²',
       steps: [
@@ -1755,10 +1755,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     };
   })();
 
-  /* ---------- Bound charge (slide 24) on the surface ΔS, θ = 53° (as in Hayt Fig. 5.9) ---------- */
+  /* ---------- Bound charge (slide 28) on the surface ΔS, θ = 53° (as in Hayt Fig. 5.9) ---------- */
   var XBC = {
     th: 53,
-    q: 'Slide 24: how much bound charge crosses a small surface Δ*S* inside a polarized dielectric? *n* dipoles **p** = *Q***d** per m³, all at the angle *θ* to the normal of Δ*S*. Then the bound charge left inside a closed surface.',
+    q: 'Slide 28: how much bound charge crosses a small surface Δ*S* inside a polarized dielectric? *n* dipoles **p** = *Q***d** per m³, all at the angle *θ* to the normal of Δ*S*. Then the bound charge left inside a closed surface.',
     given: 'Dielectric: *n* dipoles **p** = *Q***d** per m³, all at *θ* = 53° to the normal of a small surface Δ*S*',
     givenC: '*n* dipoles per m³, **p** = *Q***d**, at *θ* = 53° to the normal',
     steps: null, stepsC: null, vals: null
@@ -2052,7 +2052,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     fy.forEach(function (y) { charge(F, [PX0 + 0.24, y, 0], 'fn', rq); });
     var bq = by.map(function (y) { return charge(F, [-SX + 0.24, y, 0], 'bn', rq * 0.92); });
     by.forEach(function (y) { charge(F, [SX - 0.24, y, 0], 'bp', rq * 0.92); });
-    /* the gaussian box of slide 25 */
+    /* the gaussian box of slide 29 */
     var BX0 = -5.85, BX1 = -3.0, BY = 3.2;   /* the box spans the whole plate and slab face: all the free and bound dots of one side */
     if (c.box) {
       F.path(rect2(BX0, -BY, BX1, BY), { color: 'ink', w: 'axis', dash: 'guide', closed: true });
@@ -2088,7 +2088,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     if (c.n) F.label({ t: '*n* = ' + fmt.n(c.nv) + ' m⁻³', c: 't-ink', size: cp ? 'small' : 'main', at: F.P([0, 0, 0]), alts: [F.P([0, 1.2, 0]), F.P([0, -1.2, 0])], r: 2, dir: { x: 0, y: 0 }, kind: 'required', pri: 1, id: 'n', inReadout: true });
   }
 
-  /* ---------- the surface ΔS with tilted dipoles (slide 24, the idea of Fig. 5.9) ---------- */
+  /* ---------- the surface ΔS with tilted dipoles (slide 28, the idea of Fig. 5.9) ---------- */
   function ends(c, th) { var u = [Math.sin(th * D2R), Math.cos(th * D2R)]; return { m: [c[0] - u[0] * DL / 2, c[1] - u[1] * DL / 2], p: [c[0] + u[0] * DL / 2, c[1] + u[1] * DL / 2] }; }
   function inC(q) { return Math.hypot(q[0] - DSC[0], q[1] - DSC[1]) < RC; }
   function dsCount(th, closed) {
@@ -2240,10 +2240,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       }
     } else if (mode === 'bnd') {
       rows.push(['*θ*', '53°'], ['½*d* cos *θ*', fmt.n(0.5 * Math.cos(53 * D2R)) + '*d*'], ['Δ*Q*_{b}', '*nQd* cos *θ* Δ*S* = **P**·Δ**S**'], ['*Q*_{b} inside a closed surface', '−∮ **P**·d**S** (22)']);
-      note = 'Slide 24 gives no numbers: the counts are those of the picture. A uniform <b class="v">P</b> carries as much bound charge into a closed surface as out of it; bound volume charge appears only where <b class="v">P</b> changes, <i>ρ<sub>b</sub></i> = −∇·<b class="v">P</b>, and bound surface charge where a dielectric ends.';
+      note = 'Slide 28 gives no numbers: the counts are those of the picture. A uniform <b class="v">P</b> carries as much bound charge into a closed surface as out of it; bound volume charge appears only where <b class="v">P</b> changes, <i>ρ<sub>b</sub></i> = −∇·<b class="v">P</b>, and bound surface charge where a dielectric ends.';
     } else if (mode === 'dg') {
       dRows(XDG.d, rows); rows.push(['*Q*_{T} (per m² of box face)', fmt.q(XDG.d.e0E, 'nC')], ['*Q*_{b}', '−' + fmt.q(XDG.d.P, 'nC')], ['*Q* = *Q*_{T} − *Q*_{b}', '10 nC']);
-      note = 'Slide 25 has no numbers; this example (Teflon, ±10 nC/m²) is ours, chosen so the Teflon numbers 1/2.1 = 0.476 and 1.1/2.1 = 0.524 of Examples 5.4 and 5.5 appear. The left face of the box is in the metal, where <b class="v">E</b> = 0 and <b class="v">P</b> = 0.';
+      note = 'Slide 29 has no numbers; this example (Teflon, ±10 nC/m²) is ours, chosen so the Teflon numbers 1/2.1 = 0.476 and 1.1/2.1 = 0.524 of Examples 5.4 and 5.5 appear. The left face of the box is in the metal, where <b class="v">E</b> = 0 and <b class="v">P</b> = 0.';
     } else if (mode === 'x54') {
       rows.push(['Outside **E**, **D**, **P**', '*E*_{0} **a**_{x},  *ε*_{0}*E*_{0} **a**_{x},  0'], ['Inside **D**_[in], **P**_[in]', '2.1*ε*_{0}**E**_[in],  1.1*ε*_{0}**E**_[in]'], ['Inside (Example 5.5)', '**E**_[in] = 0.476*E*_{0} **a**_{x},  **D**_[in] = *ε*_{0}*E*_{0} **a**_{x},  **P**_[in] = 0.524*ε*_{0}*E*_{0} **a**_{x}']);
       note = 'Example 5.4 stops at the relations inside the slab; the step across the faces <i>x</i> = 0 and <i>x</i> = <i>a</i> needs the boundary condition of Section 5.8 (normal <b class="v">D</b> is continuous), which Example 5.5 uses: 1/2.1 = 0.476 and 1 − 0.476 = 0.524 = 1.1/2.1.';
@@ -2305,13 +2305,13 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   });
   var MN = {
     ex: 'Explore: a dielectric slab between charged plates (the molecules, the bound charge and <b class="v">D</b> = <i>ε</i><sub>0</sub><b class="v">E</b> + <b class="v">P</b>), or the bound charge crossing a small surface. Play shows the thermal motion of the molecules (not to scale in time).',
-    bnd: 'Slide 24: the bound charge that crosses a small surface Δ<i>S</i>, and Eq. (22) for a closed surface. Step through it (in a slide: ‹ › at the bottom right).',
-    dg: 'Slide 25: from Gauss’s law with <i>ε</i><sub>0</sub><b class="v">E</b> (all charge) to <b class="v">D</b> (free charge only), Eqs. (23)–(27), on a stated example. Step through it.',
-    x54: 'Example 5.4 (slide 27): the fields outside and inside a Teflon slab. Step through the solution.',
-    d58: 'Drill D5.8 (slide 27): <i>E</i>, <i>P</i> and the number of dipoles per m³ in a slab with <i>ε<sub>r</sub></i> = 3.8. Step through the solution.',
+    bnd: 'Slide 28: the bound charge that crosses a small surface Δ<i>S</i>, and Eq. (22) for a closed surface. Step through it (in a slide: ‹ › at the bottom right).',
+    dg: 'Slide 29: from Gauss’s law with <i>ε</i><sub>0</sub><b class="v">E</b> (all charge) to <b class="v">D</b> (free charge only), Eqs. (23)–(27), on a stated example. Step through it.',
+    x54: 'Example 5.4 (slide 31): the fields outside and inside a Teflon slab. Step through the solution.',
+    d58: 'Drill D5.8 (slide 31): <i>E</i>, <i>P</i> and the number of dipoles per m³ in a slab with <i>ε<sub>r</sub></i> = 3.8. Step through the solution.',
     dr: 'A random problem like D5.8; its number gives the same problem to everyone.'
   };
-  var HEAD = { bnd: 'Bound charge crossing Δ<i>S</i> (slide 24)', dg: 'Generalizing <b class="v">D</b> (slide 25)', x54: 'Example 5.4: a Teflon slab', d58: 'Drill D5.8: a slab with <i>ε<sub>r</sub></i> = 3.8' };
+  var HEAD = { bnd: 'Bound charge crossing Δ<i>S</i> (slide 28)', dg: 'Generalizing <b class="v">D</b> (slide 29)', x54: 'Example 5.4: a Teflon slab', d58: 'Drill D5.8: a slab with <i>ε<sub>r</sub></i> = 3.8' };
   function groups() {
     var ex = mode === 'ex';
     PK.ui.show('#g-ex', ex); PK.ui.show(capBox, S.pic === 'cap'); PK.ui.show(dsBox, S.pic === 'ds');

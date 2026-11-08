@@ -211,12 +211,12 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Energy in the electrostatic field (Hayt Section 4.8; slides 31-34), on pagekit. Explore assembles up to four point
+/* Energy in the electrostatic field (Hayt Section 4.8; slides 36-39), on pagekit. Explore assembles up to four point
    charges one at a time from infinity: the work of each step is a bar of a waterfall plot beside the 3-D view (the
    running total ends at W_E), and W_E = 1/2 sum Q_m V_m is a second readout. The plane of the charges is coloured by
    the potential of the charges already in place (diverging map, light = 0 V) or by the energy density 1/2 eps0 E^2
-   (sequential map, log scale): scalars, colour only, each with a labelled colour scale. The coax (slide 33) and D4.11
-   (slide 34) colour the region by 1/2 D.E (linear scale on the w axis of the plot) and show W_E as the area under
+   (sequential map, log scale): scalars, colour only, each with a labelled colour scale. The coax (slide 38) and D4.11
+   (slide 39) colour the region by 1/2 D.E (linear scale on the w axis of the plot) and show W_E as the area under
    dW_E/drho (or dW_E/dr). The carried charge: a thin dark path with ticks, an arrow at its end, a small disc. */
 .w-path { stroke-width: 1.7; }
 .qd { stroke: var(--paper); stroke-width: 1.5; }
@@ -1745,7 +1745,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var PL = 3;   /* the plane z = 0 is the square |x|, |y| <= 3 m; charges stay within 2.6 m */
 
   function cumul(a) { var o = a.map(function (x, i) { return a.slice(0, i + 1).join(';  '); }); o.items = a; return o; }   /* So far: every earlier value stays */
-  /* ---------- the coax of Example 3.2 (slide 33) ---------- */
+  /* ---------- the coax of Example 3.2 (slide 38) ---------- */
   var CX = { L: 0.5, a: 1e-3, b: 4e-3, Q: 30e-9, Z: 4.5 };
   CX.rs = CX.Q / (2 * PI * CX.a * CX.L); CX.ln = Math.log(CX.b / CX.a);
   CX.Va = CX.a * CX.rs * CX.ln / EPS0; CX.W = PI * CX.L * CX.a * CX.a * CX.rs * CX.rs * CX.ln / EPS0;
@@ -1753,7 +1753,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   CX.dW1 = PI * CX.L * CX.a * CX.a * CX.rs * CX.rs / EPS0 * 1e6;   /* dW_E/drho = CX.dW1/rho in μJ/mm, rho in mm (16.18 μJ/mm at 1 mm) */
   function wCx(rmm) { return rmm < 1 || rmm > 4 ? 0 : CX.wa / (rmm * rmm); }   /* J/m^3, rho in mm */
   var XCX = {
-    q: 'Slide 33: a coaxial cable of length *L*, inner radius *a*, outer radius *b*, with *ρ*_{S} on the inner conductor. Find *W*_{E} = ½∫*ε*_{0}*E*² d*v* and check it with ½*QV*_{a}. Numbers: the coax of Example 3.2 (*L* = 0.5 m, *a* = 1 mm, *b* = 4 mm, air, *Q* = 30 nC).',
+    q: 'Slide 38: a coaxial cable of length *L*, inner radius *a*, outer radius *b*, with *ρ*_{S} on the inner conductor. Find *W*_{E} = ½∫*ε*_{0}*E*² d*v* and check it with ½*QV*_{a}. Numbers: the coax of Example 3.2 (*L* = 0.5 m, *a* = 1 mm, *b* = 4 mm, air, *Q* = 30 nC).',
     given: 'Coax of Example 3.2: *L* = 0.5 m (drawn shortened), *a* = 1 mm, *b* = 4 mm, air;  *Q* = 30 nC on the inner conductor',
     givenC: 'Example 3.2 coax: *L* = 0.5 m, *a* = 1 mm, *b* = 4 mm;  *Q* = 30 nC',
     steps: [
@@ -1769,7 +1769,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     soFar: cumul(['*ρ*_{S} = ' + n4(CX.rs * 1e6) + ' μC/m²', '*E* = ' + fmt.n(CX.Ea / 1e6) + ' MV/m … ' + fmt.n(CX.Eb / 1e3) + ' kV/m', '½*ε*_{0}*E*² = ' + fmt.n(CX.wa) + ' … ' + fmt.n(CX.wb) + ' J/m³', 'd*W*_{E}/d*ρ* ∝ 1/*ρ*', '*W*_{E} = ' + n4(CX.W * 1e6) + ' μJ'])
   };
 
-  /* ---------- D4.11 (slide 34): one eighth of a thick spherical shell, 2 mm < r < 3 mm ---------- */
+  /* ---------- D4.11 (slide 39): one eighth of a thick spherical shell, 2 mm < r < 3 mm ---------- */
   var SH = { r1: 2, r2: 3 };
   SH.Ia = 1 / 0.002 - 1 / 0.003; SH.Ib = (1 / 3) * (1 / Math.pow(0.002, 3) - 1 / Math.pow(0.003, 3));
   SH.Wa = 0.5 * EPS0 * 4e4 * SH.Ia * 1 * PI / 2; SH.Wb = 0.5 * EPS0 * 9e4 * SH.Ib * 2 * PI / 2;
@@ -2160,7 +2160,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     void O;
   }
 
-  /* ---------- the coax of slide 33 (lengths in mm, the cable drawn shortened) ---------- */
+  /* ---------- the coax of slide 38 (lengths in mm, the cable drawn shortened) ---------- */
   function rim(F, pts, back, o) {
     var n = pts.length, run = null, st = null;
     function flush() { if (run && run.length > 1) F.path(run, Object.assign({}, o, st ? { dash: 'guide', w: 'guide', op: 0.7, role: 'soft' } : {})); }
@@ -2446,7 +2446,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     } else if (mode === 'cx') {
       rows.push(['*ρ*_{S} = *Q*/(2π*aL*)', n4(CX.rs * 1e6) + ' μC/m²'], ['*E* at *a*, at *b*', fmt.n(CX.Ea / 1e6) + ' MV/m, ' + fmt.n(CX.Eb / 1e3) + ' kV/m'], ['½*ε*_{0}*E*² at *a*, at *b*', fmt.n(CX.wa) + ' J/m³, ' + fmt.n(CX.wb) + ' J/m³'],
         ['ln(*b*/*a*) = ln 4', n4(CX.ln)], ['*W*_{E} = π*La*²*ρ*_{S}² ln(*b*/*a*)/*ε*_{0}', n4(CX.W * 1e6) + ' μJ'], ['*V*_{a} (outer conductor at 0 V)', fmt.n(CX.Va, 4) + ' V'], ['½*QV*_{a}', n4(CX.W * 1e6) + ' μJ'], ['*C* = *Q*/*V*_{a} (Chapter 6)', n4(CX.C * 1e12) + ' pF']);
-      note = 'Slide 33 gives the coax in symbols; the numbers are those of Example 3.2 (Section 3.3). The density falls as 1/<i>ρ</i>², but a shell holds energy in proportion to d<i>ρ</i>/<i>ρ</i>: each doubling of <i>ρ</i> holds the same energy, ' + n4(CX.W * 1e6 / 2) + ' μJ. <i>ε</i><sub class="u">0</sub> = 8.854 × 10⁻¹² F/m.';
+      note = 'Slide 38 gives the coax in symbols; the numbers are those of Example 3.2 (Section 3.3). The density falls as 1/<i>ρ</i>², but a shell holds energy in proportion to d<i>ρ</i>/<i>ρ</i>: each doubling of <i>ρ</i> holds the same energy, ' + n4(CX.W * 1e6 / 2) + ' μJ. <i>ε</i><sub class="u">0</sub> = 8.854 × 10⁻¹² F/m.';
     } else {
       rows.push(['*φ*-integral', 'π/2'], ['(a) ∫ *r*⁻² d*r*, ∫ sin *θ* d*θ*', n4(SH.Ia) + ' m⁻¹, 1'], ['(a) *W*_{E}', fmt.n(SH.Wa * 1e6) + ' μJ (slide: 46.4 μJ)'], ['(b) ∫ *r*⁻⁴ d*r*', n4(SH.Ib / 1e7) + ' × 10⁷ m⁻³'], ['(b) ∫ (4 cos²*θ* + sin²*θ*) sin *θ* d*θ*', '2'], ['(b) *W*_{E}', fmt.n(SH.Wb) + ' J (slide: 36.7 J)'],
         ['½*ε*_{0}*E*², (a)', fmt.n(wSh('a', 2) / 1e3) + ' … ' + fmt.n(wSh('a', 3) / 1e3) + ' kJ/m³'], ['½*ε*_{0}*E*², (b)', fmt.n(wSh('b', 3, PI / 2) / 1e9) + ' … ' + fmt.n(wSh('b', 2, 0) / 1e9) + ' GJ/m³']);
@@ -2521,11 +2521,11 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   }
   var MN = {
     ex: 'Bring the charges in from infinity one by one: the bar of each step is its work, the last level is <i>W</i><sub class="u"><i>E</i></sub>; ½ Σ <i>Q</i><sub class="u"><i>m</i></sub><i>V</i><sub class="u"><i>m</i></sub> gives the same.',
-    cx: 'Slide 33: the energy stored in a coaxial cable, from the energy density ½<b class="v">D</b>·<b class="v">E</b>, and the check ½<i>QV</i><sub class="u"><i>a</i></sub>. Step through the solution (in a slide: ‹ › at the bottom right).',
-    d411: 'Drill D4.11 (slide 34): the energy stored in one eighth of a spherical shell for two potential fields. Step through the solution.',
+    cx: 'Slide 38: the energy stored in a coaxial cable, from the energy density ½<b class="v">D</b>·<b class="v">E</b>, and the check ½<i>QV</i><sub class="u"><i>a</i></sub>. Step through the solution (in a slide: ‹ › at the bottom right).',
+    d411: 'Drill D4.11 (slide 39): the energy stored in one eighth of a spherical shell for two potential fields. Step through the solution.',
     dr: 'A random problem: the energy to assemble two or three point charges; its number gives the same problem to everyone.'
   };
-  var HEAD = { cx: 'Coaxial cable (slide 33)', d411: 'Drill D4.11' };
+  var HEAD = { cx: 'Coaxial cable (slide 38)', d411: 'Drill D4.11' };
   var VIEWS = { d411: { az: PK.VIEW.DEFAULT.az - 180, el: PK.VIEW.DEFAULT.el } };
   function setMode(m) {
     stopAnim();

@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Metallic conductors, Ohm's law and resistance (Hayt Sections 5.3, 5.6; slides 9–13, 21–22), on pagekit.
+/* Metallic conductors, Ohm's law and resistance (Hayt Sections 5.3, 5.6; slides 10–14, 25–26), on pagekit.
    Conductors are solid, slightly metallic grey bodies (own palette --mt-*). J is the teaching object: heavy ink
    arrows. E is green and thinner. Free electrons are blue dots with a − glyph, holes are hollow orange dots with
    a + glyph, the ions of the lattice are pale grey dots with a + glyph. Energy bands: a filled band is blue and
@@ -270,7 +270,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       <div class="nw"><i>P</i> = <i>VI</i> = <i>I</i>²<i>R</i> (power dissipated)</div>
       <div class="nw"><i>σ</i> = −<i>ρ<sub>e</sub>μ<sub>e</sub></i> + <i>ρ<sub>h</sub>μ<sub>h</sub></i> &nbsp; (19)</div>
     </div>
-    <h2>Conductors (slide 10) and semiconductors at 300 K (slide 21)</h2>
+    <h2>Conductors (slide 11) and semiconductors at 300 K (slide 25)</h2>
     <div class="tablewrap"><table class="ft">
       <thead><tr><th>material</th><th><i>σ</i> (S/m)</th><th><i>μ<sub>e</sub></i> (m²/(V·s))</th><th><i>μ<sub>h</sub></i> (m²/(V·s))</th><th><i>ρ<sub>e</sub></i> = −<i>σ</i>/<i>μ<sub>e</sub></i> (C/m³)</th></tr></thead>
       <tbody>
@@ -1705,7 +1705,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     return out;
   }
 
-  /* ---------- materials (slide 10) and the wire ---------- */
+  /* ---------- materials (slide 11) and the wire ---------- */
   var MAT = {
     al: { k: 'al', name: 'aluminium', Name: 'Aluminium', sig: 3.82e7, mu: 0.0012, sigT: '3.82 × 10⁷', muT: '0.0012' },
     cu: { k: 'cu', name: 'copper', Name: 'Copper', sig: 5.80e7, mu: 0.0032, sigT: '5.80 × 10⁷', muT: '0.0032' },
@@ -2371,10 +2371,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   });
   var MN = {
     ex: 'Explore: a wire and Ohm’s law, the drift of the free electrons inside the metal, or the energy bands of conductors, insulators and semiconductors.',
-    e51: 'Example 5.1 (slide 12): resistance, current density, voltage, field and drift velocity in 1 mile of #16 copper wire. Step through the solution (in a slide: ‹ › at the bottom right).',
-    d53: 'Drill D5.3 (slide 13): current density in silver from the drift velocity, the field, a voltage and a current. Step through the solution.',
-    d54: 'Drill D5.4 (slide 13): a thick copper conductor carrying 50 A. Step through the solution.',
-    d57: 'Drill D5.7 (slides 21–22): the conductivity of silicon from its holes and electrons. Step through the solution; Play moves the carriers.',
+    e51: 'Example 5.1 (slide 13): resistance, current density, voltage, field and drift velocity in 1 mile of #16 copper wire. Step through the solution (in a slide: ‹ › at the bottom right).',
+    d53: 'Drill D5.3 (slide 14): current density in silver from the drift velocity, the field, a voltage and a current. Step through the solution.',
+    d54: 'Drill D5.4 (slide 14): a thick copper conductor carrying 50 A. Step through the solution.',
+    d57: 'Drill D5.7 (slides 25–26): the conductivity of silicon from its holes and electrons. Step through the solution; Play moves the carriers.',
     dr: 'A random problem like Example 5.1 and D5.4; its number gives the same problem to everyone.'
   };
   var HEAD = { e51: 'Example 5.1: 1 mile of #16 copper wire', d53: 'Drill D5.3: current density in silver', d54: 'Drill D5.4: a copper conductor carrying 50 A', d57: 'Drill D5.7: conductivity of silicon at 300 K' };

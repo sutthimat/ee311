@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* The method of images (Hayt Section 5.5, slides 18–20), on pagekit. Section views (the plane of the paper holds the
+/* The method of images (Hayt Section 5.5, slides 21–23), on pagekit. Section views (the plane of the paper holds the
    charge, its image and the normal to the conducting plane). The conducting plane is a thin, slightly metallic grey
    sheet (own tokens --mt-*, as ex5_conductor_boundary); once it is removed, the plane V = 0 is a soft grey band.
    Real charges: filled discs (orange +, blue −); image charges: hollow discs with a dashed rim. Field lines teal
@@ -1821,12 +1821,12 @@ sub.sg { vertical-align: 0; font-style: normal; }
     return mk({ kind: S.kind, q: S.q, src: [0, S.h], p0: [0, 0], n: [0, 1], t: [1, 0], win: WIN, an: ['x', 'z'], names: ['*x*', '*z*'],
       metal: !S.img, showImg: S.img, vz: S.img, P: [S.xP, 0], Pon: true, plot: true, curve: true, E: true });
   }
-  /* ---------- slide 18: the dipole and its zero-potential plane (symbols only; drawn with h = 3 m) ---------- */
+  /* ---------- slide 21: the dipole and its zero-potential plane (symbols only; drawn with h = 3 m) ---------- */
   var XDIP = {
-    head: 'Slide 18: the dipole and its plane of zero potential',
+    head: 'Slide 21: the dipole and its plane of zero potential',
     q: 'A dipole: +*Q* at *z* = *h*, −*Q* at *z* = −*h*. Show that the plane *z* = 0 may be replaced by a conducting plane at *V* = 0, and that +*Q* above a conducting plane has the field of +*Q* and its image −*Q* (Figs. 5.6, 5.7).',
-    given: 'Slide 18: a dipole, +*Q* at *z* = *h* and −*Q* at *z* = −*h* (Section 4.7); drawn with *h* = 3 m',
-    givenC: 'Slide 18: +*Q* at *z* = *h*, −*Q* at *z* = −*h*',
+    given: 'Slide 21: a dipole, +*Q* at *z* = *h* and −*Q* at *z* = −*h* (Section 4.7); drawn with *h* = 3 m',
+    givenC: 'Slide 21: +*Q* at *z* = *h*, −*Q* at *z* = −*h*',
     steps: [
       'Every point of the plane *z* = 0 is as far from +*Q* as from −*Q* (*R*_{+} = *R*_{−}), so *V* = 0 there: the midplane is an infinite equipotential surface',
       'Put a thin conducting plane at *V* = 0 on it: *V* = 0 on the plane and **E** normal to it, as before, so the fields on both sides are unchanged (induced − above, + below)',
@@ -1840,14 +1840,14 @@ sub.sg { vertical-align: 0; font-style: normal; }
         metal: k === 3, sheet2: k === 2, showImg: k === 4, lowerReal: k <= 2, mid: k === 1, vz: k === 4 });
     }
   };
-  /* ---------- slide 19: a line charge above a conducting plane ---------- */
+  /* ---------- slide 22: a line charge above a conducting plane ---------- */
   var XLC = (function () {
     var kL = 30e-9 / (2 * PI * EPS0), Ep = [2 * kL / 13, -3 * kL / 13], Em = [-2 * kL / 13, -3 * kL / 13], Ez = Ep[1] + Em[1], rs = EPS0 * Ez * 1e9;
     return {
-      head: 'Slide 19: a line charge above a conducting plane', kL: kL, Ep: Ep, Em: Em, Ez: Ez, rs: rs, sE: 100, sD: 1,
+      head: 'Slide 22: a line charge above a conducting plane', kL: kL, Ep: Ep, Em: Em, Ez: Ez, rs: rs, sE: 100, sD: 1,
       q: 'Find the surface charge density at *P*(2, 5, 0) on the conducting plane *z* = 0 if there is a line charge of 30 nC/m located at *x* = 0, *z* = 3 (Fig. 5.8).',
-      given: 'Slide 19: a line charge 30 nC/m along *y* at *x* = 0, *z* = 3 m above the conducting plane *z* = 0;  find *ρ*_{S} at *P*(2, 5, 0)',
-      givenC: 'Slide 19: 30 nC/m at *x* = 0, *z* = 3 m;  *P*(2, 5, 0)',
+      given: 'Slide 22: a line charge 30 nC/m along *y* at *x* = 0, *z* = 3 m above the conducting plane *z* = 0;  find *ρ*_{S} at *P*(2, 5, 0)',
+      givenC: 'Slide 22: 30 nC/m at *x* = 0, *z* = 3 m;  *P*(2, 5, 0)',
       steps: [
         'Image: −30 nC/m along *y* at *x* = 0, *z* = −3 m (the mirror point); with the plane removed the field above *z* = 0 is the same',
         'From each line to *P* (the *y* of *P* does not matter): **R**_{+} = 2 **a**_{x} − 3 **a**_{z}, **R**_{−} = 2 **a**_{x} + 3 **a**_{z} m;  *R*_{+} = *R*_{−} = √13 = 3.606 m',
@@ -1865,12 +1865,12 @@ sub.sg { vertical-align: 0; font-style: normal; }
       }
     };
   })();
-  /* ---------- D5.6 (slide 20): plane x = 4, a line charge along x = 6, y = 3 ---------- */
+  /* ---------- D5.6 (slide 23): plane x = 4, a line charge along x = 6, y = 3 ---------- */
   var XD56 = (function () {
     var kL = 40e-9 / (2 * PI * EPS0), P = [7, -1], Rp = [1, -4], Rm = [5, -4], Vp = kL * 0.5 * Math.log(41 / 17);
     var Ep = mul2(Rp, kL / 17), Em = mul2(Rm, -kL / 41), E = add2(Ep, Em), Emag = len2(E);
     return {
-      head: 'Drill D5.6 (slide 20): a line charge beside the plane <i>x</i> = 4', kL: kL, Vp: Vp, Ep: Ep, Em: Em, E: E, Emag: Emag,
+      head: 'Drill D5.6 (slide 23): a line charge beside the plane <i>x</i> = 4', kL: kL, Vp: Vp, Ep: Ep, Em: Em, E: E, Emag: Emag,
       q: 'The perfectly conducting plane *x* = 4 lies in free space, and a uniform infinite line charge of 40 nC/m lies along the line *x* = 6, *y* = 3. Let *V* = 0 at the conducting plane. At *P*(7, −1, 5) find: (a) *V*; (b) **E**.',
       given: 'D5.6: conducting plane *x* = 4 (*V* = 0);  40 nC/m along *x* = 6, *y* = 3 (parallel to *z*);  find *V* and **E** at *P*(7, −1, 5)',
       givenC: 'D5.6: plane *x* = 4;  40 nC/m at *x* = 6, *y* = 3;  *P*(7, −1, 5)',
@@ -2344,10 +2344,10 @@ sub.sg { vertical-align: 0; font-style: normal; }
   });
   var MN = {
     ex: 'A charge above a conducting plane: its field lines end on the plane, where the induced charge sits. Show the image: the plane goes, the image appears, and the field above is the same.',
-    dip: 'Slide 18 (Fig. 5.6): the dipole has a plane of zero potential; a conductor there changes nothing above it. Step through (in a slide: ‹ › at the bottom right).',
-    lc: 'Slide 19 (Fig. 5.8): the image gives <b class="v">E</b> at <i>P</i> on the plane, and <i>ρ<sub>S</sub></i> = <i>D<sub>N</sub></i>. Step through the solution.',
-    d56: 'Drill D5.6 (slide 20): the plane <i>x</i> = 4 seen from above (the plane <i>z</i> = 5); <i>V</i> and <b class="v">E</b> at <i>P</i> from the line and its image.',
-    dr: 'A random problem of the slide 19 kind; its number gives the same problem to everyone.'
+    dip: 'Slide 21 (Fig. 5.6): the dipole has a plane of zero potential; a conductor there changes nothing above it. Step through (in a slide: ‹ › at the bottom right).',
+    lc: 'Slide 22 (Fig. 5.8): the image gives <b class="v">E</b> at <i>P</i> on the plane, and <i>ρ<sub>S</sub></i> = <i>D<sub>N</sub></i>. Step through the solution.',
+    d56: 'Drill D5.6 (slide 23): the plane <i>x</i> = 4 seen from above (the plane <i>z</i> = 5); <i>V</i> and <b class="v">E</b> at <i>P</i> from the line and its image.',
+    dr: 'A random problem of the slide 22 kind; its number gives the same problem to everyone.'
   };
   function setMode(m) {
     mode = m;

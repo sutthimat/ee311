@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Potential gradient (Hayt Section 4.6, slides 20-26), on pagekit, as a plan view of one plane (x to the right, y up,
+/* Potential gradient (Hayt Section 4.6, slides 23-29), on pagekit, as a plan view of one plane (x to the right, y up,
    azimuth -90 deg, elevation 90 deg, fixed). V is a scalar: a soft sequential colour map (lightness changes one way with V; see the scale) with
    contour lines (equipotentials) and a labelled colour scale, never an arrow. E = -grad V is the main vector (c1, solid,
    main head), crossing the equipotentials at right angles toward lower V; grad V is dashed with a hollow head (it points
@@ -1892,7 +1892,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 
   /* ---------- Example 4.4 and D4.8 (the slides' numbers; the figure values are computed) ---------- */
   var X44 = {
-    title: 'Example 4.4 (slide 25)', f: 'e44', P: [-4, 3, 6], sys: 'rect',
+    title: 'Example 4.4 (slide 28)', f: 'e44', P: [-4, 3, 6], sys: 'rect',
     q: 'Example 4.4: given the potential field *V* = 2*x*²*y* − 5*z* V and the point *P*(−4, 3, 6), find *V*, **E**, the direction of **E**, **D** and *ρ*_{v} at *P* (free space).',
     given: 'Example 4.4: *V* = 2*x*²*y* − 5*z* V, *P*(−4, 3, 6), free space; the map is the plane *z* = 6 m',
     givenC: 'Ex. 4.4: *V* = 2*x*²*y* − 5*z* V at *P*(−4, 3, 6); plane *z* = 6 m',
@@ -1918,7 +1918,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     fl: function (k) { return { vp: k >= 1, gr: k === 2 ? [1, 1, 1] : null, grT: k >= 2, E: k >= 3, comps: false, mag: k >= 4, aE: k >= 5, D: k >= 6, rho: k >= 7 ? '*ρ*_{v} = −106.2 pC/m³' : '' }; }
   };
   var X48 = {
-    title: 'Drill D4.8 (slide 26)', f: 'd48', P: [1.5, 1.5 * Math.sqrt(3), 2], sys: 'cyl',
+    title: 'Drill D4.8 (slide 29)', f: 'd48', P: [1.5, 1.5 * Math.sqrt(3), 2], sys: 'cyl',
     q: 'D4.8: given the potential field *V* = 100*ρ* cos *φ*/(*z*² + 1) V and the point *P* at *ρ* = 3 m, *φ* = 60°, *z* = 2 m, find at *P*: (a) *V*; (b) **E**; (c) |**E**|; (d) d*V*/d*N*; (e) **a**_{N}; (f) *ρ*_{v} in free space.',
     given: 'D4.8: *V* = 100*ρ* cos *φ*/(*z*² + 1) V, *P*(*ρ* = 3 m, *φ* = 60°, *z* = 2 m); the map is the plane *z* = 2 m',
     givenC: 'D4.8: *V* = 100*ρ* cos *φ*/(*z*² + 1) V at *P*(3 m, 60°, 2 m)',
@@ -1946,7 +1946,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     fl: function (k) { return { vp: k >= 1, gr: k >= 2 && k <= 4 ? [k >= 2, k >= 3, k >= 4] : null, grT: k >= 4, E: k >= 5, comps: k >= 5, mag: k >= 6, aN: k >= 7, rho: k >= 8 ? '*ρ*_{v} = −234 pC/m³' : '' }; }
   };
   var X47 = {
-    title: 'Drill D4.7 (slide 26)',
+    title: 'Drill D4.7 (slide 29)',
     q: 'D4.7: a portion of a two-dimensional (*E*_{z} = 0) potential field is shown (our own drawing of an equivalent map, from the digitised values of Fig. 4.7). The grid lines are 1 mm apart. Determine approximate values for **E** in rectangular coordinates at (a) *a*; (b) *b*; (c) *c*.',
     given: 'D4.7: equipotentials 102–112 V (2 V apart) on a 1 mm grid, *E*_{z} = 0: find **E** approximately at *a*, *b*, *c*',
     givenC: 'D4.7: lines 102–112 V, grid 1 mm: **E** ≈ ? at *a*, *b*, *c*'
@@ -2726,9 +2726,9 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   PK.ui.buttons('#g-disp', [{ id: 'btn-reset', label: 'Reset all', onClick: function () { reset(); } }]);
   var NOTES = {
     ex: 'Choose a field and a coordinate system; move <i>P</i> and turn Δ<b class="v">L</b>. <b class="v">E</b> = −∇<i>V</i> stays normal to the equipotential through <i>P</i>.',
-    e44: 'Example 4.4 (slide 25), the slide’s numbers. Step through the solution with Next step (on a slide: the ‹ <i>k</i> / <i>n</i> › bar); each step adds what it computes to the figure.',
-    d47: 'Drill D4.7 (slide 26) on our own redrawn map: <b class="v">E</b> estimated from the spacing of neighbouring equipotentials. The answers are approximate.',
-    d48: 'Drill D4.8 (slide 26): ∇<i>V</i> in cylindrical coordinates, term by term. Step through.',
+    e44: 'Example 4.4 (slide 28), the slide’s numbers. Step through the solution with Next step (on a slide: the ‹ <i>k</i> / <i>n</i> › bar); each step adds what it computes to the figure.',
+    d47: 'Drill D4.7 (slide 29) on our own redrawn map: <b class="v">E</b> estimated from the spacing of neighbouring equipotentials. The answers are approximate.',
+    d48: 'Drill D4.8 (slide 29): ∇<i>V</i> in cylindrical coordinates, term by term. Step through.',
     dr: 'A random problem of the D4.8 kind (rectangular, cylindrical or spherical); its number gives the same problem to everyone.'
   };
   function setMode(m) {
