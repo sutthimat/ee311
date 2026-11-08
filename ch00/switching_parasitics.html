@@ -260,10 +260,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   <section class="card" id="cardL">
     <h2>Inductance of the commutation loop</h2>
     <div class="band" id="e-L"></div>
-    <p class="note">The current flows out on one trace and back on the other, so the magnetic field is concentrated in the gap between them (Hayt Ch. 7–8). For wide, close traces <i>L</i> ≈ <i>μ</i><sub class="u">0</sub><i>hℓ</i>/<i>W</i>: the inductance follows the loop area <i>hℓ</i>. The page computes <i>L</i> with fringing included, from the capacitance per unit length <i>C</i>′ of the same trace pair (method of moments, 40 cells per trace) and <i>L</i>′ = <i>μ</i><sub class="u">0</sub><i>ε</i><sub class="u">0</sub>/<i>C</i>′, which holds for two conductors in air at high frequency (current on the surfaces, Hayt §8.10 and the transmission-line chapter that follows this course).</p>
+    <p class="note">The current flows out on one trace and back on the other, so the magnetic field is concentrated in the gap between them (Hayt Ch. 7–8). For wide, close traces <i>L</i> ≈ <i>μ</i><sub class="u">0</sub><i>hℓ</i>/<i>W</i>: the inductance follows the loop area <i>hℓ</i>. The page computes <i>L</i> with fringing included, from the capacitance per unit length <i>C</i>′ of the same trace pair (method of moments, 40 cells per trace) and <i>L</i>′ = <i>μ</i><sub class="u">0</sub><i>ε</i><sub class="u">0</sub>/<i>C</i>′, which holds for two conductors in air at high frequency (current on the surfaces, Hayt Section 8.10 and the transmission-line chapter that follows this course).</p>
     <h2>Voltage spike at turn-off</h2>
     <div class="band" id="e-V"></div>
-    <p class="note">When the switch turns off, the loop current falls from <i>I</i> to zero in <i>t</i><sub class="u">sw</sub>. The changing flux induces <i>L</i> d<i>i</i>/d<i>t</i> (Faraday's law, Hayt §9.1), which adds to the DC-link voltage across the switch. Idealised: linear current fall, the first overshoot only; a real switch then rings with its own capacitance. Only the traces are counted: the second switch, the device packages and the capacitor add their own inductance. With slow edges (about 100 ns) the current spreads through the copper and <i>L</i> is up to about 14 % larger.</p>
+    <p class="note">When the switch turns off, the loop current falls from <i>I</i> to zero in <i>t</i><sub class="u">sw</sub>. The changing flux induces <i>L</i> d<i>i</i>/d<i>t</i> (Faraday's law, Hayt Section 9.1), which adds to the DC-link voltage across the switch. Idealised: linear current fall, the first overshoot only; a real switch then rings with its own capacitance. Only the traces are counted: the second switch, the device packages and the capacitor add their own inductance. With slow edges (about 100 ns) the current spreads through the copper and <i>L</i> is up to about 14 % larger.</p>
     <h2>Computed values</h2>
     <div class="out"><dl class="kv" id="o-L"></dl></div>
   </section>
@@ -271,10 +271,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   <section class="card" id="cardC" hidden>
     <h2>Stray capacitance from the switch node to the heatsink</h2>
     <div class="band" id="e-C"></div>
-    <p class="note">The tab and the heatsink are two conductors separated by a thin dielectric: a parallel-plate capacitor (Hayt §6.2). Fringing at the tab edges is neglected, which is accurate when <i>d</i> is much smaller than the tab size (at <i>d</i> = 1 mm with <i>A</i> = 1 cm² it adds up to about 15 %).</p>
+    <p class="note">The tab and the heatsink are two conductors separated by a thin dielectric: a parallel-plate capacitor (Hayt Section 6.2). Fringing at the tab edges is neglected, which is accurate when <i>d</i> is much smaller than the tab size (at <i>d</i> = 1 mm with <i>A</i> = 1 cm² it adds up to about 15 %).</p>
     <h2>Current to ground at each voltage edge</h2>
     <div class="band" id="e-I"></div>
-    <p class="note">The switch node jumps between 0 and <i>V</i><sub class="u">dc</sub> at every switching edge. Across the pad, the changing <b class="v">D</b> is a displacement current (Hayt §9.2); in the wires it is the conduction current <i>i</i><sub class="u">cm</sub>, which returns to the converter through ground. This common-mode current (it leaves through ground instead of along the supply wires) is a main source of conducted EMI (electromagnetic interference). The charge moved per edge, <i>Q</i> = <i>CV</i><sub class="u">dc</sub>, does not depend on speed; a faster edge squeezes it into a taller current pulse. Idealised: linear voltage edge.</p>
+    <p class="note">The switch node jumps between 0 and <i>V</i><sub class="u">dc</sub> at every switching edge. Across the pad, the changing <b class="v">D</b> is a displacement current (Hayt Section 9.2); in the wires it is the conduction current <i>i</i><sub class="u">cm</sub>, which returns to the converter through ground. This common-mode current (it leaves through ground instead of along the supply wires) is a main source of conducted EMI (electromagnetic interference). The charge moved per edge, <i>Q</i> = <i>CV</i><sub class="u">dc</sub>, does not depend on speed; a faster edge squeezes it into a taller current pulse. Idealised: linear voltage edge.</p>
     <h2>Computed values</h2>
     <div class="out"><dl class="kv" id="o-C"></dl></div>
   </section>
@@ -813,7 +813,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   /* ---------- the drawing lists (filled by the page's draw(F)) ---------- */
   FP._begin = function () {
     var F = this;
-    F.polys = []; F.items = []; F.dots = []; F.raws = []; F.labels = []; F.occ = []; F.surfs = []; F.handles = []; F.obsExtra = []; F.defs = ''; F.split = null;
+    F.polys = []; F.items = []; F.dots = []; F.raws = []; F.rawsTop = []; F.labels = []; F.occ = []; F.surfs = []; F.handles = []; F.obsExtra = []; F.defs = ''; F.split = null;
     F.tol = 1e-4;
   };
   /* occlude(o): register a surface (PK.vis.*) that hides what lies behind it */
@@ -868,6 +868,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   };
   /* raw(svg, obs): any SVG string drawn after the lines; obs: [{pts: [{x, y}..], closed, role}] for the labels */
   FP.raw = function (s, obs) { this.raws.push(s); if (obs) this.obsExtra = this.obsExtra.concat(obs); };
+  /* rawTop(svg): drawn after the dots, e.g. the + / − glyph on a charge disc (raw() would sit under the disc) */
+  FP.rawTop = function (s) { this.rawsTop.push(s); };
   /* circle(cx, cy, r, o): a screen circle as a polyline (e.g. a sphere's silhouette r = R * F.cam.s) */
   FP.circle = function (cx, cy, r, o) {
     o = o || {}; var q = [], k;
@@ -1011,6 +1013,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       s += '<circle class="' + D.cls + (hid ? ' pk-ghd' : '') + '" cx="' + f1(q.x) + '" cy="' + f1(q.y) + '" r="' + D.r + '"/>';
       circObs(ob, q.x, q.y, D.r + 1, D.role);
     });
+    F.rawsTop.forEach(function (r) { s += r; });
     return s;
   };
   function circObs(ob, x, y, r, role) { var q = []; for (var k = 0; k <= 12; k++) q.push({ x: x + r * Math.cos(k * Math.PI / 6), y: y + r * Math.sin(k * Math.PI / 6) }); ob.pts(q, false, role); ob.seg(x - r * 0.7, y, x + r * 0.7, y, role); ob.seg(x, y - r * 0.7, x, y + r * 0.7, role); }

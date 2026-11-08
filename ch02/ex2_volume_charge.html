@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Charge in a volume (Hayt §2.3, slides 14–17), on pagekit. The charged volume carries a neutral grey sequential map
+/* Charge in a volume (Hayt Section 2.3, slides 14–17), on pagekit. The charged volume carries a neutral grey sequential map
    of |rho_v| (own tokens --m0..--m3: light = small, dark = large in light mode, the reverse in dark mode; lightness
    runs one way only), so orange and blue stay for signs (D2.4 (a)) and for the element dv; its edges are --m3.
    The element dv, its ring and its shell are blue (sh tone, c1 edges). D2.4 (a) colours its cubes by sign (diverging
@@ -229,7 +229,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 
 <main class="wrap">
   <h1>Charge in a Volume</h1>
-  <p class="lede">Many closely spaced charges are replaced by a smooth volume charge density <i>ρ<sub class="u">v</sub></i> (C/m³): a small volume Δ<i>v</i> holds Δ<i>Q</i> = <i>ρ<sub class="u">v</sub></i> Δ<i>v</i>, and the total charge is the volume integral <i>Q</i> = ∫<sub class="u">vol</sub> <i>ρ<sub class="u">v</sub> dv</i> (Hayt §2.3). In a cylinder the element is <i>dv</i> = <i>ρ dρ dφ dz</i>; when <i>ρ<sub class="u">v</sub></i> is a product of one function of each coordinate, the triple integral is a product of three single integrals. Pick a mode: Explore the electron beam of Example 2.3, step through Example 2.3 and Drill D2.4, or try a random drill.</p>
+  <p class="lede">Many closely spaced charges are replaced by a smooth volume charge density <i>ρ<sub class="u">v</sub></i> (C/m³): a small volume Δ<i>v</i> holds Δ<i>Q</i> = <i>ρ<sub class="u">v</sub></i> Δ<i>v</i>, and the total charge is the volume integral <i>Q</i> = ∫<sub class="u">vol</sub> <i>ρ<sub class="u">v</sub> dv</i> (Hayt Section 2.3). In a cylinder the element is <i>dv</i> = <i>ρ dρ dφ dz</i>; when <i>ρ<sub class="u">v</sub></i> is a product of one function of each coordinate, the triple integral is a product of three single integrals. Pick a mode: Explore the electron beam of Example 2.3, step through Example 2.3 and Drill D2.4, or try a random drill.</p>
 
   <div class="layout">
     <figure class="fig">
@@ -1781,7 +1781,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       given: '*ρ* ≤ 1 cm, 2 ≤ *z* ≤ 4 cm;  *ρ*_{v} = −5 exp(−10⁵*ρz*) μC/m³',
       steps: [
         'Volume: 0 ≤ *ρ* ≤ 0.01 m, 0 ≤ *φ* ≤ 2π, 0.02 ≤ *z* ≤ 0.04 m',
-        'd*v* = *ρ* d*ρ* d*φ* d*z* (§1.8):  *Q* = ∫∫∫ −5 × 10⁻⁶ exp(−10⁵*ρz*) *ρ* d*ρ* d*φ* d*z*',
+        'd*v* = *ρ* d*ρ* d*φ* d*z* (Section 1.8):  *Q* = ∫∫∫ −5 × 10⁻⁶ exp(−10⁵*ρz*) *ρ* d*ρ* d*φ* d*z*',
         '*φ* first: *ρ*_{v} has no *φ* in it, so ∫ d*φ* (0 to 2π) = 2π: a ring',
         '*z* (0.02 to 0.04 m): ∫ exp(−10⁵*ρz*) d*z* = [exp(−2000*ρ*) − exp(−4000*ρ*)]/(10⁵*ρ*);  the coefficient −5 × 10⁻⁶ × 2π*ρ*/(10⁵*ρ*) = −10⁻¹⁰π',
         '*ρ* (0 to 0.01 m): ∫ −10⁻¹⁰π [exp(−2000*ρ*) − exp(−4000*ρ*)] d*ρ* = −10⁻¹⁰π (1/2000 − 1/4000)  (exp(−20), exp(−40) ≈ 0)',
@@ -1831,7 +1831,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       q: 'D2.4 (c): Find the total charge in the universe (all space) if *ρ*_{v} = exp(−2*r*)/*r*² C/m³. Answer: 6.28 C.',
       given: 'All space (the universe);  *ρ*_{v} = exp(−2*r*)/*r*² C/m³',
       steps: [
-        'd*v* = *r*² sin *θ* d*r* d*θ* d*φ* (§1.9), so *ρ*_{v} d*v* = exp(−2*r*) sin *θ* d*r* d*θ* d*φ*: the *r*² cancels',
+        'd*v* = *r*² sin *θ* d*r* d*θ* d*φ* (Section 1.9), so *ρ*_{v} d*v* = exp(−2*r*) sin *θ* d*r* d*θ* d*φ*: the *r*² cancels',
         '*θ* and *φ*: ∫ sin *θ* d*θ* (0 to π) × ∫ d*φ* (0 to 2π) = 2 × 2π = 4π, so a shell of radius *r* holds d*Q* = 4π exp(−2*r*) d*r*',
         'Inside radius *r*: *Q*(*r*) = 4π ∫ exp(−2*r*′) d*r*′ (0 to *r*) = 2π [1 − exp(−2*r*)];  *Q*(1 m) = 5.43 C',
         'All space: *r* → ∞, exp(−2*r*) → 0, so *Q* = 2π = 6.28 C'

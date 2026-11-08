@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Scalar Quantities (Hayt §1.2), on pagekit. Own tokens: --rot (the turned axes x′, y′, magenta, dash-dot), --c4 (the
+/* Scalar Quantities (Hayt Section 1.2), on pagekit. Own tokens: --rot (the turned axes x′, y′, magenta, dash-dot), --c4 (the
    comparison vector A, violet), --neg / --neg-tint (a negative scalar: dashed open disc). The positive disc uses the
    blue surface tones --sh-*. */
 :root { --rot: #b0237e; --c4: #5a43c8; --neg: #c0392b; --neg-tint: #fbe4e0; }
@@ -234,7 +234,7 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 <main class="wrap">
   <h1>Scalar Quantities</h1>
-  <p class="lede">A scalar is a quantity given completely by one real number, positive or negative, together with its unit. It has a magnitude and a sign but no direction (Hayt §1.2). Pick an example and change its value, then turn the coordinate axes with <i>θ</i>: the coordinates of the point <i>P</i> change, while the value of the scalar at <i>P</i> stays the same. Drag the figure to turn the view.</p>
+  <p class="lede">A scalar is a quantity given completely by one real number, positive or negative, together with its unit. It has a magnitude and a sign but no direction (Hayt Section 1.2). Pick an example and change its value, then turn the coordinate axes with <i>θ</i>: the coordinates of the point <i>P</i> change, while the value of the scalar at <i>P</i> stays the same. Drag the figure to turn the view.</p>
 
   <div class="layout">
     <figure class="fig">
@@ -820,7 +820,7 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   /* ---------- the drawing lists (filled by the page's draw(F)) ---------- */
   FP._begin = function () {
     var F = this;
-    F.polys = []; F.items = []; F.dots = []; F.raws = []; F.labels = []; F.occ = []; F.surfs = []; F.handles = []; F.obsExtra = []; F.defs = ''; F.split = null;
+    F.polys = []; F.items = []; F.dots = []; F.raws = []; F.rawsTop = []; F.labels = []; F.occ = []; F.surfs = []; F.handles = []; F.obsExtra = []; F.defs = ''; F.split = null;
     F.tol = 1e-4;
   };
   /* occlude(o): register a surface (PK.vis.*) that hides what lies behind it */
@@ -875,6 +875,8 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   };
   /* raw(svg, obs): any SVG string drawn after the lines; obs: [{pts: [{x, y}..], closed, role}] for the labels */
   FP.raw = function (s, obs) { this.raws.push(s); if (obs) this.obsExtra = this.obsExtra.concat(obs); };
+  /* rawTop(svg): drawn after the dots, e.g. the + / − glyph on a charge disc (raw() would sit under the disc) */
+  FP.rawTop = function (s) { this.rawsTop.push(s); };
   /* circle(cx, cy, r, o): a screen circle as a polyline (e.g. a sphere's silhouette r = R * F.cam.s) */
   FP.circle = function (cx, cy, r, o) {
     o = o || {}; var q = [], k;
@@ -1018,6 +1020,7 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       s += '<circle class="' + D.cls + (hid ? ' pk-ghd' : '') + '" cx="' + f1(q.x) + '" cy="' + f1(q.y) + '" r="' + D.r + '"/>';
       circObs(ob, q.x, q.y, D.r + 1, D.role);
     });
+    F.rawsTop.forEach(function (r) { s += r; });
     return s;
   };
   function circObs(ob, x, y, r, role) { var q = []; for (var k = 0; k <= 12; k++) q.push({ x: x + r * Math.cos(k * Math.PI / 6), y: y + r * Math.sin(k * Math.PI / 6) }); ob.pts(q, false, role); ob.seg(x - r * 0.7, y, x + r * 0.7, y, role); ob.seg(x, y - r * 0.7, x, y + r * 0.7, role); }
