@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Capacitance of a two-wire line (Hayt Section 6.4, slides 11–15), on pagekit. Plan view of the plane z = 0 (x to the
+/* Capacitance of a two-wire line (Hayt Section 6.4, slides 13–17), on pagekit. Plan view of the plane z = 0 (x to the
    right, y up), to scale. Conductors: solid, slightly metallic bodies; the +Q cylinder tinted warm (--mp-*), the −Q
    body (the plane x = 0, or the mirror cylinder) tinted cool (--mn-*). Line charges: filled discs (orange +, blue −);
    an equivalent line charge inside a conductor, or an image, is a hollow disc with a dashed rim. Flux (D) lines teal
@@ -1805,11 +1805,11 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     return [x0, x1, -yh, yh];
   }
 
-  /* ---------- slide 11: two line charges (drawn with a = 12 m and the rl of Fig. 6.5) ---------- */
+  /* ---------- slide 13: two line charges (drawn with a = 12 m and the rl of Fig. 6.5) ---------- */
   var XLC = (function () {
     var P = [20, 9], VP = Vat(CF0, P), R1 = len2(sub2(P, [12, 0])), R2 = len2(sub2(P, [-12, 0]));
     return {
-      head: 'Slide 11: two line charges (Fig. 6.4)', VP: VP, R1: R1, R2: R2,
+      head: 'Slide 13: two line charges (Fig. 6.4)', VP: VP, R1: R1, R2: R2,
       q: 'Fig. 6.4: a line charge +*ρ*_{L} at *x* = *a* and −*ρ*_{L} at *x* = −*a*, both parallel to *z*, in a dielectric *ε*. Find the potential *V* at *P*(*x*, *y*, 0), and the shape of the equipotentials.',
       given: 'Fig. 6.4: +*ρ*_{L} at *x* = *a*, −*ρ*_{L} at *x* = −*a* (along *z*), dielectric *ε*;  find *V* at *P*(*x*, *y*, 0);  drawn with *a* = 12 m, *ρ*_{L} = ' + fmt.n(CF0.rl) + ' nC/m, *ε* = *ε*_{0}, *P*(20, 9, 0)',
       givenC: '±*ρ*_{L} at *x* = ±*a*;  *V* at *P*(*x*, *y*, 0);  drawn with *a* = 12 m',
@@ -1828,13 +1828,13 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       }
     };
   })();
-  /* ---------- slide 12: the equipotentials are circles (drawn with a = 12 m, rl of Fig. 6.5, V1 = 100 V) ---------- */
+  /* ---------- slide 14: the equipotentials are circles (drawn with a = 12 m, rl of Fig. 6.5, V1 = 100 V) ---------- */
   var XEQ = (function () {
     var cy = circOf(CF0, 100);
     return {
-      head: 'Slide 12: the equipotentials are cylinders', cy: cy,
+      head: 'Slide 14: the equipotentials are cylinders', cy: cy,
       q: 'Show that the equipotential *V* = *V*_{1} of the two line charges is a circular cylinder, find its axis *h* and radius *b*, and the capacitance between a conducting cylinder of radius *b* at *V*_{0} and the plane *x* = 0 at *V* = 0.',
-      given: 'Slide 12: the surface *V* = *V*_{1} of (11);  drawn with *a* = 12 m, *ρ*_{L} = ' + fmt.n(CF0.rl) + ' nC/m, *ε* = *ε*_{0}, *V*_{1} = 100 V',
+      given: 'Slide 14: the surface *V* = *V*_{1} of (11);  drawn with *a* = 12 m, *ρ*_{L} = ' + fmt.n(CF0.rl) + ' nC/m, *ε* = *ε*_{0}, *V*_{1} = 100 V',
       givenC: '*V* = *V*_{1} in (11);  *a* = 12 m, *V*_{1} = 100 V',
       steps: [
         'On *V* = *V*_{1}, (11) gives [(*x* + *a*)² + *y*²]/[(*x* − *a*)² + *y*²] = *K*_{1}, a constant: *K*_{1} = exp(4π*εV*_{1}/*ρ*_{L}) (12); here *K*_{1} = ' + fmt.n(cy.K),
@@ -1853,12 +1853,12 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       }
     };
   })();
-  /* ---------- slides 13–14: Fig. 6.5, b = 5 m, h = 13 m, V0 = 100 V ---------- */
+  /* ---------- slides 15–16: Fig. 6.5, b = 5 m, h = 13 m, V0 = 100 V ---------- */
   var XF65 = (function () {
     var G = solveCyl(5, 13, 100, 1, 1), cf = G.cf, cy = G.cy, c50 = circOf(cf, 50), C17 = 2 * PI * EPS0 / Math.log(2 * 13 / 5) * 1e12;
     var Dn = Dat(cf, [8, 0]), Df = Dat(cf, [18, 0]), En = mul2(Dn, 1e-9 / EPS0), Ef = mul2(Df, 1e-9 / EPS0);
     return {
-      head: 'Slides 13–14: Fig. 6.5, a cylinder over a conducting plane', G: G, c50: c50, C17: C17, Dn: Dn, Df: Df, En: En, Ef: Ef,
+      head: 'Slides 15–16: Fig. 6.5, a cylinder over a conducting plane', G: G, c50: c50, C17: C17, Dn: Dn, Df: Df, En: En, Ef: Ef,
       q: 'A conducting cylinder of radius *b* = 5 m at *V*_{0} = 100 V has its axis *h* = 13 m from a conducting plane at 0 V, in free space (Fig. 6.5). Find *a*, *K*_{1}, *ρ*_{L} and *C* per metre, the 50-V equipotential, and **E**, **D** and the largest and smallest *ρ*_{S} on the cylinder.',
       given: 'Fig. 6.5: cylinder *b* = 5 m at *V*_{0} = 100 V, axis *h* = 13 m from the plane *x* = 0 at 0 V;  free space',
       givenC: 'Fig. 6.5: *b* = 5 m, *h* = 13 m, *V*_{0} = 100 V;  free space',
@@ -1910,7 +1910,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     };
   }
   var XD63 = (function () {
-    var X = cylProblem(1, 5, 20, 4.5, 'Drill D6.3 (slide 15): a cylinder over a plane');
+    var X = cylProblem(1, 5, 20, 4.5, 'Drill D6.3 (slide 17): a cylinder over a plane');
     X.q = 'D6.3: a conducting cylinder with a radius of 1 cm and at a potential of 20 V is parallel to a conducting plane which is at zero potential. The plane is 5 cm distant from the cylinder axis. If the conductors are embedded in a perfect dielectric for which *ε*_{r} = 4.5, find: (a) the capacitance per unit length between cylinder and plane; (b) *ρ*_{S,max} on the cylinder.'.replace('*ρ*_{S,max}', RSM);
     X.given = 'D6.3: ' + X.given;
     X.givenC = 'D6.3: ' + X.givenC;
@@ -2246,7 +2246,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     F.axes({ len: [w[1] - 0.04 * (w[1] - w[0]), w[3] - 0.06 * (w[3] - w[2]), 0], neg: [pm ? 0 : -w[0] - 0.03 * (w[1] - w[0]), -w[2] - 0.04 * (w[3] - w[2]), 0], names: ['*x*', '*y*', ''], pri: 1 });
     /* the plane V = 0 as a dashed line (no conductor) */
     if (sc.plane === 'dash') F.line([0, w[2], 0], [0, w[3], 0], { color: 'ink', w: 'axis', dash: 'guide', n: 1 });
-    /* one line charge alone: its concentric equipotentials (slide 11, Step 1) */
+    /* one line charge alone: its concentric equipotentials (slide 13, Step 1) */
     if (sc.one) [4, 8, 12].forEach(function (r) { F.path(circRuns(cf.a, r, function (X) { return inWin(w, X); })[0].map(p3), { color: 'ct', w: 'ct', dash: 'guide', role: 'soft' }); });
     /* flux lines */
     if (show.fl && sc.flux) drawFlux(F, sc);
@@ -2281,7 +2281,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     if (sc.P) { var qP = F.P(p3(sc.P)); keep.push({ x: qP.x + 30, y: qP.y + 10, r: 34 }, { x: qP.x + 20, y: qP.y - 14, r: 30 }); }
     if (sc.plane === 'dash') { var qv = F.P([0, w[3] - 0.18 * (w[3] - w[2]), 0]); keep.push({ x: qv.x + 22, y: qv.y, r: 26 }); }
     if (sc.plane === 'metal') { var qc = F.P([0, w[3] - 0.22 * (w[3] - w[2]), 0]); keep.push({ x: qc.x + 60, y: qc.y, r: 20 }); }
-    /* P with R1, R2 (slide 11) */
+    /* P with R1, R2 (slide 13) */
     if (sc.P) {
       if (sc.R1) F.arrow([cf.a, 0, 0], p3(sc.P), { color: 'c3', w: 'axis', head: 'comp' });
       if (sc.R2) F.arrow([-cf.a, 0, 0], p3(sc.P), { color: 'c3', w: 'axis', head: 'comp' });
@@ -2460,10 +2460,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   });
   var MN = {
     ex: 'Two line charges and their equipotential circles; the circle through the handle is a conducting cylinder over the plane <i>V</i> = 0. Watch <i>C</i> and the surface charge as you pick another circle; the toggle turns the plane into a second wire.',
-    lc2: 'Slide 11 (Fig. 6.4): the potential of two line charges, step by step (in a slide: ‹ › at the bottom right).',
-    eqc: 'Slide 12: each equipotential is a circle; make one a conducting cylinder and find <i>C</i>.',
-    f65: 'Slides 13–14 (Fig. 6.5): the numbers for a cylinder of radius 5 m at 100 V, 13 m from a plane.',
-    d63: 'Drill D6.3 (slide 15): a 1-cm cylinder at 20 V, 5 cm from a plane, in a dielectric.',
+    lc2: 'Slide 13 (Fig. 6.4): the potential of two line charges, step by step (in a slide: ‹ › at the bottom right).',
+    eqc: 'Slide 14: each equipotential is a circle; make one a conducting cylinder and find <i>C</i>.',
+    f65: 'Slides 15–16 (Fig. 6.5): the numbers for a cylinder of radius 5 m at 100 V, 13 m from a plane.',
+    d63: 'Drill D6.3 (slide 17): a 1-cm cylinder at 20 V, 5 cm from a plane, in a dielectric.',
     dr: 'A random problem of the D6.3 kind; its number gives the same problem to everyone.'
   };
   function setMode(m) {

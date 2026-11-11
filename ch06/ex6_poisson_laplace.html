@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Poisson's and Laplace's equations (Hayt Section 6.6, slides 20–23), on pagekit. V is a scalar: it is drawn as a
+/* Poisson's and Laplace's equations (Hayt Section 6.6, slides 24–27), on pagekit. V is a scalar: it is drawn as a
    height surface over a square region, coloured by the sequential map (--s0 low, light .. --s3 high, dark) with thin
    contour lines (equipotentials) and a colour post that is also the V axis. Never an arrow. The teaching object is the
    five-point stencil: P and its four neighbours at spacing h (ink dots joined along the surface), a level cross at the
@@ -1789,7 +1789,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     return fv;
   }
 
-  /* ======================= the analytic fields: D6.5 (slide 23) ======================= */
+  /* ======================= the analytic fields: D6.5 (slide 27) ======================= */
   function cyl(x, y) { return [Math.hypot(x, y), Math.atan2(y, x)]; }
   var S45 = Math.SQRT1_2;
   var D65 = [
@@ -2334,9 +2334,9 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   });
   var MN = {
     ex: 'Set the edge potentials and move <i>P</i>: with no volume charge, <i>V</i>(<i>P</i>) equals the average of its four neighbours and the surface has no peak or dip inside. Switch on the volume charge to make a peak (or a dip).',
-    poi: 'Poisson’s equation (slide 20): Eqs. (21)–(24) on a small square around <i>P</i>, at the centre of a volume charge. In a slide: ‹ › at the bottom right.',
-    lap: 'The Laplacian (slides 21–22): Eqs. (25)–(30) at <i>P</i>, for the field of Explore.',
-    d65: 'Drill D6.5 (slide 23): <i>V</i> and <i>ρ<sub>v</sub></i> at <i>P</i> for three potentials in free space. Step through the solution.',
+    poi: 'Poisson’s equation (slide 24): Eqs. (21)–(24) on a small square around <i>P</i>, at the centre of a volume charge. In a slide: ‹ › at the bottom right.',
+    lap: 'The Laplacian (slides 25–26): Eqs. (25)–(30) at <i>P</i>, for the field of Explore.',
+    d65: 'Drill D6.5 (slide 27): <i>V</i> and <i>ρ<sub>v</sub></i> at <i>P</i> for three potentials in free space. Step through the solution.',
     dr: 'A random problem of the D6.5 kind (rectangular, cylindrical or spherical); its number gives the same problem to everyone.'
   };
   var HEAD = { poi: 'Poisson’s equation: Eqs. (21)–(24)', lap: 'The Laplacian: Eqs. (25)–(30)', d65: 'Drill D6.5: <i>V</i> and <i>ρ<sub>v</sub></i> at <i>P</i>' };

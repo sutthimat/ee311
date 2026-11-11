@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Laplace's equation in one dimension (Hayt Section 6.7, slides 24-31), on pagekit. Five problems in which V depends on
+/* Laplace's equation in one dimension (Hayt Section 6.7, slides 29-36), on pagekit. Five problems in which V depends on
    one coordinate only: x (parallel planes), rho (coaxial cylinders), phi (radial planes with an insulating gap), r
    (concentric spheres), theta (cones on a plane, gap at the vertex). The 3-D view draws the two conductors to scale
    (slightly metallic grey: warm for the +Q body, cool for the -Q body, + / - glyphs for the surface charge). The
@@ -2060,9 +2060,9 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   EX.e62 = exampleX('x', { u1: 0, u2: 1, V1: 0, V2: 100, w: 2 },
     { c1: '*x* = 0:  *V* = 0', c2: '*x* = *d*:  *V* = *V*_{0}', ut: [['0', 0], ['*d*', 1]], vt: [['0', 0], ['*V*_{0}', 100]], C: '*C* = *εS*/*d*', Q: '*Q* = −*εV*_{0}*S*/*d*', rs: '*ρ*_{S} = −*εV*_{0}/*d*' },
     { fam: 1, bc: 2, E: 3, D: 4, rs: 5, Q: 5, C: 6 },
-    'Example 6.2: parallel plates of area *S* at *x* = 0 (*V* = 0) and *x* = *d* (*V* = *V*_{0}); find *V*(*x*), then *C* by the five steps of slide 25',
+    'Example 6.2: parallel plates of area *S* at *x* = 0 (*V* = 0) and *x* = *d* (*V* = *V*_{0}); find *V*(*x*), then *C* by the five steps of slide 30',
     'Ex. 6.2: plates *x* = 0 (*V* = 0), *x* = *d* (*V* = *V*_{0}), area *S*',
-    'Example 6.2 (slides 24–25): from (31), find the capacitance of a parallel-plate capacitor of plate area *S*, separation *d* and potential difference *V*_{0}, with *V* = 0 at *x* = 0 and *V* = *V*_{0} at *x* = *d*.',
+    'Example 6.2 (slides 29–30): from (31), find the capacitance of a parallel-plate capacitor of plate area *S*, separation *d* and potential difference *V*_{0}, with *V* = 0 at *x* = 0 and *V* = *V*_{0} at *x* = *d*.',
     ['(31) d²*V*/d*x*² = 0, so d*V*/d*x* = *A* and *V* = *Ax* + *B*: the equipotentials *x* = const are parallel planes',
       'Boundary conditions: *V* = 0 at *x* = 0 gives *B* = 0; *V* = *V*_{0} at *x* = *d* gives *A* = *V*_{0}/*d*:  (32) *V* = *V*_{0}*x*/*d*',
       '**E** = −∇*V* = −(*V*_{0}/*d*) **a**_{x}: uniform, from the *V*_{0} plate toward the 0 V plate',
@@ -2076,7 +2076,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     { fam: 1, bc: 2, E: 3, D: 4, rs: 4, Q: 5, C: 6 },
     'Example 6.3: *V* = *V*(*ρ*) only;  *V* = *V*_{0} at *ρ* = *a*, *V* = 0 at *ρ* = *b* (*b* > *a*);  find *V*, the device and *C* for a length *L*',
     'Ex. 6.3: *V* = *V*_{0} at *ρ* = *a*, 0 at *ρ* = *b*, length *L*',
-    'Example 6.3 (slide 26): the potential depends on *ρ* only. Solve Laplace’s equation, identify the device and find its capacitance for a length *L*, with *V* = *V*_{0} at *ρ* = *a* and *V* = 0 at *ρ* = *b* (*b* > *a*).',
+    'Example 6.3 (slide 31): the potential depends on *ρ* only. Solve Laplace’s equation, identify the device and find its capacitance for a length *L*, with *V* = *V*_{0} at *ρ* = *a* and *V* = 0 at *ρ* = *b* (*b* > *a*).',
     ['(1/*ρ*) d/d*ρ*(*ρ* d*V*/d*ρ*) = 0 (*ρ* ≠ 0), so *ρ* d*V*/d*ρ* = *A* and (34) *V* = *A* ln *ρ* + *B*: the equipotentials are coaxial cylinders',
       'Boundary conditions *V*(*a*) = *V*_{0}, *V*(*b*) = 0:  (35) *V* = *V*_{0} ln(*b*/*ρ*)/ln(*b*/*a*); equal steps of *V* crowd near the inner conductor',
       '**E** = −(d*V*/d*ρ*) **a**_{ρ} = (*V*_{0}/*ρ*)(1/ln(*b*/*a*)) **a**_{ρ}: radial, falling as 1/*ρ*',
@@ -2090,7 +2090,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     { fam: 1, bc: 2, E: 3 },
     'Example 6.4: two half-planes meeting at the angle *α* with an insulating gap along the *z* axis;  *V* = 0 at *φ* = 0, *V* = *V*_{0} at *φ* = *α*;  find *V* and **E**',
     'Ex. 6.4: *V* = 0 at *φ* = 0, *V* = *V*_{0} at *φ* = *α*; gap along *z*',
-    'Example 6.4 (slide 27, Fig. 6.10): two infinite conducting half-planes meet at the angle *α* with an insulating gap along the *z* axis; *V* = 0 on *φ* = 0 and *V* = *V*_{0} on *φ* = *α*. The potential depends on *φ* only: find *V* and **E**. (Drawn with *α* = 30° = 0.524 rad.)',
+    'Example 6.4 (slide 32, Fig. 6.10): two infinite conducting half-planes meet at the angle *α* with an insulating gap along the *z* axis; *V* = 0 on *φ* = 0 and *V* = *V*_{0} on *φ* = *α*. The potential depends on *φ* only: find *V* and **E**. (Drawn with *α* = 30° = 0.524 rad.)',
     ['(1/*ρ*²) ∂²*V*/∂*φ*² = 0; excluding *ρ* = 0 (the insulating gap), *V* = *Aφ* + *B*: the equipotentials *φ* = const are radial planes',
       'Boundary conditions: *V* = 0 at *φ* = 0 gives *B* = 0; *V* = *V*_{0} at *φ* = *α* gives *A* = *V*_{0}/*α*:  (37) *V* = *V*_{0}*φ*/*α* (*φ* and *α* in radians; drawn: *α* = 30° = 0.524 rad)',
       '(38) **E** = −(1/*ρ*)(∂*V*/∂*φ*) **a**_{φ} = −(*V*_{0}/(*αρ*)) **a**_{φ}: along −**a**_{φ}, from the *V*_{0} plane toward the 0 V plane, on circles about the *z* axis; *E* varies with *ρ* (as 1/*ρ*), not with *φ*'],
@@ -2101,7 +2101,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     { fam: 1, bc: 2, E: 3, D: 4, rs: 4, Q: 5, C: 6 },
     'Example 6.5: concentric spheres *a* < *b*;  *V* = *V*_{0} at *r* = *a*, *V* = 0 at *r* = *b*;  find *V* and *C*',
     'Ex. 6.5: *V* = *V*_{0} at *r* = *a*, 0 at *r* = *b*',
-    'Example 6.5 (slide 28): the potential depends on *r* only, with *V* = *V*_{0} at *r* = *a* and *V* = 0 at *r* = *b* (*b* > *a*). Find *V* and the capacitance.',
+    'Example 6.5 (slide 33): the potential depends on *r* only, with *V* = *V*_{0} at *r* = *a* and *V* = 0 at *r* = *b* (*b* > *a*). Find *V* and the capacitance.',
     ['(1/*r*²) d/d*r*(*r*² d*V*/d*r*) = 0, so *r*² d*V*/d*r* = *A* and *V* = −*A*/*r* + *B*: the equipotentials are concentric spheres',
       'Boundary conditions *V*(*a*) = *V*_{0}, *V*(*b*) = 0:  (39) *V* = *V*_{0}(1/*r* − 1/*b*)/(1/*a* − 1/*b*)',
       '**E** = −(d*V*/d*r*) **a**_{r} = *V*_{0}/(*r*²(1/*a* − 1/*b*)) **a**_{r}: radial, falling as 1/*r*²',
@@ -2115,7 +2115,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     { fam: 2, bc: 3, E: 4, D: 5, rs: 5, Q: 6, C: 7 },
     'Example 6.6: a conducting cone *θ* = *α* at *V*_{0} on a conducting plane *θ* = 90° at *V* = 0, small gap at the vertex;  find *V* and *C*',
     'Ex. 6.6: cone *θ* = *α* (*V*_{0}) on the plane *θ* = 90° (0 V)',
-    'Example 6.6 (slides 29–30, Fig. 6.11): a conducting cone of half-angle *α* at the potential *V*_{0} stands on its vertex on a conducting plane *θ* = 90° at *V* = 0, with a small insulating gap at the vertex. *V* depends on *θ* only: find *V* and the capacitance.',
+    'Example 6.6 (slides 34–35, Fig. 6.11): a conducting cone of half-angle *α* at the potential *V*_{0} stands on its vertex on a conducting plane *θ* = 90° at *V* = 0, with a small insulating gap at the vertex. *V* depends on *θ* only: find *V* and the capacitance.',
     ['(1/(*r*² sin *θ*)) d/d*θ*(sin *θ* d*V*/d*θ*) = 0, excluding *r* = 0 and *θ* = 0°, 180°:  sin *θ* d*V*/d*θ* = *A*',
       '∫d*θ*/sin *θ* = ln tan(*θ*/2):  (41) *V* = *A* ln tan(*θ*/2) + *B*;  the equipotentials *θ* = const are cones',
       '*V* = 0 at *θ* = 90° gives *B* = 0 (tan 45° = 1); *V* = *V*_{0} at *θ* = *α*:  (42) *V* = *V*_{0} ln tan(*θ*/2)/ln tan(*α*/2)',
@@ -2136,7 +2136,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       ans: { Ea: Ea, Eb: Eb, Va: Pa.Vu(rP), Vb: Pb.Vu(phP), A: Pa.A, B: Pa.B, Ab: Pb.A, Bb: Pb.B },
       given: 'D6.6: |**E**| at *P*(3, 1, 2) for (a) coaxial cylinders, 50 V at *ρ* = 2 m and 20 V at *ρ* = 3 m;  (b) radial planes, 50 V at *φ* = 10° and 20 V at *φ* = 30°',
       givenC: 'D6.6: |**E**| at *P*(3, 1, 2):  (a) 50 V at *ρ* = 2 m, 20 V at 3 m;  (b) 50 V at 10°, 20 V at 30°',
-      q: 'D6.6 (slide 31): find |**E**| at *P*(3, 1, 2) in rectangular coordinates for (a) the coaxial conducting cylinders with 50 V at *ρ* = 2 m and 20 V at *ρ* = 3 m; (b) the radial conducting planes with 50 V at *φ* = 10° and 20 V at *φ* = 30°. The slide gives 23.4 V/m and 27.2 V/m.',
+      q: 'D6.6 (slide 36): find |**E**| at *P*(3, 1, 2) in rectangular coordinates for (a) the coaxial conducting cylinders with 50 V at *ρ* = 2 m and 20 V at *ρ* = 3 m; (b) the radial conducting planes with 50 V at *φ* = 10° and 20 V at *φ* = 30°. The slide gives 23.4 V/m and 27.2 V/m.',
       steps: [
         '*P*(3, 1, 2) in cylindrical coordinates:  *ρ* = √(3² + 1²) = √10 = 3.162 m,  *φ* = tan⁻¹(1/3) = ' + fmt.deg(phP, 2) + ',  *z* = 2 m',
         '(a) *V* = *A* ln *ρ* + *B* with *V*(2) = 50 V, *V*(3) = 20 V:  *A* = (50 − 20)/ln(2/3) = ' + fmt.q(Pa.A, 'V') + ',  *B* = 50 − *A* ln 2 = ' + fmt.q(Pa.B, 'V'),
@@ -2669,7 +2669,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       rows.push(['Problem', geoTxt(G, false)], ['General solution', K.gen + ' ' + K.eq], ['*A*, *B*', fmt.q(P.A, K.aU) + ', ' + fmt.q(P.B, 'V')], ['Equipotentials (equal steps)', P.levels.map(function (L) { return fVx(L.v) + ' at ' + (K.ang ? fmt.deg(L.u, 1) : fmt.q(L.u, 'm')); }).join(';  ') || 'none (*V*_{1} = *V*_{2})'],
         ['**E**', eExpr(G, P)], ['*D*_{N} = *ρ*_{S} on conductor 1' + refTxt(G, P), fRs(P.DN)], ['*Q* on conductor 1', fQ(P.Q1) + (P.per ? ' per metre of height' : '')], [P.per ? '*C*/*h*' : '*C*', fC(P.C, P.per)]);
       if (G.P) rows.push(['Point *P*', probeTxt(G, P, false).replace(/^\*P\*: /, '')]);
-      note = 'Change <i>V</i><sub>1</sub> or <i>V</i><sub>2</sub>: <i>A</i>, <i>B</i>, <b class="v">E</b> and <i>Q</i> change, the equipotentials keep their shape, and <i>C</i> stays the same, since it depends only on the geometry and <i>ε</i>. Equal steps of <i>V</i> are evenly spaced only for planes; they crowd toward the smaller conductor for cylinders and spheres, where <i>E</i> is largest. ' + (G.kind === 'phi' ? 'For the radial planes the slide finds <i>V</i> and <b class="v">E</b> only; the value <i>C</i>/<i>h</i> here is for plates from <i>ρ</i> = <i>g</i> to <i>R</i>, fringing neglected. ' : '') + (G.kind === 'th' ? 'The base of the cone and the fringing are neglected, as on slide 30. ' : '') + '<i>ε</i><sub>0</sub> = 8.854 × 10⁻¹² F/m.';
+      note = 'Change <i>V</i><sub>1</sub> or <i>V</i><sub>2</sub>: <i>A</i>, <i>B</i>, <b class="v">E</b> and <i>Q</i> change, the equipotentials keep their shape, and <i>C</i> stays the same, since it depends only on the geometry and <i>ε</i>. Equal steps of <i>V</i> are evenly spaced only for planes; they crowd toward the smaller conductor for cylinders and spheres, where <i>E</i> is largest. ' + (G.kind === 'phi' ? 'For the radial planes the slide finds <i>V</i> and <b class="v">E</b> only; the value <i>C</i>/<i>h</i> here is for plates from <i>ρ</i> = <i>g</i> to <i>R</i>, fringing neglected. ' : '') + (G.kind === 'th' ? 'The base of the cone and the fringing are neglected, as on slide 35. ' : '') + '<i>ε</i><sub>0</sub> = 8.854 × 10⁻¹² F/m.';
     } else if (mode === 'd66') {
       var a = EX.d66.ans;
       rows.push(['*P*(3, 1, 2): *ρ*, *φ*', '3.162 m, 18.43°'], ['(a) *A*, *B*', fmt.q(a.A, 'V') + ', ' + fmt.q(a.B, 'V')], ['(a) |**E**| at *P*', fE(a.Ea) + ' (slide: 23.4 V/m)'], ['(a) *V* by the formula at *P*', fV(a.Va) + ' (outside the cylinders)'], ['(b) *A*, *B*', fmt.q(a.Ab, 'V/rad') + ', ' + fmt.q(a.Bb, 'V')], ['(b) |**E**| at *P*', fE(a.Eb) + ' (slide: 27.2 V/m)'], ['(b) *V* at *P*', fV(a.Vb)]);
@@ -2739,11 +2739,11 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     onStep: function () { if (mode === 'dr') { F.render(); renderCard(); } }
   });
   var MN = {
-    ex: 'Pick a problem, set the two boundary conditions and watch <i>A</i>, <i>B</i>, the equipotentials and <b class="v">E</b>. The ‹ › steps go from <i>V</i> to <i>C</i> (slide 25).',
-    e62: 'Example 6.2 (slides 24–25): <i>V</i>(<i>x</i>) between parallel plates, then <i>C</i> by the five steps. In a slide: ‹ › at the bottom right.',
-    e63: 'Example 6.3 (slide 26): <i>V</i>(<i>ρ</i>), the coaxial cable.', e64: 'Example 6.4 (slide 27, Fig. 6.10): <i>V</i>(<i>φ</i>), two radial planes with an insulating gap.',
-    e65: 'Example 6.5 (slide 28): <i>V</i>(<i>r</i>), concentric spheres.', e66: 'Example 6.6 (slides 29–30, Fig. 6.11): <i>V</i>(<i>θ</i>), a cone on a plane with a gap at the vertex.',
-    d66: 'Drill D6.6 (slide 31): |<b class="v">E</b>| at <i>P</i>(3, 1, 2) for coaxial cylinders and for radial planes.', dr: 'A random problem of the D6.6 kind; its number gives the same problem to everyone.'
+    ex: 'Pick a problem, set the two boundary conditions and watch <i>A</i>, <i>B</i>, the equipotentials and <b class="v">E</b>. The ‹ › steps go from <i>V</i> to <i>C</i> (slide 30).',
+    e62: 'Example 6.2 (slides 29–30): <i>V</i>(<i>x</i>) between parallel plates, then <i>C</i> by the five steps. In a slide: ‹ › at the bottom right.',
+    e63: 'Example 6.3 (slide 31): <i>V</i>(<i>ρ</i>), the coaxial cable.', e64: 'Example 6.4 (slide 32, Fig. 6.10): <i>V</i>(<i>φ</i>), two radial planes with an insulating gap.',
+    e65: 'Example 6.5 (slide 33): <i>V</i>(<i>r</i>), concentric spheres.', e66: 'Example 6.6 (slides 34–35, Fig. 6.11): <i>V</i>(<i>θ</i>), a cone on a plane with a gap at the vertex.',
+    d66: 'Drill D6.6 (slide 36): |<b class="v">E</b>| at <i>P</i>(3, 1, 2) for coaxial cylinders and for radial planes.', dr: 'A random problem of the D6.6 kind; its number gives the same problem to everyone.'
   };
   var HEAD = { e62: 'Example 6.2: <i>V</i> = <i>V</i>(<i>x</i>)', e63: 'Example 6.3: <i>V</i> = <i>V</i>(<i>ρ</i>)', e64: 'Example 6.4: <i>V</i> = <i>V</i>(<i>φ</i>)', e65: 'Example 6.5: <i>V</i> = <i>V</i>(<i>r</i>)', e66: 'Example 6.6: <i>V</i> = <i>V</i>(<i>θ</i>)', d66: 'Drill D6.6' };
   function homeOf() { return mode === 'ex' ? HOMEK[S.kind] : spec().home; }
@@ -2754,7 +2754,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     MODES.forEach(function (x) { PK.ui.pressed(mb['m-' + x[0]], x[0] === m); });
     mnote.innerHTML = MN[m];
     PK.ui.show('#g-ex', m === 'ex'); PK.ui.show('#g-st', m !== 'dr'); PK.ui.show('#g-drill', m === 'dr');
-    if (m === 'ex') { document.getElementById('st-h').innerHTML = 'From <i>V</i> to <i>C</i> (slide 25)'; document.getElementById('st-q').innerHTML = 'Each step adds its result to the figure and to the readout.'; steps.setSteps(XST[S.kind]); }
+    if (m === 'ex') { document.getElementById('st-h').innerHTML = 'From <i>V</i> to <i>C</i> (slide 30)'; document.getElementById('st-q').innerHTML = 'Each step adds its result to the figure and to the readout.'; steps.setSteps(XST[S.kind]); }
     else if (m !== 'dr') { document.getElementById('st-h').innerHTML = HEAD[m]; document.getElementById('st-q').innerHTML = T.html(EXS[m].q); steps.setSteps(EXS[m].steps); }
     else steps.setSteps([]);
     goHome(); F.invalidate(); F.render(); renderCard();

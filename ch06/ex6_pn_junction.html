@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* The pn junction (Hayt Section 6.8, slides 32–35), on pagekit. A fixed 2-D view: world x to the right, world y up.
+/* The pn junction (Hayt Section 6.8, slides 38–41), on pagekit. A fixed 2-D view: world x to the right, world y up.
    Top: the semiconductor bar (p type left, n type right) with uncovered ions (circled − / +) in the depletion layer and
    mobile carriers outside it (holes: hollow rings, electrons: filled dots). Under it, three plots on one x axis:
    rho_v(x) (44), E_x(x) (45), V(x) (46). Beside (or under) them a small plot of C against V0 (or Q against V0). */
@@ -242,7 +242,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   <div class="layout">
     <figure class="fig">
       <div class="stage"><svg id="fg" role="img" aria-label="A semiconductor bar, p type on the left and n type on the right, with the depletion layer at the junction; below it the charge density, the field E_x and the potential V against x; a small plot of the capacitance against V0"></svg></div>
-      <figcaption><details id="cap" open><summary>About this figure</summary>Top: the semiconductor bar along <i>x</i>, p type on the left (cool tint), n type on the right (warm tint); the dashed line is the junction, <i>x</i> = 0. Circled signs are the ions left uncovered in the depletion layer (− acceptors on the p side, + donors on the n side); they crowd where the model’s |<i>ρ<sub>v</sub></i>| is largest, and their number grows with <i>Q</i>. Hollow rings are holes and filled dots electrons, the mobile carriers of the neutral regions outside the layer. The arrow above the bar gives the direction of <b class="v">E</b> in the layer (−<i>x</i>, from the n side to the p side); its length is not a scale. Below, on the same <i>x</i> axis: <i>ρ<sub>v</sub></i> (44), <i>E<sub>x</sub></i> (45) and <i>V</i> (46), with <i>V</i> = 0 at the junction; the bracket on the right of the <i>V</i> plot is <i>V</i><sub>0</sub>. In Explore the axes are in μm and their scales stay fixed while <i>V</i><sub>0</sub> changes, so the curves widen and grow. The worked steps of slides 32 and 33 use Hayt’s normalised axes against <i>x</i>/<i>a</i> (Fig. 6.12, our own drawing); D6.7 and the Drill use <i>x</i>/<i>a</i> with a scale bar in nm or μm, and Junction capacitance uses μm like Explore. The small plot is <i>C</i> against <i>V</i><sub>0</sub> (drag its marker), or <i>Q</i> against <i>V</i><sub>0</sub> with the tangent of slope <i>C</i>; narrow screens leave it out (its value is in the readouts). Dimensions along <i>x</i> are to scale; the bar’s height is not.</details></figcaption>
+      <figcaption><details id="cap" open><summary>About this figure</summary>Top: the semiconductor bar along <i>x</i>, p type on the left (cool tint), n type on the right (warm tint); the dashed line is the junction, <i>x</i> = 0. Circled signs are the ions left uncovered in the depletion layer (− acceptors on the p side, + donors on the n side); they crowd where the model’s |<i>ρ<sub>v</sub></i>| is largest, and their number grows with <i>Q</i>. Hollow rings are holes and filled dots electrons, the mobile carriers of the neutral regions outside the layer. The arrow above the bar gives the direction of <b class="v">E</b> in the layer (−<i>x</i>, from the n side to the p side); its length is not a scale. Below, on the same <i>x</i> axis: <i>ρ<sub>v</sub></i> (44), <i>E<sub>x</sub></i> (45) and <i>V</i> (46), with <i>V</i> = 0 at the junction; the bracket on the right of the <i>V</i> plot is <i>V</i><sub>0</sub>. In Explore the axes are in μm and their scales stay fixed while <i>V</i><sub>0</sub> changes, so the curves widen and grow. The worked steps of slides 38 and 39 use Hayt’s normalised axes against <i>x</i>/<i>a</i> (Fig. 6.12, our own drawing); D6.7 and the Drill use <i>x</i>/<i>a</i> with a scale bar in nm or μm, and Junction capacitance uses μm like Explore. The small plot is <i>C</i> against <i>V</i><sub>0</sub> (drag its marker), or <i>Q</i> against <i>V</i><sub>0</sub> with the tangent of slope <i>C</i>; narrow screens leave it out (its value is in the readouts). Dimensions along <i>x</i> are to scale; the bar’s height is not.</details></figcaption>
     </figure>
     <aside class="panel" id="panel">
       <section class="grp" id="g-mode"><h2>Mode</h2></section>
@@ -1737,9 +1737,9 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     return pnScene(J, { xh: xh, side: 'C', nIon: Math.max(5, Math.min(40, Math.round(15 * J.a / aRef))), ref: { rho: J.rho0, E: Jm.E0, V: VMAX } });
   }
   var X_CM = {
-    head: 'Slide 32: the charge in the depletion layer',
+    head: 'Slide 38: the charge in the depletion layer',
     q: 'A bar of semiconductor along *x*: p type for *x* < 0, n type for *x* > 0, with equal doping (*N*_{a} = *N*_{d}). Describe the charge near the junction and its model (44).',
-    given: 'Slide 32: a bar along *x*, p type for *x* < 0 and n type for *x* > 0, with equal doping (*N*_{a} = *N*_{d})',
+    given: 'Slide 38: a bar along *x*, p type for *x* < 0 and n type for *x* > 0, with equal doping (*N*_{a} = *N*_{d})',
     givenC: 'p type (*x* < 0), n type (*x* > 0), *N*_{a} = *N*_{d}',
     steps: [
       'Holes diffuse to the right and electrons to the left, and they recombine near the junction: uncovered acceptor ions (−) stay on the p side, donor ions (+) on the n side',
@@ -1754,9 +1754,9 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     }
   };
   var X_SP = {
-    head: 'Slide 33: solving Poisson’s equation',
+    head: 'Slide 39: solving Poisson’s equation',
     q: 'With the charge model (44), solve Poisson’s equation in one dimension for *E*_{x}(*x*) and *V*(*x*), with *V* = 0 at the junction (Fig. 6.12).',
-    given: 'Slide 33: *ρ*_{v} = 2*ρ*_{v}_{0} sech(*x*/*a*) tanh(*x*/*a*) (44); find *E*_{x} and *V* from ∇²*V* = −*ρ*_{v}/*ε* in one dimension, *V* = 0 at *x* = 0',
+    given: 'Slide 39: *ρ*_{v} = 2*ρ*_{v}_{0} sech(*x*/*a*) tanh(*x*/*a*) (44); find *E*_{x} and *V* from ∇²*V* = −*ρ*_{v}/*ε* in one dimension, *V* = 0 at *x* = 0',
     givenC: '(44) given; find *E*_{x}, *V* (*V* = 0 at *x* = 0)',
     steps: [
       'In one dimension: d²*V*/d*x*² = −*ρ*_{v}/*ε* = −(2*ρ*_{v}_{0}/*ε*) sech(*x*/*a*) tanh(*x*/*a*). So *V* curves upward where *ρ*_{v} < 0 (p side) and downward where *ρ*_{v} > 0 (n side), as sketched',
@@ -1773,9 +1773,9 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var X_JC = (function () {
     var J = J67;
     return {
-      head: 'Slide 34: the junction capacitance',
+      head: 'Slide 40: the junction capacitance',
       q: 'Find the total potential difference across the junction, *V*_{0}, the charge *Q* on each side and the capacitance, (47)–(49).',
-      given: 'Slide 34: *V*_{0}, *Q* and *C* of the junction, (47)–(49); drawn with the numbers of D6.7 (*ρ*_{v}_{0} = 375 C/m³, *ε*_{r} = 10, *S* = 2 × 10⁻⁷ m²)',
+      given: 'Slide 40: *V*_{0}, *Q* and *C* of the junction, (47)–(49); drawn with the numbers of D6.7 (*ρ*_{v}_{0} = 375 C/m³, *ε*_{r} = 10, *S* = 2 × 10⁻⁷ m²)',
       givenC: '*V*_{0}, *Q*, *C* (47)–(49); D6.7 numbers',
       steps: [
         '(47) *V*_{0} = *V*(*x* → ∞) − *V*(*x* → −∞) = 2π*ρ*_{v}_{0}*a*²/*ε* = ' + fmt.n(J.V0) + ' V. *V* is nearly constant beyond 4*a* (97.7 % of the way) to 5*a* (99.1 %)',
@@ -1798,7 +1798,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var X_67 = (function () {
     var J = J67;
     return {
-      head: 'Drill D6.7 (slide 35)',
+      head: 'Drill D6.7 (slide 41)',
       q: 'In the region of a pn junction, *ρ*_{v} = 750 sech(10⁶π*x*) tanh(10⁶π*x*) C/m³, the dielectric constant is 10 and the junction area is 2 × 10⁻⁷ m². Find (a) *V*_{0}; (b) *C*; (c) *E* at the junction.',
       given: 'D6.7: *ρ*_{v} = 750 sech(10⁶π*x*) tanh(10⁶π*x*) C/m³, *ε*_{r} = 10, *S* = 2 × 10⁻⁷ m²; find *V*_{0}, *C* and *E* at the junction',
       givenC: 'D6.7: *ρ*_{v} = 750 sech(10⁶π*x*) tanh(10⁶π*x*), *ε*_{r} = 10, *S* = 2 × 10⁻⁷ m²',
@@ -1819,7 +1819,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   function E68(x) { return -(2.5 * K68 * Math.pow(x, 1.5) + C168); }
   function R68(x) { return -2e7 * EPS0 * Math.sqrt(x); }
   var X_68 = {
-    head: 'Drill D6.8 (slide 35)',
+    head: 'Drill D6.8 (slide 41)',
     q: 'In free space, *ρ*_{v} = −2 × 10⁷*ε*_{0}√*x* C/m³; *V* = 0 at *x* = 0 and *V* = 2 V at *x* = 2.5 mm. At *x* = 1 mm find (a) *V*; (b) *E*_{x}.',
     given: 'D6.8: *ρ*_{v} = −2 × 10⁷*ε*_{0}√*x* C/m³ in free space; *V* = 0 at *x* = 0, *V* = 2 V at *x* = 2.5 mm; find *V* and *E*_{x} at *x* = 1 mm',
     givenC: 'D6.8: *ρ*_{v} = −2 × 10⁷*ε*_{0}√*x*; *V*(0) = 0, *V*(2.5 mm) = 2 V; *x* = 1 mm',
@@ -2148,7 +2148,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
           F.label({ t: bt, c: 't-ink', size: 'small', at: F.P(bA), r: 6, dir: { x: -1, y: 0.35 }, alts: [{ x: F.P(bA).x, y: F.P(p3(Xb, Yv(-hv * 0.55))).y, pen: 1 }], pri: 0, kind: 'owned', id: 'v0' });
         }
       }
-      /* slide 33, Step 1: the sign of the curvature of V, sketched in the (still empty) V plot */
+      /* slide 39, Step 1: the sign of the curvature of V, sketched in the (still empty) V plot */
       if (PP.V && sc.curv) {
         var Yc = Ymap(PP.V);
         [[-2.5, 1], [2.5, -1]].forEach(function (c) {
@@ -2315,7 +2315,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       note = 'Hayt assumes this profile so that Poisson’s equation can be solved in closed form; it is a model, not a measured profile. The axes are Hayt’s normalised axes against <i>x</i>/<i>a</i> (Fig. 6.12, our own drawing).';
     } else if (mode === 'sp') {
       rows = [['(45)', '*E*_{x} = −(2*ρ*_{v}_{0}*a*/*ε*) sech(*x*/*a*)'], ['(46)', '*V* = (4*ρ*_{v}_{0}*a*²/*ε*)[tan⁻¹ exp(*x*/*a*) − π/4]'], ['Normalised', '*εV*/(2π*ρ*_{v}_{0}*a*²) = (2/π)[tan⁻¹ exp(*x*/*a*) − π/4], from −0.5 to 0.5']];
-      note = 'Erratum: on slide 33 (Hayt Fig. 6.12(c)) the potential axis is labelled π<i>εV</i>/(2<i>ρ<sub>v</sub></i><sub>0</sub><i>a</i>²) and the bracket π<i>εV</i><sub>0</sub>/(2<i>ρ<sub>v</sub></i><sub>0</sub><i>a</i>²). With (46), that quantity would reach π²/2 = 4.93 as <i>x</i> → ∞, but the curve levels off at 0.5: the curve is <i>εV</i>/(2π<i>ρ<sub>v</sub></i><sub>0</sub><i>a</i>²), whose span is exactly 1 by (47). The page uses the corrected label.';
+      note = 'Erratum: on slide 39 (Hayt Fig. 6.12(c)) the potential axis is labelled π<i>εV</i>/(2<i>ρ<sub>v</sub></i><sub>0</sub><i>a</i>²) and the bracket π<i>εV</i><sub>0</sub>/(2<i>ρ<sub>v</sub></i><sub>0</sub><i>a</i>²). With (46), that quantity would reach π²/2 = 4.93 as <i>x</i> → ∞, but the curve levels off at 0.5: the curve is <i>εV</i>/(2π<i>ρ<sub>v</sub></i><sub>0</sub><i>a</i>²), whose span is exactly 1 by (47). The page uses the corrected label.';
     } else if (mode === 'jc') {
       rows = jRows(J67, '2 × 10⁻⁷ m²').concat([['*V* at 4*a*, 5*a*', '97.7 %, 99.1 % of the way to *V*_{0}/2']]);
       note = 'Why d<i>Q</i>/d<i>V</i><sub>0</sub>: the current into the junction is <i>I</i> = d<i>Q</i>/d<i>t</i> = (d<i>Q</i>/d<i>V</i><sub>0</sub>)(d<i>V</i><sub>0</sub>/d<i>t</i>), so the factor that plays the part of <i>C</i> is the slope of <i>Q</i>(<i>V</i><sub>0</sub>). When <i>V</i><sub>0</sub> rises, the net added charge on each side has its centroid at ±π<i>a</i> (from ∫<i>x</i> ∂<i>ρ<sub>v</sub></i>/∂<i>a</i> d<i>x</i> / ∫∂<i>ρ<sub>v</sub></i>/∂<i>a</i> d<i>x</i>), which is why <i>C</i> equals a parallel-plate capacitor with a gap of 2π<i>a</i>.';
@@ -2362,11 +2362,11 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   });
   var MN = {
     ex: 'Move <i>V</i><sub>0</sub>: the depletion layer widens, <i>Q</i> rises and <i>C</i> = d<i>Q</i>/d<i>V</i><sub>0</sub> falls as 1/√<i>V</i><sub>0</sub>. Opens on the numbers of D6.7.',
-    cm: 'Slide 32: where the charge comes from, and Hayt’s model (44) of it. Step through (in a slide: ‹ › at the bottom right).',
-    sp: 'Slide 33: Poisson’s equation integrated twice gives (45) and (46) (Fig. 6.12, with the corrected potential axis).',
-    jc: 'Slide 34: <i>V</i><sub>0</sub>, <i>Q</i> and <i>C</i> = d<i>Q</i>/d<i>V</i><sub>0</sub>, (47)–(49), drawn with the numbers of D6.7.',
-    d67: 'Drill D6.7 (slide 35): <i>V</i><sub>0</sub>, <i>C</i> and <i>E</i> at the junction for a given profile.',
-    d68: 'Drill D6.8 (slide 35): Poisson’s equation with a charge ∝ √<i>x</i> between two boundary values.',
+    cm: 'Slide 38: where the charge comes from, and Hayt’s model (44) of it. Step through (in a slide: ‹ › at the bottom right).',
+    sp: 'Slide 39: Poisson’s equation integrated twice gives (45) and (46) (Fig. 6.12, with the corrected potential axis).',
+    jc: 'Slide 40: <i>V</i><sub>0</sub>, <i>Q</i> and <i>C</i> = d<i>Q</i>/d<i>V</i><sub>0</sub>, (47)–(49), drawn with the numbers of D6.7.',
+    d67: 'Drill D6.7 (slide 41): <i>V</i><sub>0</sub>, <i>C</i> and <i>E</i> at the junction for a given profile.',
+    d68: 'Drill D6.8 (slide 41): Poisson’s equation with a charge ∝ √<i>x</i> between two boundary values.',
     dr: 'A random problem of the D6.7 kind; its number gives the same problem to everyone.'
   };
   function setMode(m) {

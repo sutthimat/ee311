@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Curvilinear squares (Hayt Section 6.5, slides 16-19), on pagekit. A plan view of the cross section of a two-conductor
+/* Curvilinear squares (Hayt Section 6.5, slides 19-22), on pagekit. A plan view of the cross section of a two-conductor
    line (x to the right, y up, fixed). The map is computed in the page: Laplace's equation by finite differences
    (Shortley-Weller stars at the curved and straight conductor boundaries, SOR), so it is not drawn by hand.
    Conductors: slightly metallic grey bodies; the inner one (+Q, V0) tinted warm, the outer one (-Q, 0 V) cool, with
@@ -239,7 +239,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 
 <main class="wrap">
   <h1>Curvilinear Squares: Capacitance from a Field Sketch</h1>
-  <p class="lede">In a two-dimensional problem the conductor surfaces are equipotentials, and the flux lines leave them at right angles and cross every equipotential at 90°. Divide the potential difference into <i>N<sub>V</sub></i> equal steps Δ<i>V</i>, and start the flux lines so that each flux tube carries the same flux ΔΨ = <i>ε</i>Δ<i>V</i>: then every cell of the map is a curvilinear square, Δ<i>L<sub>t</sub></i>/Δ<i>L<sub>N</sub></i> = 1, and counting the tubes gives the capacitance per metre, <i>C</i> = <i>ε</i><i>N<sub>Q</sub></i>/<i>N<sub>V</sub></i> (Hayt Section 6.5, Eqs. (18)–(20)). The map here is computed (finite differences), not sketched; a careful hand sketch reaches 5–10 percent. Pick a mode: Explore, the flux tube of slide 16, Fig. 6.8 and Drill D6.4 step by step, or a random drill.</p>
+  <p class="lede">In a two-dimensional problem the conductor surfaces are equipotentials, and the flux lines leave them at right angles and cross every equipotential at 90°. Divide the potential difference into <i>N<sub>V</sub></i> equal steps Δ<i>V</i>, and start the flux lines so that each flux tube carries the same flux ΔΨ = <i>ε</i>Δ<i>V</i>: then every cell of the map is a curvilinear square, Δ<i>L<sub>t</sub></i>/Δ<i>L<sub>N</sub></i> = 1, and counting the tubes gives the capacitance per metre, <i>C</i> = <i>ε</i><i>N<sub>Q</sub></i>/<i>N<sub>V</sub></i> (Hayt Section 6.5, Eqs. (18)–(20)). The map here is computed (finite differences), not sketched; a careful hand sketch reaches 5–10 percent. Pick a mode: Explore, the flux tube of slide 19, Fig. 6.8 and Drill D6.4 step by step, or a random drill.</p>
 
   <div class="layout" id="lay">
     <figure class="fig">
@@ -2037,11 +2037,11 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     return { g: g, M: Mp, NV: S.NV, V0: v0Of(S.kind), er: S.er, eq: show.eq, fl: show.fl ? 'all' : 'none', cnt: show.cnt && show.fl, sec: show.cnt && show.fl,
       cells: show.cell ? [{ k: k, j: j, T: S.cT, dims: true, handle: true }] : [], glyph: true };
   }
-  /* ---------- slide 16: the flux tube (our own drawing on a computed map: the two cylinders of Fig. 6.9) ---------- */
+  /* ---------- slide 19: the flux tube (our own drawing on a computed map: the two cylinders of Fig. 6.9) ---------- */
   var XTUBE = {
-    head: 'Slide 16: a flux tube and the cell ratio', NV: 4, V0: 100, j0: 12,
+    head: 'Slide 19: a flux tube and the cell ratio', NV: 4, V0: 100, j0: 12,
     q: 'Between two conductors at 100 V and 0 V, follow one flux tube and show that every cell of it has the same ratio Δ*L*_{t}/Δ*L*_{N} (Eqs. (18), (19)).',
-    given: 'Slide 16 (Fig. 6.6 idea): two conductors at *V*_{0} = 100 V and 0 V (the cylinders of Fig. 6.9); equipotentials every Δ*V* = 25 V; air',
+    given: 'Slide 19 (Fig. 6.6 idea): two conductors at *V*_{0} = 100 V and 0 V (the cylinders of Fig. 6.9); equipotentials every Δ*V* = 25 V; air',
     givenC: 'Two conductors, 100 V and 0 V; Δ*V* = 25 V',
     steps: null, stepsC: null, soFar: null,
     scene: function (k) {
@@ -2051,18 +2051,18 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       return { g: G64, M: Mp, NV: 4, V0: 100, er: 1, eq: true, fl: k === 0 ? 'none' : k < 3 ? 'tube' : 'all', tube: k >= 1 ? X.j0 : -1, ab: k >= 1 && k <= 2, cells: c, glyph: k >= 3, cnt: false, sec: false };
     }
   };
-  /* ---------- slide 17: Fig. 6.8, a square inner conductor in a circular outer one (side = 2/3 of the radius) ---------- */
-  var XF68 = { head: 'Slide 17: Fig. 6.8, a square inside a circle', NV: 4, V0: 100,
+  /* ---------- slide 20: Fig. 6.8, a square inner conductor in a circular outer one (side = 2/3 of the radius) ---------- */
+  var XF68 = { head: 'Slide 20: Fig. 6.8, a square inside a circle', NV: 4, V0: 100,
     q: 'A square inner conductor (side 2/3 of the radius of the outer circle) centred in a circular outer conductor, air between. Map it with *N*_{V} = 4 and count *N*_{Q}; find *C* per metre (Eq. (20)).',
-    given: 'Slide 17 (Fig. 6.8): square inner conductor, side = 2/3 of the outer radius (4 mm in a 6-mm circle); air; *N*_{V} = 4',
+    given: 'Slide 20 (Fig. 6.8): square inner conductor, side = 2/3 of the outer radius (4 mm in a 6-mm circle); air; *N*_{V} = 4',
     givenC: 'Fig. 6.8: square (side 2/3 of the radius) in a circle; air; *N*_{V} = 4',
     scene: function (k) {
       var Mp = mapFor(G68, true);
       return { g: G68, M: Mp, NV: 4, V0: 100, er: 1, eq: k >= 1, fl: k < 2 ? 'none' : k === 2 ? 'fund' : 'all', cnt: k >= 2, sec: k >= 2, cells: k >= 4 ? [{ k: 1, j: 1, T: ID, dims: true }] : [], glyph: k >= 3 };
     }
   };
-  /* ---------- slide 19: Drill D6.4, Fig. 6.9 (measured: R = 6.33 mm, r = 2.00 mm, centres 3.16 mm apart) ---------- */
-  var XD64 = { head: 'Drill D6.4 (slide 19): two cylinders, Fig. 6.9', NV: 3, V0: 60,
+  /* ---------- slide 22: Drill D6.4, Fig. 6.9 (measured: R = 6.33 mm, r = 2.00 mm, centres 3.16 mm apart) ---------- */
+  var XD64 = { head: 'Drill D6.4 (slide 22): two cylinders, Fig. 6.9', NV: 3, V0: 60,
     q: 'Fig. 6.9: two circular cylinders at 0 V and 60 V, parallel axes, air between; equipotentials at 20 V and 40 V. Make a curvilinear-square map and estimate (a) *C* per metre; (b) *E* at the left side of the 60-V conductor if its true radius is 2 mm; (c) *ρ*_{S} there.',
     given: 'D6.4 (Fig. 6.9, to scale): outer cylinder *R* = 6.33 mm at 0 V; inner *r* = 2.00 mm at 60 V, its axis 3.155 mm (measured ≈ 3.16) to the left; air; equipotentials 20 V, 40 V',
     givenC: 'D6.4: *R* = 6.33 mm (0 V), *r* = 2.00 mm (60 V), axes 3.155 mm apart; air',
@@ -2432,7 +2432,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       F.path(ln.dpts.map(p3), { color: 'c1', w: sc.fl === 'tube' ? 'tb' : 'fl', dash: ln.kind === 'sym' ? 'guide' : null, role: 'soft' });
       if (ln.kind === 'eq') headOn(F, ln, hv);
     });
-    /* the flux tube of slide 16 */
+    /* the flux tube of slide 19 */
     if (sc.tube >= 0 && sc.tube !== undefined) {
       var A = LS.fund[sc.tube], B = LS.fund[sc.tube + 1], tp = A.pts.concat(arcBetween(Mp.surfOut, A.pts[A.pts.length - 1], B.pts[B.pts.length - 1]).slice(1, -1), B.pts.slice().reverse(), arcBetween(Mp.surfIn, B.pts[0], A.pts[0]).slice(1, -1));
       F.poly(tp.map(p3), { cls: 'tubef', role: null, depth: 2e6 });
@@ -2605,9 +2605,9 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   });
   var MN = {
     ex: 'Change the cross section or <i>N<sub>V</sub></i>: the map is solved again, the tubes are counted, and <i>C</i> = <i>εN<sub>Q</sub></i>/<i>N<sub>V</sub></i> follows; the green cell stays a curvilinear square.',
-    tube: 'Slide 16 (Fig. 6.6 idea): one flux tube between two conductors, and why its cells all have the same side ratio. Step through (in a slide: ‹ › at the bottom right).',
-    f68: 'Slide 17 (Fig. 6.8): the slide&#39;s counting, 8 × 3.25 tubes, beside the computed map.',
-    d64: 'Drill D6.4 (slide 19): <i>C</i>, <i>E</i> and <i>ρ<sub>S</sub></i> from the map of Fig. 6.9; the slide&#39;s answers are approximate.',
+    tube: 'Slide 19 (Fig. 6.6 idea): one flux tube between two conductors, and why its cells all have the same side ratio. Step through (in a slide: ‹ › at the bottom right).',
+    f68: 'Slide 20 (Fig. 6.8): the slide&#39;s counting, 8 × 3.25 tubes, beside the computed map.',
+    d64: 'Drill D6.4 (slide 22): <i>C</i>, <i>E</i> and <i>ρ<sub>S</sub></i> from the map of Fig. 6.9; the slide&#39;s answers are approximate.',
     dr: 'A random problem of the D6.4 kind; its number gives the same problem to everyone.'
   };
   function setMode(m) {

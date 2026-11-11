@@ -211,7 +211,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .pk-notrans *, .pk-notrans *::before { transition: none !important; }
 </style>
 <style>
-/* Several capacitance examples (Hayt Section 6.3, slides 7–10), on pagekit. Section views, drawn to scale in mm:
+/* Several capacitance examples (Hayt Section 6.3, slides 8–11), on pagekit. Section views, drawn to scale in mm:
    the cross-section of a coaxial cable, a section through the centre of concentric spheres, or a strip of a
    parallel-plate capacitor (a zoom: the plates continue past the wavy break lines). Conductors are slightly metallic
    grey bodies (own tokens --mw-* warm for the +Q body, --mc-* cool for the -Q body); free surface charge as + / -
@@ -1800,8 +1800,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var XCOAX = (function () {
     var G0 = { cyl: true, a: 1.32715, b: 8.636, er1: 2.26, L: 0.3048 }, P = phys(rad(G0));
     return {
-      q: 'Coaxial cable (slide 7): an inner conductor of radius *a* carries *ρ*_{L} per metre, the outer conductor has inner radius *b*, and a dielectric *ε* fills the space between, over a length *L*. Find the capacitance. The figure is drawn for the cable of D6.2 (a): *a* = 1.33 mm, *b* = 8.64 mm, polyethylene *ε*_{r} = 2.26.',
-      given: 'Coaxial cable (slide 7): inner radius *a* (charge *ρ*_{L} per metre), outer radius *b*, dielectric *ε*, length *L*;  drawn: *a* = 1.33 mm, *b* = 8.64 mm, *ε*_{r} = 2.26' + V100,
+      q: 'Coaxial cable (slide 8): an inner conductor of radius *a* carries *ρ*_{L} per metre, the outer conductor has inner radius *b*, and a dielectric *ε* fills the space between, over a length *L*. Find the capacitance. The figure is drawn for the cable of D6.2 (a): *a* = 1.33 mm, *b* = 8.64 mm, polyethylene *ε*_{r} = 2.26.',
+      given: 'Coaxial cable (slide 8): inner radius *a* (charge *ρ*_{L} per metre), outer radius *b*, dielectric *ε*, length *L*;  drawn: *a* = 1.33 mm, *b* = 8.64 mm, *ε*_{r} = 2.26' + V100,
       givenC: 'Coax: *a*, *b*, *ε*, *L*;  drawn *a* = 1.33 mm, *b* = 8.64 mm, *ε*_{r} = 2.26',
       steps: [
         'Gauss’s law on a cylinder of radius *ρ* (*a* < *ρ* < *b*):  *D*_{ρ}(2π*ρL*) = *ρ*_{L}*L*,  so **D** = (*ρ*_{L}/2π*ρ*) **a**_{ρ}: radial, and weaker farther out',
@@ -1818,8 +1818,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var XSPH = (function () {
     var Gb = { a: 5, b: 10, er1: 1, Rw: 10 * (1 + TH) }, P = phys(rad(Gb)), Pm = phys(rad({ a: 5, er1: 1 }));
     return {
-      q: 'Concentric spheres (slide 7): an inner conducting sphere of radius *a* carries +*Q*, an outer one of radius *b* carries −*Q*, with a dielectric *ε* between them. Find *C*, then let *b* → ∞. The figure is drawn for *a* = 5 mm and *b* = 10 mm in free space; the last step is the slide’s 1-cm marble.',
-      given: 'Concentric spheres (slide 7): inner radius *a* (+*Q*), outer radius *b* (−*Q*), dielectric *ε*;  drawn: *a* = 5 mm, *b* = 10 mm, free space' + V100,
+      q: 'Concentric spheres (slide 8): an inner conducting sphere of radius *a* carries +*Q*, an outer one of radius *b* carries −*Q*, with a dielectric *ε* between them. Find *C*, then let *b* → ∞. The figure is drawn for *a* = 5 mm and *b* = 10 mm in free space; the last step is the slide’s 1-cm marble.',
+      given: 'Concentric spheres (slide 8): inner radius *a* (+*Q*), outer radius *b* (−*Q*), dielectric *ε*;  drawn: *a* = 5 mm, *b* = 10 mm, free space' + V100,
       givenC: 'Spheres *a* (+*Q*), *b* (−*Q*);  drawn *a* = 5 mm, *b* = 10 mm, free space',
       steps: [
         'Gauss’s law on a sphere of radius *r* (*a* < *r* < *b*):  **D** = (*Q*/4π*r*²) **a**_{r},  **E** = (*Q*/4π*εr*²) **a**_{r}',
@@ -1838,8 +1838,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     var G0 = { a: 5, b: Infinity, r1: 10, er1: 2.26, er2: 1, Rw: 18 }, P = phys(rad(G0)), r1 = 0.01, Dd = P.D(r1), DU = dU(Dd), EU = eU(Dd / E0);
     var bare = 4 * PI * E0 * 0.005, emb = 4 * PI * 2.26 * E0 * 0.005;
     return {
-      q: 'Coated sphere (slide 8): a conducting sphere of radius *a* has a dielectric coating *ε*_{1} out to *r*_{1}, with free space beyond. Find *C* (the other conductor is at infinity), following the slide’s Steps 1–4. The slide gives no numbers; our example: *a* = 5 mm (the 1-cm marble), polyethylene *ε*_{r1} = 2.26 out to *r*_{1} = 10 mm.',
-      given: 'Coated sphere (slide 8; our example): *a* = 5 mm, coating *ε*_{r1} = 2.26 out to *r*_{1} = 10 mm, free space beyond' + V100,
+      q: 'Coated sphere (slide 9): a conducting sphere of radius *a* has a dielectric coating *ε*_{1} out to *r*_{1}, with free space beyond. Find *C* (the other conductor is at infinity), following the slide’s Steps 1–4. The slide gives no numbers; our example: *a* = 5 mm (the 1-cm marble), polyethylene *ε*_{r1} = 2.26 out to *r*_{1} = 10 mm.',
+      given: 'Coated sphere (slide 9; our example): *a* = 5 mm, coating *ε*_{r1} = 2.26 out to *r*_{1} = 10 mm, free space beyond' + V100,
       givenC: 'Our example: *a* = 5 mm, *ε*_{r1} = 2.26 to *r*_{1} = 10 mm, then free space',
       steps: [
         'free charge is the only source of **D**, so *D*_{r} = *Q*/4π*r*² in the coating and outside alike: at *r*_{1} the normal component *D*_{N} = *D*_{r} is continuous (' + fq(Dd, DU) + ' on both sides)',
@@ -1856,8 +1856,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var XSER = (function () {
     var G0 = { S: 4, L: [{ d: 0.1, er: 1.5 }, { d: 0.1, er: 6 }] }, P = phys(lay(G0)), DU = dU(P.Dv), EU = eU(P.Ei[0]);
     return {
-      q: 'Two dielectrics in layers parallel to the plates (slide 9, Fig. 6.3): layer 1 (*ε*_{1}, thickness *d*_{1}) on the + plate, layer 2 (*ε*_{2}, *d*_{2}) above it, plate area *S*. Find *C*. Our example: *S* = 4 cm², *d*_{1} = *d*_{2} = 0.1 mm, *ε*_{r1} = 1.5, *ε*_{r2} = 6.',
-      given: 'Layers parallel to the plates (slide 9; our example): *S* = 4 cm²;  *d*_{1} = *d*_{2} = 0.1 mm;  *ε*_{r1} = 1.5, *ε*_{r2} = 6' + V100,
+      q: 'Two dielectrics in layers parallel to the plates (slide 10, Fig. 6.3): layer 1 (*ε*_{1}, thickness *d*_{1}) on the + plate, layer 2 (*ε*_{2}, *d*_{2}) above it, plate area *S*. Find *C*. Our example: *S* = 4 cm², *d*_{1} = *d*_{2} = 0.1 mm, *ε*_{r1} = 1.5, *ε*_{r2} = 6.',
+      given: 'Layers parallel to the plates (slide 10; our example): *S* = 4 cm²;  *d*_{1} = *d*_{2} = 0.1 mm;  *ε*_{r1} = 1.5, *ε*_{r2} = 6' + V100,
       givenC: 'Layers: *S* = 4 cm², *d*_{1} = *d*_{2} = 0.1 mm, *ε*_{r1} = 1.5, *ε*_{r2} = 6;  *V*_{0} = 100 V',
       steps: [
         'Assume *Q* on the plates (here ' + fmt.q(P.Q * 1e9, 'nC') + '): **D** = *Q*/*S* is normal to the interface, and *D*_{N} is continuous (Chapter 5), so *D* = ' + fq(P.Dv, DU) + ' in both layers',
@@ -1874,8 +1874,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var XSIDE = (function () {
     var G0 = { S1: 2, S2: 2, d: 0.1, er1: 1.5, er2: 6 }, P = phys(side(G0)), DU = dU(P.Di[1]), EU = eU(P.Ev);
     return {
-      q: 'Two dielectrics side by side, the interface normal to the plates (slide 9): dielectric 1 (*ε*_{1}) over area *S*_{1}, dielectric 2 (*ε*_{2}) over *S*_{2}, both filling the gap *d*. Find *C*. Our example: *d* = 0.1 mm, *S*_{1} = *S*_{2} = 2 cm², *ε*_{r1} = 1.5, *ε*_{r2} = 6.',
-      given: 'Interface normal to the plates (slide 9; our example): *d* = 0.1 mm;  *S*_{1} = *S*_{2} = 2 cm²;  *ε*_{r1} = 1.5, *ε*_{r2} = 6;  *V*_{0} = 100 V',
+      q: 'Two dielectrics side by side, the interface normal to the plates (slide 10): dielectric 1 (*ε*_{1}) over area *S*_{1}, dielectric 2 (*ε*_{2}) over *S*_{2}, both filling the gap *d*. Find *C*. Our example: *d* = 0.1 mm, *S*_{1} = *S*_{2} = 2 cm², *ε*_{r1} = 1.5, *ε*_{r2} = 6.',
+      given: 'Interface normal to the plates (slide 10; our example): *d* = 0.1 mm;  *S*_{1} = *S*_{2} = 2 cm²;  *ε*_{r1} = 1.5, *ε*_{r2} = 6;  *V*_{0} = 100 V',
       givenC: 'Side by side: *d* = 0.1 mm, *S*_{1} = *S*_{2} = 2 cm², *ε*_{r1} = 1.5, *ε*_{r2} = 6;  *V*_{0} = 100 V',
       steps: [
         'Assume *V*_{0}: both dielectrics span the whole gap, so *E*_{1} = *E*_{2} = *V*_{0}/*d* = ' + fq(P.Ev, EU) + ':  **E** is tangential to the interface and continuous across it',
@@ -2548,12 +2548,12 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var drill = PK.ui.drill('#g-drill', { id: 'dr', start: 1, gen: drillGen, onProblem: function () { if (mode === 'dr') { F.invalidate(); F.render(); renderCard(); } }, onStep: function () { if (mode === 'dr') { F.render(); renderCard(); } } });
   var MN = {
     ex: 'Choose a geometry and change its sizes and dielectric: <i>C</i> follows the shape and <i>ε</i> only.',
-    coax: 'The coaxial cable (slide 7, Eq. (5)). Step through the solution; in a slide use ‹ › at the bottom right.',
-    sph: 'Concentric spheres and the isolated sphere (slide 7, Eqs. (6), (7)), with the 1-cm marble.',
-    coat: 'A sphere with a dielectric coating (slide 8, Eq. (8), Steps 1–4), on our own example.',
-    ser: 'Two dielectrics in layers parallel to the plates (slide 9, Eq. (9)): capacitors in series.',
-    side: 'Two dielectrics side by side, the interface normal to the plates (slide 9, Eq. (10)): capacitors in parallel.',
-    d62: 'Drill D6.2 (slide 10): parts (a), (b) and (c), each drawn to scale in turn.',
+    coax: 'The coaxial cable (slide 8, Eq. (5)). Step through the solution; in a slide use ‹ › at the bottom right.',
+    sph: 'Concentric spheres and the isolated sphere (slide 8, Eqs. (6), (7)), with the 1-cm marble.',
+    coat: 'A sphere with a dielectric coating (slide 9, Eq. (8), Steps 1–4), on our own example.',
+    ser: 'Two dielectrics in layers parallel to the plates (slide 10, Eq. (9)): capacitors in series.',
+    side: 'Two dielectrics side by side, the interface normal to the plates (slide 10, Eq. (10)): capacitors in parallel.',
+    d62: 'Drill D6.2 (slide 11): parts (a), (b) and (c), each drawn to scale in turn.',
     dr: 'A random problem: a cable, spheres, a coated sphere, or two dielectrics between plates. Its number gives the same problem to everyone.'
   };
   var HEAD = { coax: 'Coaxial cable: Eq. (5)', sph: 'Concentric spheres: Eqs. (6), (7)', coat: 'Coated sphere: Eq. (8)', ser: 'Layers in series: Eq. (9)', side: 'Side by side: Eq. (10)', d62: 'Drill D6.2' };
