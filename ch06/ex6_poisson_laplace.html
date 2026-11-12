@@ -369,6 +369,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   /* italic correction (as in TeX): a little room after an italic letter followed by upright text, e.g. P(1, 2, 3),
      so the slanted letter is not cut by the next run's halo */
   var ICOR = 0.1;
+  var SCOR = 0.18;  /* gap after a subscript before an italic run, so the run's halo does not cover the subscript */
+  function scor(a, b) { return !!(a && b && (a.st === 's' || a.st === 'su') && b.st === 'i' && !/^\s/.test(b.s)); }
   function icor(a, b) { return !!(a && b && a.st === 'i' && (b.st === 'n' || b.st === 'b') && /^[^\s ,.;:]/.test(b.s)); }
   var MC = null, MW = {}, FM = {};
   var COARSE = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);   /* a touch screen (phone, tablet) */
@@ -393,7 +395,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
     /* measure(spec, fs): { w, asc, desc } of the text box (baseline at 0) */
     measure: function (spec, fs) {
       var w = 0, hasSub = false, sf = subFs(fs);
-      parse(spec).forEach(function (r, i, rs) { var sb = r.st === 's' || r.st === 'su'; if (sb) hasSub = true; w += runW(r.s, r.st, sb ? sf : fs) + (icor(r, rs[i + 1]) ? ICOR * fs : 0); });
+      parse(spec).forEach(function (r, i, rs) { var sb = r.st === 's' || r.st === 'su'; if (sb) hasSub = true; w += runW(r.s, r.st, sb ? sf : fs) + (icor(r, rs[i + 1]) ? ICOR * fs : 0) + (scor(r, rs[i + 1]) ? SCOR * fs : 0); });
       var m = fmet(fs), desc = m.d;
       if (hasSub) desc = Math.max(desc, 0.22 * fs + fmet(sf).d);
       return { w: w, asc: m.a, desc: desc };
@@ -403,7 +405,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
       var s = '<text x="' + f1(x) + '" y="' + f1(y) + '" class="' + cls + '" font-size="' + f1(fs) + '" text-anchor="' + (anchor || 'middle') + '"' + (attrs || '') + '>';
       var down = false, dd = f1(0.22 * fs), sf = f1(subFs(fs));
       parse(spec).forEach(function (r, i, rs) {
-        var ic = icor(rs[i - 1], r) ? ' dx="' + f1(ICOR * fs) + '"' : '';
+        var ic = icor(rs[i - 1], r) ? ' dx="' + f1(ICOR * fs) + '"' : scor(rs[i - 1], r) ? ' dx="' + f1(SCOR * fs) + '"' : '';
         if (r.st === 's' || r.st === 'su') { s += '<tspan class="' + (r.st === 's' ? 'pk-s' : 'pk-su') + '" font-size="' + sf + '"' + (down ? '' : ' dy="' + dd + '"') + '>' + esc(r.s) + '</tspan>'; down = true; return; }
         var dy = (down ? ' dy="-' + dd + '"' : '') + ic; down = false;
         s += '<tspan' + (r.st === 'b' ? ' class="pk-b"' : r.st === 'i' ? ' class="pk-i"' : '') + dy + '>' + esc(r.s) + '</tspan>';
