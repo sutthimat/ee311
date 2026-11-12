@@ -1685,7 +1685,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   var V = PK.v, fmt = PK.fmt, T = PK.text, PI = Math.PI, D2R = PI / 180, MU0 = 4e-7 * PI;
 
   /* ---------- text helpers ---------- */
-  var NB = ' ';
+  var NB = '\u00a0';
   /* chunk(t): readout lines wrap only between expressions (no-break spaces inside short brackets, around operators,
      before units and unit vectors, after 'Step', '(a)') */
   function chunk(t) {
