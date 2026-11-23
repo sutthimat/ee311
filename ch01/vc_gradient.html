@@ -782,12 +782,6 @@ svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-
 
   /* per field: lowest and highest value and the largest |grad f| (121 x 121 grid of the square) */
   var extCache = {}, statCache = {};
-  /* the longest of a few lengths at which a tangent from the surface point stays (mostly) in front of the surface */
-  function visLen(A, d, l0) {
-    var fs = [1, 0.75, 0.55, 0.4, 0.3];
-    for (var i = 0; i < fs.length; i++) { var l = l0 * fs[i], h = 0; [0.35, 0.65, 0.95].forEach(function (t) { if (hidden(add(A, mul(d, l * t)))) h++; }); if (h <= 1) return l; }
-    return l0 * 0.3;
-  }
   /* stationary points that bound the arrow (summits, valley bottoms, saddle points, the charge): interior local minima
      of |grad f| that are close to zero, on a 121 x 121 grid */
   function statPts(k) {
@@ -861,9 +855,9 @@ svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-
       if (showU) FIT.push([x0 + Math.cos(S.psi * D2R), y0 + Math.sin(S.psi * D2R), 0]);
       /* and the tangents on the surface */
       if (onS && gm > 1e-12) {
-        var Ps0 = [x0, y0, hz(fP0)], sl0 = kz * gm, lf0 = Math.min(1.1, 1.3 / Math.sqrt(1 + sl0 * sl0)), dg0 = [gh0[0], gh0[1], sl0];
-        FIT.push(add(Ps0, mul(dg0, lf0)), add(Ps0, mul(dg0, -0.6 * lf0)));
-        if (showU) { var au0 = [Math.cos(S.psi * D2R), Math.sin(S.psi * D2R)], su0 = kz * Du0, lu0 = Math.min(1.1, 1.3 / Math.sqrt(1 + su0 * su0)), du0 = [au0[0], au0[1], su0]; FIT.push(add(Ps0, mul(du0, lu0)), add(Ps0, mul(du0, -0.6 * lu0))); }
+        var Ps0 = [x0, y0, hz(fP0)], sl0 = kz * gm, dg0 = [gh0[0], gh0[1], sl0];
+        FIT.push(add(Ps0, mul(dg0, gm / U)));
+        if (showU) { var au0 = [Math.cos(S.psi * D2R), Math.sin(S.psi * D2R)], su0 = kz * Du0, du0 = [au0[0], au0[1], su0]; FIT.push(add(Ps0, du0)); }
       }
       fitCrop(FIT, vaxis ? 3 * FS.small + 10 : 0);
       if (pass === 0 && NRW && gm > 1e-9 * (ext.gmax || 1)) {
@@ -953,10 +947,12 @@ svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-
     if (gz) {
       CURW = 1000; addArrow(Pf, Gt, 'k-g', 'h-g', 20, 4.5, 5); CURW = 1;
       if (showE) addArrow(Pf, Et, 'k-e', 'h-eo', 15, 5, 0);
-      /* tangent of steepest ascent on the surface: horizontal direction gh, rise kz |grad f| per unit */
+      /* tangent of steepest ascent on the surface, directly above the grad f arrow: the same horizontal run |grad f|/U
+         (so it is short where f changes slowly) and slope |grad f| (rise kz |grad f| per unit run); parts behind the
+         surface are drawn faint, never cut shorter */
       if (onS) {
-        var sl = kz * gm, lf = Math.min(1.1, 1.3 / Math.sqrt(1 + sl * sl)), dg = [gh[0], gh[1], sl];
-        lf = visLen(Ps, dg, lf); Tend = add(Ps, mul(dg, lf));
+        var sl = kz * gm, dg = [gh[0], gh[1], sl];
+        Tend = add(Ps, mul(dg, gm / U));
         addArrow(Ps, Tend, 'k-gt', 'h-gt', 13, 4, 3);
       }
     }
@@ -964,8 +960,9 @@ svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-
     if (showU) {
       addArrow(Pf, Ut, 'k-u', 'h-u', 15, 4.5, 3.6);
       if (onS) {
-        var su2 = kz * Du, lu2 = Math.min(1.1, 1.3 / Math.sqrt(1 + su2 * su2)), du3 = [au[0], au[1], su2];
-        lu2 = visLen(Ps, du3, lu2); Uend = add(Ps, mul(du3, lu2));
+        /* directly above the unit arrow a_u: horizontal run 1, so its rise is kz D_u f */
+        var su2 = kz * Du, du3 = [au[0], au[1], su2];
+        Uend = add(Ps, du3);
         addArrow(Ps, Uend, 'k-ut', 'h-u', 13, 4, 3);
         var sec = [];
         for (k = -12; k <= 12; k++) {
@@ -1147,8 +1144,8 @@ svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-
         : '<b class="v">E</b> = −<b class="v">∇</b><i>V</i> = 0 at <i>P</i>: the potential does not change to first order in any direction here, so there is no in-plane field.') + r3;
     } else el('o-e').innerHTML = 'This field is not a potential, so <b class="v">E</b> = −<b class="v">∇</b><i>V</i> is not shown; choose the saddle or the point-charge potential.';
     el('l-e').hidden = !F.pot;
-    var cap = 'Base plane: colour map and level curves of ' + f + (F.div ? ' (blue below zero, orange above, light near zero)' : ' (darker means higher)') + '. At <i>P</i> the solid arrow is <b class="v">∇</b>' + f + ', drawn to the scale stated in the figure, with its magnitude written beside it; the bold curve is the level curve through <i>P</i>, and the small square marks the right angle between <b class="v">∇</b>' + f + ' and that curve. On the surface, the solid line marked "steepest ascent" is the tangent in the direction of <b class="v">∇</b>' + f + '.';
-    if (flags.u) cap += ' The dashed arrow with a filled head is the unit vector <b class="v">a</b><sub class="u"><i>u</i></sub>, with <i>D</i><sub class="u"><i>u</i></sub>' + f + ' beside it; the dashed line on the surface is the tangent along it, whose slope is <i>D</i><sub class="u"><i>u</i></sub>' + f + ', with the dotted section of the surface along <b class="v">a</b><sub class="u"><i>u</i></sub>.';
+    var cap = 'Base plane: colour map and level curves of ' + f + (F.div ? ' (blue below zero, orange above, light near zero)' : ' (darker means higher)') + '. At <i>P</i> the solid arrow is <b class="v">∇</b>' + f + ', drawn to the scale stated in the figure, with its magnitude written beside it; the bold curve is the level curve through <i>P</i>, and the small square marks the right angle between <b class="v">∇</b>' + f + ' and that curve. On the surface, the solid arrow (marked "steepest ascent" when there is room) is the tangent in the direction of <b class="v">∇</b>' + f + ', directly above the base arrow: it covers the same horizontal distance and climbs at slope |<b class="v">∇</b>' + f + '|, so it is long and steep where ' + f + ' changes fast and short and nearly level near a summit or a valley bottom.';
+    if (flags.u) cap += ' The dashed arrow with a filled head is the unit vector <b class="v">a</b><sub class="u"><i>u</i></sub>, with <i>D</i><sub class="u"><i>u</i></sub>' + f + ' beside it; the dashed line on the surface is the tangent along it, directly above <b class="v">a</b><sub class="u"><i>u</i></sub>, whose slope is <i>D</i><sub class="u"><i>u</i></sub>' + f + ', with the dotted section of the surface along <b class="v">a</b><sub class="u"><i>u</i></sub>.';
     if (flags.e && F.pot) cap += ' Dashed arrows with hollow heads: <b class="v">E</b> = −<b class="v">∇</b><i>V</i>, at <i>P</i> and on a grid, on the same scale as <b class="v">∇</b><i>V</i>.';
     cap += ' Hidden parts are faint and dashed; seen from high above, the surface fades. Orthographic view.';
     el('cap-t').innerHTML = cap;
